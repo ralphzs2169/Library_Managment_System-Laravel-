@@ -1,7 +1,6 @@
 
 import { logoutHandler } from "./api/authHandler.js";
-
-const Swal = window.Swal || window.Sweetalert2;
+import Swal from 'sweetalert2';
 
 export function showError(title, message) {
   Swal.fire({
@@ -81,7 +80,7 @@ export async function showConfirmation(title, text, confirmText = "Yes, proceed"
     cancelButtonText: "Cancel",
     confirmButtonColor: "#00ADB5",
     cancelButtonColor: "#6c757d",
-    reverseButtons: true, // makes Cancel appear on the left
+    reverseButtons: true, 
   });
 
   return result.isConfirmed;

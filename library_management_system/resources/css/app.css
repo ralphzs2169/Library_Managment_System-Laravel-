@@ -30,3 +30,126 @@
   .form-section:last-child {
     margin-bottom: 0;
   }
+
+
+  /* Custom Box Shadows (for containers) */
+  .shadow-custom {
+    box-shadow: var(--shadow-custom);
+  }
+  .shadow-custom-sm {
+    box-shadow: var(--shadow-custom-sm);
+  }
+  .shadow-custom-md {
+    box-shadow: var(--shadow-custom-md);
+  }
+  .shadow-custom-lg {
+    box-shadow: var(--shadow-custom-lg);
+  }
+
+  
+
+.nav-link {
+    @apply relative inline-block py-2;
+}
+.nav-link:hover {
+  @apply text-accent;
+}
+       /* Nav Link Underline Animation */
+.nav-link::after {
+  content: '';
+  @apply absolute left-0 w-0 h-0.5 bg-accent transition-all duration-300 ease-out;
+  bottom: 0;
+}
+.nav-link:hover::after {
+  @apply w-full;
+}
+
+
+
+
+  /* Button Animation */
+  .hover-scale-xl { @apply transform transition-transform duration-150; }
+  .hover-scale-xl:hover { @apply scale-110; }
+  .hover-scale-xl:active { @apply scale-100; }
+
+  .hover-scale-lg { @apply transform transition-transform duration-150; }
+  .hover-scale-lg:hover { @apply scale-107; }
+  .hover-scale-lg:active { @apply scale-100; }
+
+  .hover-scale-md { @apply transform transition-transform duration-150; }
+  .hover-scale-md:hover { @apply scale-105; }
+  .hover-scale-md:active { @apply scale-100; }
+
+  .hover-scale-sm { @apply transform transition-transform duration-150; }
+  .hover-scale-sm:hover { @apply scale-102; }
+  .hover-scale-sm:active { @apply scale-100; }
+
+  .genres-section {
+    background-color: #f9fafb; /* same as bg-gray-50 */
+  }
+
+  /* Invalid Inputs */
+  .invalid-input{
+    @apply border-red-500 border-2 bg-red-50 focus:ring-red-500;
+  }
+  .error-message {
+    @apply text-red-600 text-xs font-bold;
+    margin-bottom: 0;
+    margin-top: 0;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+    visibility: hidden;
+    overflow: hidden;
+  }
+  .error-placeholder {
+    @apply text-xs font-medium;
+  
+    margin: 0;
+    padding: 0;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.12s ease, visibility 0.12s;
+    display: block;
+  }
+
+  .error-placeholder.visible {
+    opacity: 1;
+    visibility: visible;
+    @apply text-red-600; 
+  }
+
+  .field-container {
+    position: relative;
+    margin-bottom: 4px;
+  }
+  
+  /* Section spacing adjustments */
+  .form-section {
+    margin-bottom: 16px;
+  }
+
+  .form-section:last-child {
+    margin-bottom: 0;
+  }
+
+
+  /* Drop Shadow Utility */
+  .drop-shadow-custom {
+    filter: drop-shadow(0px 8px 4px rgba(0, 0, 0, 0.25));
+  }
+  .drop-shadow-custom-sm {
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.25));
+  }
+
+  .icon-size-sm{
+    width: 24px;
+    height:24px;
+  }
+  .icon-size-md{
+    width: 32px;
+    height:32px;
+  }
+  .icon-size-lg{
+    width: 40px;
+    height:40px;
+  }

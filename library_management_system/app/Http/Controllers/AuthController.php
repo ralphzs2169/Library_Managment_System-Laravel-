@@ -6,17 +6,59 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function login() {}
+    public function showLoginForm()
+    {
+        return view('pages.login');
+    }
+
+    public function showSignupForm()
+    {
+        $departments = Department::all();
+        return view('pages.signup', ['departments' => $departments]);
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string'
+        ]);
+
+        $user = User::where('username', $credentials['username'])->first();
+
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'username' => 'Username not found',
+            ]);
+        }
+
+        if (Hash::check($credentials['password'], $user->password)) {
+            $request->session()->regenerate();
+            $request->session()->regenerateToken();
+
+            Auth::login($user);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login successful',
+                'role' => $user->role
+            ], 200);
+        }
+
+        throw ValidationException::withMessages([
+            'password' => 'The password is incorrect',
+        ]);
+    }
 
     public function signup(Request $request)
     {
-        $request->all();
-
         $rules = [
             // Basic info
             'firstname' => 'required|string|max:45',
@@ -55,7 +97,6 @@ class AuthController extends Controller
         }
 
         $request->validate($rules);
-
 
         try {
             DB::beginTransaction();
@@ -102,5 +143,18 @@ class AuthController extends Controller
                 'message' => 'An error occurred during registration: ' . $e->getMessage()
             ], 500);
         };
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Logged out successfully'
+        ], 200);
     }
 }

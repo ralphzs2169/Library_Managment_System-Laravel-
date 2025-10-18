@@ -3,21 +3,32 @@ import { redirectTo, showError, showSuccessWithRedirect, showLoader, hideLoader,
 import { displayInputErrors } from '../helpers.js';
 
 export async function loginHandler(username, password) {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+  
   try {
     const response = await fetch(API_ROUTES.LOGIN, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+       headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'X-CSRF-TOKEN': csrfToken
+      },
       body: JSON.stringify({ username, password }),
     });
 
     const result = await response.json();
-
+    
     if (result.errors) {
         displayInputErrors(result.errors);
         return;
     }
-    
-     window.location.href = BASE_URL + 'public/index.php';
+
+
+    if (result.status === 'success' && result.role === 'librarian') {
+      window.location.href = BASE_URL + 'librarian/dashboard';
+    } else {
+       window.location.href = BASE_URL;
+    }
   } catch (err) {
     showError("Something went wrong while logging in.");
     console.error(err);
@@ -26,8 +37,7 @@ export async function loginHandler(username, password) {
 }
 
 export async function signupHandler(data) {
-    console.log(API_ROUTES.SIGNUP);
-    // showLoader();
+    showLoader();
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     
     try {
@@ -54,9 +64,8 @@ export async function signupHandler(data) {
         showSuccessWithRedirect(
             'Account Successfully Created', 
             'You have successfully registered!',
-             BASE_URL + 'views/auth/login.php'  
+             '/login'  
         );
-
     } catch (error) {
         hideLoader();
         console.error('Error:', error);
@@ -65,17 +74,23 @@ export async function signupHandler(data) {
 }
 
 export async function logoutHandler(){
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     
     try {
       const response = await fetch(API_ROUTES.LOGOUT, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken
+        },
+        credentials: 'include' // Include cookies for session management
       });
 
-      if (response.ok) {
-        window.location.href = BASE_URL + 'views/auth/login.php';
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        window.location.href = BASE_URL + 'login';
       } else {
         showError('Logout Failed', 'Something went wrong while logging out. Please try again.');
       }

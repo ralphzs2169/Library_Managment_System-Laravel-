@@ -1,9 +1,9 @@
 export const BASE_URL = "https://library_management_system.test/";
 
 export const API_ROUTES ={
-    LOGIN: BASE_URL + 'app/routes/api.php/login',
+    LOGIN: BASE_URL + 'login',
     SIGNUP: BASE_URL + 'signup',
-    LOGOUT: BASE_URL + 'app/routes/api.php/logout',
+    LOGOUT: BASE_URL + 'logout',
 
     ADD_CATEGORY: BASE_URL + 'app/routes/api.php/category/create',
     ADD_GENRE: BASE_URL + 'app/routes/api.php/genre/create',

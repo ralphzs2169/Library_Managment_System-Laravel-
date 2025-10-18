@@ -1,11 +1,10 @@
 import { clearInputError, autoCapitalizeOnBlur, autoCapitalizeWords, blurActiveElement } from '../helpers.js';
 import { signupHandler } from '../api/authHandler.js';
-
+import { showSuccessWithRedirect } from '../utils.js';
 
 const firstnameField = document.getElementById('firstname');
 const lastnameField = document.getElementById('lastname');
 const middleInitialField = document.getElementById('middle_initial');
-
 
 // Apply auto-capitalization to name fields
 [firstnameField, lastnameField, middleInitialField].forEach(autoCapitalizeWords);
