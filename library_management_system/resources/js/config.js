@@ -5,16 +5,16 @@ export const API_ROUTES ={
     SIGNUP: BASE_URL + 'signup',
     LOGOUT: BASE_URL + 'logout',
 
-    ADD_CATEGORY: BASE_URL + 'app/routes/api.php/category/create',
-    ADD_GENRE: BASE_URL + 'app/routes/api.php/genre/create',
+    GET_CATEGORIES: BASE_URL + 'librarian/categories',
+    ADD_CATEGORY: BASE_URL + 'librarian/category-management',
+    UPDATE_CATEGORY: BASE_URL + 'librarian/category-management',
+    DELETE_CATEGORY: BASE_URL + 'librarian/category-management', 
 
-    GET_CATEGORIES: BASE_URL + 'app/routes/api.php/categories',
-    GET_GENRES: BASE_URL + 'app/routes/api.php/genres',
-
-    UPDATE_CATEGORY: BASE_URL + 'app/routes/api.php/category/update',
-    UPDATE_GENRE: BASE_URL + 'app/routes/api.php/genre/update',
-
-    DELETE_CATEGORY: BASE_URL + 'app/routes/api.php/category/delete', 
-    DELETE_GENRE: BASE_URL + 'app/routes/api.php/genre/delete'
+    GET_GENRES: BASE_URL + 'librarian/category-management/genres',
+    ADD_GENRE: BASE_URL + 'librarian/category-management/genres',
+    UPDATE_GENRE: BASE_URL + 'librarian/category-management/genres',
+    DELETE_GENRE: BASE_URL + 'librarian/category-management/genres'
     // Add other API routes as needed
 };
+
+export const VALIDATION_ERROR = 422;

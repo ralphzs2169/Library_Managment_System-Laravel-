@@ -1,6 +1,56 @@
 
+import { VALIDATION_ERROR } from "./config.js";
 import { logoutHandler } from "./api/authHandler.js";
 import Swal from 'sweetalert2';
+import { displayInputErrors } from "./helpers.js";
+
+
+export function getJsonHeaders() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    return {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+    };
+}
+
+export async function parseJsonSafely(response) {
+  try {
+    // Attempt to parse JSON
+    return await response.json();
+  } catch (error) {
+    // Handle unexpected or invalid JSON
+    showError('Something went wrong!', 'Unexpected server response.');
+    return null;
+  }
+}
+
+export async function apiRequest(url, options = {}) {
+    try {
+        const response = await fetch(url, options);
+        const result = await parseJsonSafely(response);
+
+        // Handle validation errors
+        if (!response.ok) {
+            if (response.status === VALIDATION_ERROR && result?.errors) {
+                displayInputErrors(result.errors);
+                return { errorHandled: true };
+            }
+
+            showError('Something went wrong!', result?.message || 'Please try again.');
+            return { errorHandled: true };
+        }
+
+        return result;
+    } catch (error) {
+        showError('Network Error', 'Unable to process request. Please try again.');
+        console.error(error);
+        return { errorHandled: true };
+    }
+}
+
+
 
 export function showError(title, message) {
   Swal.fire({

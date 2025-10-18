@@ -1,39 +1,22 @@
 import { API_ROUTES, BASE_URL } from '../config.js';
-import { redirectTo, showError, showSuccessWithRedirect, showLoader, hideLoader, confirmLogout } from '../utils.js';
+import { redirectTo, showError, showSuccessWithRedirect, showLoader, hideLoader, confirmLogout, apiRequest, getJsonHeaders } from '../utils.js';
 import { displayInputErrors } from '../helpers.js';
 
 export async function loginHandler(username, password) {
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-  
-  try {
-    const response = await fetch(API_ROUTES.LOGIN, {
-      method: "POST",
-       headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  'X-CSRF-TOKEN': csrfToken
-      },
-      body: JSON.stringify({ username, password }),
-    });
+  let result = await apiRequest(API_ROUTES.LOGIN, {
+    method: "POST",
+    headers: getJsonHeaders(),
+    body: JSON.stringify({ username, password }),
+  });
 
-    const result = await response.json();
-    
-    if (result.errors) {
-        displayInputErrors(result.errors);
-        return;
-    }
+  if (result?.errorHandled) return;
 
-
-    if (result.status === 'success' && result.role === 'librarian') {
-      window.location.href = BASE_URL + 'librarian/dashboard';
-    } else {
-       window.location.href = BASE_URL;
-    }
-  } catch (err) {
-    showError("Something went wrong while logging in.");
-    console.error(err);
-    return null;
+  if (result.role === 'librarian') {
+    window.location.href = BASE_URL + 'librarian/dashboard';
+  } else {
+    window.location.href = BASE_URL;
   }
+
 }
 
 export async function signupHandler(data) {

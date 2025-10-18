@@ -32,7 +32,11 @@ class AuthController extends Controller
             'password' => 'required|string'
         ]);
 
-        $user = User::where('username', $credentials['username'])->first();
+        try {
+            $user = User::where('username', $credentials['username'])->first();
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', 'Something went wrong', 500);
+        }
 
         if (!$user) {
             throw ValidationException::withMessages([
@@ -44,12 +48,13 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $request->session()->regenerateToken();
 
-            Auth::login($user);
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Login successful',
-                'role' => $user->role
-            ], 200);
+            try {
+                Auth::login($user);
+
+                return $this->jsonResponse('success', 'Login successful', 200, [$user->role]);
+            } catch (\Exception $e) {
+                return $this->jsonResponse('error', 'Something went wrong', 500);
+            }
         }
 
         throw ValidationException::withMessages([

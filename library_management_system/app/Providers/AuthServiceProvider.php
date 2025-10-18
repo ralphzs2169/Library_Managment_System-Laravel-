@@ -31,7 +31,10 @@ class AuthServiceProvider extends ServiceProvider
             return $user->role === 'librarian';
         });
 
-        Gate::define('view-header-links', function ($user) {
+        Gate::define('view-header-links', function ($user = null) {
+
+            if (is_null($user)) return true; //Allow guests to view header links
+
             return in_array($user->role, ['student', 'teacher']);
         });
     }

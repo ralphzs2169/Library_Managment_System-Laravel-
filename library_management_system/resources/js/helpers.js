@@ -3,7 +3,7 @@
 export function displayInputErrors(errors) {
     // Clear previous errors and reset all placeholders
     const errorPlaceholders = Array.from(document.querySelectorAll('.error-placeholder'));
-
+    console.log(errorPlaceholders);
     // clear text, visible class and any inline height from previous run
     errorPlaceholders.forEach(placeholder => {
         placeholder.textContent = '';
@@ -13,7 +13,7 @@ export function displayInputErrors(errors) {
 
     // Display new errors
     for (const field in errors) {
-
+        console.log(field);
         const fieldMapping = {
             'student_no': 'id_number',
             'employee_no': 'id_number'
@@ -21,6 +21,7 @@ export function displayInputErrors(errors) {
 
         const inputId = fieldMapping[field] || field;
         const inputElement = document.getElementById(inputId);
+        console.log(inputElement + ' | ' + inputId);
         const errorPlaceholder = document.getElementById(inputId + '-error-placeholder');
 
         if (inputElement && errorPlaceholder) {

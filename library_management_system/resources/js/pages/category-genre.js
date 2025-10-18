@@ -77,7 +77,7 @@ const addCategorySetup = setupModal(
     'close-add-category-modal',
     'cancel-add-category',
     'add-category-form',
-    'category-name',
+    'category_name',
     () => addCategoryHandler(addCategorySetup.nameInput.value.trim()) // call handler directly
 );
 
@@ -99,6 +99,7 @@ const addGenreSetup = setupModal(
 );
 
 document.querySelectorAll('.open-add-genre-modal').forEach(btn => {
+    console.log('HELLO');
     btn.addEventListener('click', () => {
         addGenreCategoryIdInput.value = btn.getAttribute('data-category-id');
         addGenreCategoryNameDisplay.textContent = btn.getAttribute('data-category-name');
@@ -115,7 +116,7 @@ const editCategorySetup = setupModal(
     'close-edit-category-modal',
     'cancel-edit-category',
     'edit-category-form',
-    'edit-category-name',
+    'updated_category_name',
     () => editCategoryHandler(editCategoryIdInput.value, editCategorySetup.nameInput.value.trim()) // call handler directly
 );
 
@@ -128,7 +129,7 @@ const editGenreSetup = setupModal(
     'close-edit-genre-modal',
     'cancel-edit-genre',
     'edit-genre-form',
-    'edit-genre-name',
+    'updated_genre_name',
     () => editGenreHandler(editGenreIdInput.value, editGenreSetup.nameInput.value.trim())
 );
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\CategoryGenre;
 use App\Models\User;
 use App\Models\Department;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -24,7 +25,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            DepartmentSeeder::class
+            DepartmentSeeder::class,
+            CategorySeeder::class
         ]);
     }
 }

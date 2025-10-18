@@ -22,7 +22,7 @@
                         <a href="{{ asset('index.php?route=books/create') }}" class="sidebar-link block">Add New Book</a>
                     </li>
                     <li class="hover:bg-accent hover:text-white rounded p-2 pl-[3.75rem] transition-colors duration-100 text-[#8593A6]">
-                        <a href="{{ route('librarian.categories-genres') }}" class="sidebar-link block">Categories/Genres</a>
+                        <a href="{{ route('librarian.category-management') }}" class="sidebar-link block">Categories/Genres</a>
                     </li>
                 </ul>
             </li>
