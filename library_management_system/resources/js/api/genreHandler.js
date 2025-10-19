@@ -1,7 +1,7 @@
 
 import { API_ROUTES } from "../config.js";
-import { showError, showSuccessWithRedirect, showWarning, showConfirmation, showInfo, apiRequest, getJsonHeaders } from "../utils.js";
-import { displayInputErrors } from "../helpers.js";
+import { showSuccessWithRedirect, showConfirmation, showInfo, apiRequest, getJsonHeaders } from "../utils.js";
+
 
 export async function addGenreHandler(categoryId, genreName) {
     // Step 1: Validate only
@@ -33,7 +33,7 @@ export async function addGenreHandler(categoryId, genreName) {
         body: JSON.stringify({ genre_name: genreName, category_id: categoryId })
     });
     
-    if (errors?.errorHandled) return; 
+    if (result?.errorHandled) return; 
 
     showSuccessWithRedirect('Success', 'Genre added successfully!', window.location.href);
 }

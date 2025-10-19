@@ -71,7 +71,7 @@
 
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-accent p-2">
                 <img src="{{ asset('build/assets/icons/activity-log.svg') }}" alt="Activity Log Icon" class="inline-block w-7 h-7 mr-5">
-                <a href="{{ asset('index.php?route=activity-logs') }}" class="sidebar-link">Activity Log</a>
+                <a href="{{ asset('librarian/activity-logs') }}" class="sidebar-link">Activity Log</a>
             </li>
         </ul>
     </nav>

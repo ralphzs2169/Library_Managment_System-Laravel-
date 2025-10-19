@@ -44,7 +44,7 @@ export async function apiRequest(url, options = {}) {
 
         return result;
     } catch (error) {
-        showError('Network Error', 'Unable to process request. Please try again.');
+        showError('Something went wrong!', 'Unable to process request. Please try again.');
         console.error(error);
         return { errorHandled: true };
     }

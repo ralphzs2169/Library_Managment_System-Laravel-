@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
-use App\Http\Controllers\LibrarianController;
+use App\Http\Controllers\ActivityLogController;
 use App\Models\Librarian;
 
 Route::get('/', function () {
@@ -34,6 +34,8 @@ Route::prefix('librarian')
         Route::post('/category-management/genres', [GenreController::class, 'store'])->name('category-management.genres.store');
         Route::put('/category-management/genres/{genre}', [GenreController::class, 'update'])->name('category-management.genres.update');
         Route::delete('/category-management/genres/{genre}', [GenreController::class, 'destroy'])->name('category-management.genres.destroy');
+
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs');
     });
 // Route::get('/librarian/dashboard', [DashboardController::class, 'index'])->name('librarian.dashboard');
 

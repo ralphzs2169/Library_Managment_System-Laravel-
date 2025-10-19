@@ -4,7 +4,7 @@ import { addCategoryHandler, deleteCategoryHandler, editCategoryHandler } from "
 import { addGenreHandler, editGenreHandler, deleteGenreHandler } from "../api/genreHandler.js";
 import { showDangerConfirmation } from "../utils.js";
 
-function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId, onSubmit) {
+function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId, onSubmit, parentId = null) {
     const modal = document.getElementById(modalId);
     const closeBtn = document.getElementById(closeButtonId);
     const cancelBtn = document.getElementById(cancelButtonId);
@@ -99,7 +99,6 @@ const addGenreSetup = setupModal(
 );
 
 document.querySelectorAll('.open-add-genre-modal').forEach(btn => {
-    console.log('HELLO');
     btn.addEventListener('click', () => {
         addGenreCategoryIdInput.value = btn.getAttribute('data-category-id');
         addGenreCategoryNameDisplay.textContent = btn.getAttribute('data-category-name');
@@ -110,6 +109,7 @@ document.querySelectorAll('.open-add-genre-modal').forEach(btn => {
 // Edit Category Modal
 
 const editCategoryIdInput = document.getElementById('edit-category-id');
+const genreCategoryParentId = document.getElementById('genre-category-parent-id');
 
 const editCategorySetup = setupModal(
     'edit-category-modal',

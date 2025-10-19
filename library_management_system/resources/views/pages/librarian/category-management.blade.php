@@ -1,8 +1,8 @@
 <x-layout>
     <section class="md:pl-78 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
-        <div class="bg-white shadow-sm rounded-xl p-6  ">
-            <div class="flex justify-between items-center mb-10">
+        <div class="bg-white shadow-sm rounded-xl p-5">
+            <div class="flex justify-between items-center">
                 <div class="flex items-center">
                     <img src="{{ asset('build/assets/icons/category.svg') }}" alt="Category Icon" class="inline-block w-10 h-10 mr-2">
                     <h1 class="text-2xl font-bold rounded-xl">Categories & Genres</h1>
@@ -12,8 +12,16 @@
                     <span class="text-white">Add Category</span>
                 </button>
             </div>
+        </div>
 
-            <!-- Main Content Area -->
+        <!-- Main Content Area -->
+        <div class="bg-white shadow-sm rounded-xl p-6 mt-5">
+          {{-- <select name="action" class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 cursor-pointer shadow-sm outline-none focus:ring-0">
+            <option value="">All Actions</option>
+            <option value="create" >Create</option>
+            <option value="update" >Update</option>
+            <option value="delete" >Delete</option>
+        </select> --}}
             @if ($categories->isEmpty())
                 <div class="text-center py-20">
                     <h2 class="text-xl font-semibold text-gray-600">No Categories Available</h2>

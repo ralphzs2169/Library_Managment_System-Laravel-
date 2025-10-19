@@ -57,4 +57,9 @@ class User extends Authenticatable
         $middle_name = $this->middle_initial ? "{$this->middle_initial}. " : '';
         return "{$this->firstname} " . $middle_name . "{$this->lastname}";
     }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class, 'user_id');
+    }
 }

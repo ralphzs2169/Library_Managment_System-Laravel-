@@ -61,7 +61,7 @@ export async function editCategoryHandler(categoryId, categoryName) {
     result = await apiRequest(`${API_ROUTES.UPDATE_CATEGORY}/${categoryId}`, {
         method: 'PUT',
         headers: getJsonHeaders(),
-        body: JSON.stringify({ updated_category_name: categoryName })
+        body: JSON.stringify({ updated_category_name: categoryName, current_category_id: categoryId })
     });
 
     if (result?.errorHandled) return;

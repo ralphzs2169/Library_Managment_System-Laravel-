@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Genre;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -42,11 +44,27 @@ class CategoryController extends Controller
             return $this->jsonResponse('valid', 'Validation passed');
         }
 
-        Category::create([
-            'name' => $request->category_name
-        ]);
+        try {
 
-        return $this->jsonResponse('success', 'Category created successfully', 201);
+            DB::transaction(function () use ($request) {
+
+                $category = Category::create([
+                    'name' => $request->category_name
+                ]);
+
+                ActivityLog::create([
+                    'action' => 'created',
+                    'details' => 'Created category: ' . $request->category_name,
+                    'entity_type' => 'Category',
+                    'entity_id' => $category->id,
+                    'user_id' => $request->user()->id,
+                ]);
+            });
+
+            return $this->jsonResponse('success', 'Category created successfully', 201);
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', 'Unable to create category', 500);
+        }
     }
 
     /**
@@ -81,20 +99,52 @@ class CategoryController extends Controller
 
             return $this->jsonResponse('success', 'Category valid', 200, ['old_category_name' => $category->name]);
         }
-        $category->update([
-            'name' => $request->updated_category_name
-        ]);
 
-        return $this->jsonResponse('success', 'Category updated successfully', 200, ['old_category_name' => $category->name]);
+        try {
+            $oldCategoryName = $category->name;
+
+            DB::transaction(function () use ($category, $request, $oldCategoryName) {
+                $category->update([
+                    'name' => $request->updated_category_name
+                ]);
+
+                ActivityLog::create([
+                    'action' => 'updated',
+                    'details' => 'Updated category: From "' . $oldCategoryName . '" to "' . $request->updated_category_name . '"',
+                    'entity_type' => 'Category',
+                    'entity_id' => $category->id,
+                    'user_id' => $request->user()->id,
+                ]);
+            });
+
+            // return using the saved old name
+            return $this->jsonResponse('success', 'Category updated successfully', 200, ['old_category_name' => $oldCategoryName]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', $e->getMessage(), 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(Request $request, Category $category)
     {
-        $category->delete();
+        try {
+            DB::transaction(function () use ($category, $request) {
+                $category->delete();
 
-        return $this->jsonResponse('success', 'Category deleted successfully', 200);
+                ActivityLog::create([
+                    'action' => 'deleted',
+                    'details' => 'Deleted category: ' . $category->name,
+                    'entity_type' => 'Category',
+                    'entity_id' => $category->id,
+                    'user_id' => $request->user()->id,
+                ]);
+            });
+
+            return $this->jsonResponse('success', 'Category deleted successfully', 200);
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', 'Unable to delete category', 500);
+        }
     }
 }

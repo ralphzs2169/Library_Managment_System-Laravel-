@@ -1,0 +1,6 @@
+FIX 
+
+add logs for categories and genre
+date filter
+ascedning and descengin sorting
+search filter

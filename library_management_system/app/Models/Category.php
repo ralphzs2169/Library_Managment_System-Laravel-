@@ -15,5 +15,10 @@ class Category extends Model
         return $this->hasMany(Genre::class);
     }
 
+    public function activityLogs()
+    {
+        return $this->morphMany(ActivityLog::class, 'entity');
+    }
+
     use HasFactory;
 }

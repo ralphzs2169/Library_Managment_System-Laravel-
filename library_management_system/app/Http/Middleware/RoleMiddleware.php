@@ -19,7 +19,7 @@ class RoleMiddleware
         $user = $request->user();
 
         if (!$user || $user->role !== $role) {
-            abort(Response::HTTP_FORBIDDEN, 'Unauthorized.');
+            abort(403, 'Unauthorized action.');
         }
 
         return $next($request);

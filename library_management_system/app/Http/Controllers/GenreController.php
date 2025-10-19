@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Genre;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GenreController extends Controller
 {
@@ -46,12 +48,28 @@ class GenreController extends Controller
             return $this->jsonResponse('valid', 'Validation passed');
         }
 
-        Genre::create([
-            'name' => $request->genre_name,
-            'category_id' => $request->category_id
-        ]);
+        try {
+            $category_name = Category::findOrFail($request->category_id)->name;
 
-        return $this->jsonResponse('success', 'Genre created successfully', 201);
+            DB::transaction(function () use ($request, $category_name) {
+                $genre = Genre::create([
+                    'name' => $request->genre_name,
+                    'category_id' => $request->category_id
+                ]);
+
+                ActivityLog::create([
+                    'action' => 'created',
+                    'details' => 'Created genre "' . $request->genre_name . '" for the category: ' . $category_name,
+                    'entity_type' => 'Genre',
+                    'entity_id' => $genre->id,
+                    'user_id' => $request->user()->id,
+                ]);
+            });
+
+            return $this->jsonResponse('success', 'Genre created successfully', 201);
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', 'Unable to create genre', 500);
+        }
     }
 
     /**
@@ -86,20 +104,53 @@ class GenreController extends Controller
 
             return $this->jsonResponse('success', 'Genre valid', 200, ['old_genre_name' => $genre->name]);
         }
-        $genre->update([
-            'name' => $request->updated_genre_name
-        ]);
 
-        return $this->jsonResponse('success', 'Genre updated successfully', 200, ['old_genre_name' => $genre->name]);
+        try {
+            $oldName = $genre->name;
+
+            DB::transaction(function () use ($request, $genre, $oldName) {
+                $genre->update([
+                    'name' => $request->updated_genre_name
+                ]);
+
+                ActivityLog::create([
+                    'action' => 'updated',
+                    'details' => 'Updated genre from: "' . $oldName . '" to: "' . $request->updated_genre_name . '" 
+                                  under the category: ' . $genre->category->name,
+                    'entity_type' => 'Genre',
+                    'entity_id' => $genre->id,
+                    'user_id' => $request->user()->id,
+                ]);
+            });
+
+            return $this->jsonResponse('success', 'Genre updated successfully', 200, ['old_genre_name' => $genre->name]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', 'Unable to update genre', 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Genre $genre)
+    public function destroy(Request $request, Genre $genre)
     {
-        $genre->delete();
+        try {
+            $category_name = $genre->category->name;
+            DB::transaction(function () use ($genre, $request, $category_name) {
+                $genre->delete();
 
-        return $this->jsonResponse('success', 'Genre deleted successfully', 200);
+                ActivityLog::create([
+                    'action' => 'deleted',
+                    'details' => 'Deleted genre: "' . $genre->name . '" under the category: ' . $category_name,
+                    'entity_type' => 'Genre',
+                    'entity_id' => $genre->id,
+                    'user_id' => $request->user()->id,
+                ]);
+            });
+
+            return $this->jsonResponse('success', 'Genre deleted successfully', 200);
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', 'Unable to delete genre', 500);
+        }
     }
 }
