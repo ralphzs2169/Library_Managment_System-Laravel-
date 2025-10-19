@@ -5,7 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ActivityLogController;
-use App\Models\Librarian;
+use App\Http\Controllers\BookController;
+use Illuminate\Http\Request;
+use App\Models\Genre;
 
 Route::get('/', function () {
     return view('pages.welcome');
@@ -25,6 +27,9 @@ Route::prefix('librarian')
     ->name('librarian.')
     ->group(function () {
 
+        Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
+        Route::post('/books/store', [BookController::class, 'store'])->name('books.store');
+
         Route::get('/category-management', [CategoryController::class, 'index'])->name('category-management');
         Route::post('/category-management', [CategoryController::class, 'store'])->name('category-management.store');
         Route::put('/category-management/{category}', [CategoryController::class, 'update'])->name('category-management.update');
@@ -36,7 +41,11 @@ Route::prefix('librarian')
         Route::delete('/category-management/genres/{genre}', [GenreController::class, 'destroy'])->name('category-management.genres.destroy');
 
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs');
+
+        // AJAX: Get genres by category for add-book page
+        Route::get('/genres/by-category', [CategoryController::class, 'genresByCategory'])->name('genres.by-category');
     });
 // Route::get('/librarian/dashboard', [DashboardController::class, 'index'])->name('librarian.dashboard');
+
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

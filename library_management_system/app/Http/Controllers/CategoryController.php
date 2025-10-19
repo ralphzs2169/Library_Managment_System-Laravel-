@@ -25,6 +25,18 @@ class CategoryController extends Controller
         }
     }
 
+    public function genresByCategory(Request $request)
+    {
+        $categoryId = $request->query('category_id');
+        $genres = [];
+        if ($categoryId) {
+            $genres = Genre::where('category_id', $categoryId)
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get();
+        }
+        return response()->json(['genres' => $genres]);
+    }
 
     /**
      * Show the form for creating a new resource.

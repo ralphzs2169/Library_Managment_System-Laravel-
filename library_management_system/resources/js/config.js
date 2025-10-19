@@ -13,7 +13,9 @@ export const API_ROUTES ={
     GET_GENRES: BASE_URL + 'librarian/category-management/genres',
     ADD_GENRE: BASE_URL + 'librarian/category-management/genres',
     UPDATE_GENRE: BASE_URL + 'librarian/category-management/genres',
-    DELETE_GENRE: BASE_URL + 'librarian/category-management/genres'
+    DELETE_GENRE: BASE_URL + 'librarian/category-management/genres',
+
+    ADD_BOOK: BASE_URL + 'librarian/books/store',
     // Add other API routes as needed
 };
 

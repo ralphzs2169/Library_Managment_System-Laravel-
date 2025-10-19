@@ -1,6 +1,6 @@
 FIX 
 
-add logs for categories and genre
-date filter
-ascedning and descengin sorting
-search filter
+Input fields in the same row when error dont align
+covert picture validation
+clear input when focused
+publication details display input errors

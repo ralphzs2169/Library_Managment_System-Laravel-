@@ -1,55 +1,87 @@
 // ============= FORM ERROR HANDLING ==============
 
+
+
 export function displayInputErrors(errors) {
     // Clear previous errors and reset all placeholders
     const errorPlaceholders = Array.from(document.querySelectorAll('.error-placeholder'));
-    console.log(errorPlaceholders);
-    // clear text, visible class and any inline height from previous run
-    errorPlaceholders.forEach(placeholder => {
+  
+    errorPlaceholders.forEach((placeholder, i) => {
         placeholder.textContent = '';
         placeholder.classList.remove('visible');
         placeholder.style.height = '';
     });
 
-    // Display new errors
     for (const field in errors) {
-        console.log(field);
-        const fieldMapping = {
-            'student_no': 'id_number',
-            'employee_no': 'id_number'
-        };
+    let inputElement, errorPlaceholder;
+    let friendlyMessage;
 
-        const inputId = fieldMapping[field] || field;
-        const inputElement = document.getElementById(inputId);
-        console.log(inputElement + ' | ' + inputId);
-        const errorPlaceholder = document.getElementById(inputId + '-error-placeholder');
+    if (field.startsWith('authors.')) {
+        // Split authors.0.firstname
+        const parts = field.split('.');
+        const index = parseInt(parts[1], 10); // 0-based
+        const subfield = parts[2]; // firstname, lastname, middle_initial
 
-        if (inputElement && errorPlaceholder) {
-            // Add error styling to input
-            inputElement.classList.add('invalid-input');
+        // Find input element by name
+        inputElement = document.querySelector(`input[name="authors[${index}][${subfield}]"]`);
+        if (!inputElement) continue;
 
-            // Show error text (we'll compute heights afterwards)
-            errorPlaceholder.textContent = errors[field];
-            errorPlaceholder.classList.add('visible');
+        // Create or reuse error placeholder
+        errorPlaceholder = inputElement.parentElement.querySelector('.error-placeholder');
+        if (!errorPlaceholder) {
+            errorPlaceholder = document.createElement('div');
+            errorPlaceholder.classList.add('error-placeholder', 'text-red-600', 'text-sm', 'mt-1');
+            inputElement.parentElement.appendChild(errorPlaceholder);
         }
 
-        // Special case: show password errors on both password and confirm_password fields
-        if (field === 'password') {
+        // Friendly field names mapping
+        const fieldNames = {
+            firstname: 'First Name',
+            lastname: 'Last Name',
+            middle_initial: 'Middle Initial'
+        };
+        const nameText = fieldNames[subfield] || subfield;
+
+        // Prefix with Author number if not the first
+        const authorText = index === 0 ? 'Author' : `Author ${index + 1}`;
+
+        // Laravel error messages are arrays, join them
+        const rawMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
+
+        // Replace the original field mention with friendly text
+        friendlyMessage = rawMessage.replace(new RegExp(`authors\\.\\d+\\.${subfield}`, 'g'), `${authorText} ${nameText}`);
+
+    } else {
+        // Non-author fields
+        const fieldMapping = {
+            student_no: 'id_number',
+            employee_no: 'id_number'
+        };
+        const inputId = fieldMapping[field] || field;
+        inputElement = document.getElementById(inputId);
+        errorPlaceholder = document.getElementById(inputId + '-error-placeholder');
+
+        friendlyMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
+    }
+
+    if (inputElement && errorPlaceholder) {
+        inputElement.classList.add('invalid-input');
+        errorPlaceholder.textContent = friendlyMessage;
+        errorPlaceholder.classList.add('visible');
+    }
+      if (field === 'password') {
             const confirmPasswordElement = document.getElementById('confirm_password');
             const confirmPasswordPlaceholder = document.getElementById('confirm_password-error-placeholder');
 
             if (confirmPasswordElement && confirmPasswordPlaceholder) {
                 confirmPasswordElement.classList.add('invalid-input');
-                confirmPasswordPlaceholder.textContent = errors[field];
+                confirmPasswordPlaceholder.textContent = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
                 confirmPasswordPlaceholder.classList.add('visible');
             }
         }
     }
 
-    // After rendering errors, compute and apply equalized heights per grid row
     normalizePlaceholdersByRow();
-
-    // After heights applied, scroll to first invalid field smoothly
     scrollToFirstError();
 }
 

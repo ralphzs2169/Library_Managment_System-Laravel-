@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
+            $table->string('cover_image')->nullable();
+            $table->string('title');
+            $table->string('isbn')->unique();
+            $table->text('description')->nullable();
+            $table->string('publisher')->nullable();
+            $table->year('publication_year');
+            $table->integer('copies_available')->default(0);
+            $table->enum('language', ['English', 'Filipino', 'Spanish', 'Chinese', 'Others'])->default('English');
+            $table->float('price')->nullable();
+            $table->foreignId('genre_id')->constrained('genres')->onDelete('cascade');
             $table->timestamps();
         });
     }

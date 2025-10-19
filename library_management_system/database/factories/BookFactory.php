@@ -17,7 +17,16 @@ class BookFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'cover_image' => fake()->imageUrl(),
+            'title' => fake()->sentence(3),
+            'isbn' => fake()->unique()->isbn13(),
+            'description' => fake()->paragraph(),
+            'publisher' => fake()->company(),
+            'publication_year' => fake()->year(),
+            'copies_available' => fake()->numberBetween(1, 20),
+            'language' => fake()->randomElement(['English', 'Filipino', 'Spanish', 'Chinese', 'Others']),
+            'price' => fake()->randomFloat(2, 5, 100),
+            'genre_id' => fake()->numberBetween(5, 6), // Assuming you have 10 genres
         ];
     }
 }
