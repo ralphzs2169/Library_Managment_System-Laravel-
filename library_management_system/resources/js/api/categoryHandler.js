@@ -1,7 +1,6 @@
 
 import { API_ROUTES } from "../config.js";
-import { showError, showSuccessWithRedirect, showWarning, showConfirmation, showInfo, getJsonHeaders, parseJsonSafely, apiRequest } from "../utils.js";
-import { displayInputErrors } from "../helpers.js";
+import { showSuccessWithRedirect, showWarning, showConfirmation, showInfo, getJsonHeaders, apiRequest } from "../utils.js";
 
 export async function addCategoryHandler(categoryName) {
     // Step 1: Validate only

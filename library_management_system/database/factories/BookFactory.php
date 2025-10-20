@@ -17,7 +17,7 @@ class BookFactory extends Factory
     public function definition(): array
     {
         return [
-            'cover_image' => fake()->imageUrl(),
+            'cover_image' => 'covers/' . fake()->image(storage_path('app/public/covers'), 200, 300, null, false),
             'title' => fake()->sentence(3),
             'isbn' => fake()->unique()->isbn13(),
             'description' => fake()->paragraph(),

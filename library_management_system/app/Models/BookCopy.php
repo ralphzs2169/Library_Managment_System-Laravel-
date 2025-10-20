@@ -11,4 +11,9 @@ class BookCopy extends Model
         'status',
         'copies_available',
     ];
+
+    public function book()
+    {
+        return $this->belongsTo(Book::class);
+    }
 }

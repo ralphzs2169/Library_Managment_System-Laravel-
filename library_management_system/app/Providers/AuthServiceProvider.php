@@ -37,5 +37,9 @@ class AuthServiceProvider extends ServiceProvider
 
             return in_array($user->role, ['student', 'teacher']);
         });
+
+        Gate::define('view-footer', function ($user) {
+            return $user->role !== 'librarian';
+        });
     }
 }

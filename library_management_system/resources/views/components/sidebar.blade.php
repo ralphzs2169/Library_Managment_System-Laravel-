@@ -16,7 +16,7 @@
                 
                 <ul class="mt-2 space-y-1 collapsible-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0">
                     <li class="hover:bg-accent hover:text-white rounded p-2 pl-[3.75rem] transition-colors duration-100 text-[#8593A6]">
-                        <a href="{{ asset('librarian.books.index') }}" class="sidebar-link block">All Books</a>
+                        <a href="{{ route('librarian.books.index') }}" class="sidebar-link block">All Books</a>
                     </li>
                     <li class="hover:bg-accent hover:text-white rounded p-2 pl-[3.75rem] transition-colors duration-100 text-[#8593A6]">
                         <a href="{{ route('librarian.books.create') }}" class="sidebar-link block">Add New Book</a>

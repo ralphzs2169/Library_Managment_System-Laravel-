@@ -4,12 +4,12 @@
         <div class="flex justify-between items-center mb-4 bg-white shadow-sm rounded-xl px-6 py-2">
             <div class="flex items-center">
                 <img src="{{ asset('build/assets/icons/activity-log-black.svg') }}" alt="Category Icon" class="inline-block w-10 h-10 mr-2">
-                <h1 class="text-2xl font-bold  rounded-xl">Activity Logs</h1>
+                <h1 class="text-2xl font-bold  rounded-xl">{{ $title }}</h1>
             </div>
 
             <div class="flex flex-col">
                 <span class="text-xs text-secondary font-bold">Total Activity Logs</span>
-                <span class="ml-auto text-accent font-bold text-xl">{{ $activity_logs->total() }}</span>
+                <span class="ml-auto text-accent font-bold text-xl">{{ $totalItems }}</span>
             </div>
         </div>
 
@@ -45,14 +45,16 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-3 w-full items-end">
+
+                    @if($title != 'Books List')
                     <!-- Action Filter -->
                     <select id="filter-action" name="action" class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 cursor-pointer shadow-sm outline-none focus:ring-0">
                         <option value="">All Actions</option>
                         <option value="created">Created</option>
                         <option value="updated">Updated</option>
                         <option value="deleted">Deleted</option>
-
                     </select>
+                    @endif
                     <!-- Entity Filter -->
                     <select name="entity" class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 cursor-pointer shadow-sm outline-none focus:ring-0">
                         <option value="">All Entities</option>
@@ -76,18 +78,21 @@
             </form>
 
             <!--  Table -->
-            <div id="activity-logs-container" class="overflow-x-auto overflow-y-auto border border-gray-200 rounded-xl shadow-sm" style="max-height: 450px; min-height: 360px;">
-                @include('pages.librarian.activity-logs-table', ['activity_logs' => $activity_logs])
-            </div>
+            {{ $slot }}
+
 
 
             <!-- 📄 Pagination -->
             <div class="pagination mt-2">
-                {{ $activity_logs->links('pagination::tailwind') }}
+                {{-- {{ $activity_logs->links('pagination::tailwind') }} --}}
             </div>
 
         </div>
     </section>
 </x-layout>
 
+@if($title == 'Activity Logs')
 @vite('resources/js/api/activityLogHandler.js')
+@elseif($title == 'Books List')
+{{-- @vite('resources/js/api/booksListHandler.js' ) --}}
+@endif

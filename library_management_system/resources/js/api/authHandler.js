@@ -1,5 +1,5 @@
 import { API_ROUTES, BASE_URL } from '../config.js';
-import { redirectTo, showError, showSuccessWithRedirect, showLoader, hideLoader, confirmLogout, apiRequest, getJsonHeaders } from '../utils.js';
+import { showError, showSuccessWithRedirect, showLoader, hideLoader, confirmLogout, apiRequest, getJsonHeaders } from '../utils.js';
 import { displayInputErrors } from '../helpers.js';
 
 export async function loginHandler(username, password) {
@@ -37,7 +37,7 @@ export async function signupHandler(data) {
         const result = await response.json();
 
         if (result.errors){
-            displayInputErrors(result.errors);
+            displayInputErrors(result.errors, '#signup-form');
             hideLoader();
             return;
         }

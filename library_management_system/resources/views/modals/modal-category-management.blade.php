@@ -79,9 +79,9 @@
         <form id="add-genre-form" novalidate>
             <input type="hidden" id="add-genre-category-id" name="category_id">
             <div class="mb-4">
-                <label for="genre-name" class="block text-sm font-medium text-gray-700 mb-2">Genre Name</label>
-                <div id="genre-name-error-placeholder" class="error-placeholder"></div>
-                <input type="text" id="genre-name" name="name" required 
+                <label for="genre_name" class="block text-sm font-medium text-gray-700 mb-2">Genre Name</label>
+                <div id="genre_name-error-placeholder" class="error-placeholder"></div>
+                <input type="text" id="genre_name" name="genre_name" required 
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                     placeholder="Enter genre name">
             </div>

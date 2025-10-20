@@ -41,7 +41,7 @@ class GenreController extends Controller
     {
         if ($request->validate_only) {
             $request->validate([
-                'genre_name' => 'required|string|max:50|unique:categories,name',
+                'genre_name' => 'required|string|max:50|unique:categories,name|unique:genres,name',
                 'category_id' => 'required|string|exists:categories,id'
             ]);
 

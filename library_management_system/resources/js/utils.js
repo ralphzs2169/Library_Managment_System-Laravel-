@@ -30,7 +30,7 @@ export async function apiRequest(url, options = {}) {
     try {
         const response = await fetch(url, options);
         const result = await parseJsonSafely(response);
-
+        
         // Handle validation errors
         if (!response.ok) {
             if (response.status === VALIDATION_ERROR && result?.errors) {

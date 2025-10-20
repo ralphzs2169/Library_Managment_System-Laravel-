@@ -18,7 +18,26 @@ class BookController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() {}
+    public function index(Request $request)
+    {
+        $query = Book::query();
+        $categories = Category::with('genres')->get();
+
+
+        // Apply filters based on request parameters
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        $books = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $books->load('authors', 'genre', 'copies');
+
+        if ($request->ajax()) {
+            return view('pages.librarian.books-list', compact('books', 'categories'))->render();
+        }
+
+        return view('pages.librarian.books-list', compact('books', 'categories'));
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -96,10 +115,12 @@ class BookController extends Controller
                     ]);
                 }
 
-                BookCopy::create([
-                    'book_id' => $book->id,
-                    'copies_available' => $request->copies_available,
-                ]);
+                for ($i = 0; $i < $request->copies_available; $i++) {
+                    BookCopy::create([
+                        'book_id' => $book->id,
+                        'status' => 'available'
+                    ]);
+                }
 
                 ActivityLog::create([
                     'action' => 'created',
@@ -138,7 +159,92 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
-        //
+        $changes = [];
+
+        if ($request->boolean('validate_only')) {
+            $fields = [
+                'title',
+                'isbn',
+                'description',
+                'publisher',
+                'publication_year',
+                'language',
+                'price',
+                'genre_id',
+                'category_id'
+            ];
+
+            $normalize = function ($field, $value) {
+                if ($value === '' || $value === null) return null;
+                if (str_ends_with($field, '_id')) return (int)$value;
+                if ($field === 'publication_year') return (int)$value;
+                if ($field === 'price') return is_numeric($value) ? (float)$value : null;
+                return is_string($value) ? trim($value) : $value;
+            };
+
+            foreach ($fields as $field) {
+                // detect presence in request (handles updated_*, edit-*, edit_-, or raw keys)
+                $possibleKeys = [
+                    'updated_' . $field,
+                    'updated-' . $field,
+                    $field
+                ];
+
+                $found = false;
+                $newRaw = null;
+                foreach ($possibleKeys as $key) {
+                    if ($request->exists($key)) {
+                        $found = true;
+                        $newRaw = $request->input($key);
+                        break;
+                    }
+                }
+
+                // if not provided, skip comparison for this field
+                if (! $found) {
+                    continue;
+                }
+
+                // derive old raw value, with special handling for category_id:
+                $oldRaw = $book->$field;
+                if ($field === 'category_id' && ($oldRaw === null || $oldRaw === '')) {
+                    $oldRaw = $book->genre && $book->genre->category ? $book->genre->category->id : null;
+                }
+                // similarly, derive genre_id from relations if needed (optional)
+                if ($field === 'genre_id' && ($oldRaw === null || $oldRaw === '')) {
+                    $oldRaw = $book->genre ? $book->genre->id : null;
+                }
+
+                $old = $normalize($field, $oldRaw);
+                $new = $normalize($field, $newRaw);
+
+                if ($old !== $new) {
+                    $changes[$field] = [
+                        'old' => $oldRaw,
+                        'new' => $newRaw
+                    ];
+                }
+            }
+
+            if (empty($changes)) {
+                return response()->json(['status' => 'unchanged', 'message' => 'No changes detected.']);
+            }
+        }
+
+        $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'isbn' => 'sometimes|required|string|unique:books,isbn,' . $book->id . '|max:13',
+            'description' => 'sometimes|nullable|string',
+            'cover' => 'sometimes|nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'publisher' => 'sometimes|nullable|string|max:255',
+            'publication_year' => 'sometimes|nullable|digits:4|integer|min:1901|max:' . date('Y'),
+            'language' => 'sometimes|required|in:English,Filipino,Spanish,Chinese,Others',
+            'price' => 'sometimes|nullable|numeric|min:0',
+            'genre_id' => 'sometimes|required|exists:genres,id',
+            'category_id' => 'sometimes|required|exists:categories,id',
+        ]);
+
+        return response()->json(['status' => 'success', 'changes' => $changes]);
     }
 
     /**

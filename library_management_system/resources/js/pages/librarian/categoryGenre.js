@@ -1,8 +1,8 @@
 
-import { clearInputError } from "../helpers.js";
-import { addCategoryHandler, deleteCategoryHandler, editCategoryHandler } from "../api/categoryHandler.js";
-import { addGenreHandler, editGenreHandler, deleteGenreHandler } from "../api/genreHandler.js";
-import { showDangerConfirmation } from "../utils.js";
+import { clearInputError } from "../../helpers.js";
+import { addCategoryHandler, deleteCategoryHandler, editCategoryHandler } from "../../api/categoryHandler.js";
+import { addGenreHandler, editGenreHandler, deleteGenreHandler } from "../../api/genreHandler.js";
+import { showDangerConfirmation } from "../../utils.js";
 
 function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId, onSubmit, parentId = null) {
     const modal = document.getElementById(modalId);
@@ -94,7 +94,7 @@ const addGenreSetup = setupModal(
     'close-add-genre-modal',
     'cancel-add-genre',
     'add-genre-form',
-    'genre-name',
+    'genre_name',
     () => addGenreHandler(addGenreCategoryIdInput.value, addGenreSetup.nameInput.value.trim())
 );
 
@@ -109,7 +109,6 @@ document.querySelectorAll('.open-add-genre-modal').forEach(btn => {
 // Edit Category Modal
 
 const editCategoryIdInput = document.getElementById('edit-category-id');
-const genreCategoryParentId = document.getElementById('genre-category-parent-id');
 
 const editCategorySetup = setupModal(
     'edit-category-modal',

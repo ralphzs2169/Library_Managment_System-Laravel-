@@ -27,8 +27,11 @@ Route::prefix('librarian')
     ->name('librarian.')
     ->group(function () {
 
+        Route::get('/books/index', [BookController::class, 'index'])->name('books.index');
         Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
         Route::post('/books/store', [BookController::class, 'store'])->name('books.store');
+        Route::get('/books/{book}/edit', [BookController::class, 'edit'])->name('books.edit');
+        Route::put('/books/update/{book}', [BookController::class, 'update'])->name('books.update');
 
         Route::get('/category-management', [CategoryController::class, 'index'])->name('category-management');
         Route::post('/category-management', [CategoryController::class, 'store'])->name('category-management.store');

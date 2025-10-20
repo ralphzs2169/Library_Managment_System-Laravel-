@@ -1,5 +1,6 @@
-import { addBookHandler, fetchGenresByCategory } from "../api/add-book-handler";
-import { blurActiveElement } from "../helpers.js";
+import { addBookHandler } from "../../api/bookHandler.js";
+import { blurActiveElement, clearInputError } from "../../helpers.js";
+import { fetchGenresByCategory } from "../../api/genreHandler.js";
 
 // Individual element references (no refs object)
 const addBookform = document.getElementById('add-book-form');
@@ -37,8 +38,6 @@ if (coverInputField) {
 		reader.readAsDataURL(file);
 	});
 }
-
-// Guard the submit listener in case the form is not present
 
 
 const addAuthorBtn = document.getElementById('add-author-btn');
@@ -156,3 +155,12 @@ if (categorySelect && genreSelect) {
         fetchGenresByCategory(categorySelect, genreSelect, genreLoading, categoryId);
     });
 }
+
+// Attach clear logic to all relevant fields
+document.querySelectorAll(
+    '#add-book-form input, #add-book-form select, #add-book-form textarea'
+).forEach(el => {
+    el.addEventListener('focus', () => clearInputError(el));
+    el.addEventListener('input', () => clearInputError(el));
+    el.addEventListener('change', () => clearInputError(el));
+});

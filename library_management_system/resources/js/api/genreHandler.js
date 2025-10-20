@@ -1,11 +1,10 @@
-
 import { API_ROUTES } from "../config.js";
 import { showSuccessWithRedirect, showConfirmation, showInfo, apiRequest, getJsonHeaders } from "../utils.js";
 
 
 export async function addGenreHandler(categoryId, genreName) {
     // Step 1: Validate only
-    let result = apiRequest(API_ROUTES.ADD_GENRE, {
+    let result = await apiRequest(API_ROUTES.ADD_GENRE, {
         method: 'POST',
         headers: getJsonHeaders(),
         body: JSON.stringify({ 
@@ -13,7 +12,7 @@ export async function addGenreHandler(categoryId, genreName) {
             category_id: categoryId, 
             validate_only: true
         })
-    })
+    });
     
     if (result?.errorHandled) return;
 
@@ -82,4 +81,57 @@ export async function deleteGenreHandler(genreId) {
     if (result?.errorHandled) return;
     
     showSuccessWithRedirect('Success', 'Genre deleted successfully!', window.location.href);
+}
+
+export async function fetchGenresByCategory(categorySelect, genreSelect, genreLoading, categoryId, selectedId = null) {
+    console.log('fetchGenresByCategory called');
+	try {
+		const endpoint = categorySelect.getAttribute('data-endpoint');
+		if (genreLoading) genreLoading.classList.remove('hidden');
+		genreSelect.disabled = true;
+		genreSelect.innerHTML = '<option value="">Select Genre...</option>';
+
+		const resp = await fetch(`${endpoint}?category_id=${encodeURIComponent(categoryId)}`, {
+			headers: { 'Accept': 'application/json' }
+		});
+		if (!resp.ok) throw new Error('Failed to fetch genres');
+
+		const data = await resp.json();
+
+		// Normalize different response shapes into an array of { id, name }
+		let genres = [];
+		if (Array.isArray(data)) {
+			genres = data;
+		} else if (Array.isArray(data.data)) {
+			genres = data.data;
+		} else if (Array.isArray(data.genres)) {
+			genres = data.genres;
+		} else if (data && typeof data === 'object') {
+			const entries = Object.entries(data);
+			if (entries.length && typeof entries[0][1] === 'string') {
+				genres = entries.map(([id, name]) => ({ id, name }));
+			} else {
+				const firstArrayProp = Object.values(data).find(v => Array.isArray(v));
+				if (firstArrayProp) genres = firstArrayProp;
+			}
+		}else if (Array.isArray(data.data?.genres)) {
+            genres = data.data.genres;
+        }
+
+		(genres || []).forEach(g => {
+			const opt = document.createElement('option');
+			opt.value = g.id ?? g.value ?? '';
+			opt.textContent = g.name ?? g.label ?? g.title ?? String(g);
+			if (selectedId && String(g.id ?? g.value) === String(selectedId)) opt.selected = true;
+			genreSelect.appendChild(opt);
+		});
+
+		genreSelect.disabled = genreSelect.options.length <= 1;
+	} catch (e) {
+		console.error('loadGenresByCategory error', e);
+		showError('Something went wrong', 'Failed to fetch genres. Please try again later.');
+	} finally {
+		if (genreLoading) genreLoading.classList.add('hidden');
+		genreSelect.disabled = genreSelect.options.length <= 1;
+	}
 }

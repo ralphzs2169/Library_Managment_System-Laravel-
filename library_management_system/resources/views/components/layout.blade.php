@@ -24,6 +24,8 @@
 
     {{ $slot }}
 
-    @include('components/footer')</footer>
+    @can('view-footer')
+        @include('components/footer')
+    @endcan
 </body>
 </html>
