@@ -1,25 +1,34 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const tableContainer = document.getElementById('books-table-container');
+import { fetchBookDetails } from '../../api/bookHandler.js';
+import { clearAllErrors } from '../../helpers.js';
+import { initializeEditForm } from './editBook.js';
 
-    document.querySelectorAll('.edit-book-btn').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const bookId = this.getAttribute('data-book-id');
-            tableContainer.classList.add('hidden');
-            document.querySelectorAll('[id^="edit-book-form-container-"]').forEach(form => form.classList.add('hidden'));
-            const editForm = document.getElementById('edit-book-form-container-' + bookId);
-            if (editForm) editForm.classList.remove('hidden');
-        });
-    });
+const tableContainer = document.getElementById('books-table-container');
+const editButtons = document.querySelectorAll('.edit-book-btn');
+const editForm = document.getElementById('edit-book-form-container');
+const cancelEditButton = document.getElementById('cancel-edit-book');
 
-    // Improved cancel logic: works for button, icon, and text
-    document.querySelectorAll('[id^="edit-book-form-container-"]').forEach(form => {
-        form.addEventListener('click', function (e) {
-            const cancelBtn = e.target.closest('#cancel-edit-book');
-            if (cancelBtn) {
-                form.classList.add('hidden');
-                tableContainer.classList.remove('hidden');
-            }
-        });
+
+cancelEditButton.addEventListener('click', function (e) {
+    e.preventDefault();
+    tableContainer.classList.remove('hidden');
+    editForm.classList.add('hidden');
+    clearAllErrors(editForm);
+});
+
+editButtons.forEach(btn => {
+    btn.addEventListener('click', async function (e) {
+        e.preventDefault();
+        const bookId = this.getAttribute('data-book-id');
+        console.log('Edit button clicked for book ID:', bookId);
+        editForm.setAttribute('data-book-id', bookId);
+
+        const book = await fetchBookDetails({ id: bookId });
+
+        tableContainer.classList.add('hidden');
+        editForm.classList.remove('hidden');
+        initializeEditForm(editForm, book);
+
     });
 });
+
+

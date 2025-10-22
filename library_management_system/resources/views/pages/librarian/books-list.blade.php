@@ -39,14 +39,11 @@
                     </td>
                     <td class="px-4 py-3">{{ $book->title }}</td>
                     <td class="px-4 py-3 text-gray-500">
-                        @if($book->authors && $book->authors->count())
-                        {{ $book->authors
-                                        ->map(fn($a) => $a->lastname . ', ' . strtoupper(substr($a->firstname, 0, 1) . '.'))
-                                        ->join(', ') 
-                                    }}
-                        @else
-                        N/A
-                        @endif
+
+                        {{ $book->author->firstname }}
+                        {{ $book->author->middle_initial ? ' ' . $book->author->middle_initial . '.' : '' }}
+                        {{ $book->author->lastname }}
+
                     </td>
                     <td class="px-4 py-3">{{ $book->genre->category->name ?? 'N/A' }}</td>
                     <td class="px-4 py-3">{{ $book->copies->where('status', 'available')->count() . '/' . $book->copies->count() }}</td>
@@ -80,17 +77,10 @@
         </table>
     </div>
 
-    @foreach ($books as $book)
-    <div id="edit-book-form-container-{{ $book->id }}" class="hidden">
-        @include('pages.librarian.edit-book-form', [
-        'book' => $book,
-        'bookCategory' => $book->genre->category ?? null,
-        'categories' => $categories,
-        'genres' => $book->genre && $book->genre->category ? $book->genre->category->genres : collect()
-        ])
+
+    <div id="edit-book-form-container" data-book-id="" class="hidden">
+        @include('pages.librarian.edit-book-form')
     </div>
-    @endforeach
 
     @vite('resources/js/pages/librarian/booksList.js')
-    @vite('resources/js/pages/librarian/editBook.js')
 </x-table-section-layout>

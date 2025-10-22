@@ -2,8 +2,9 @@ import { API_ROUTES, BASE_URL } from '../config.js';
 import { showError, showSuccessWithRedirect, showLoader, hideLoader, confirmLogout, apiRequest, getJsonHeaders } from '../utils.js';
 import { displayInputErrors } from '../helpers.js';
 
-export async function loginHandler(username, password) {
+export async function loginHandler(username, password, form) {
   let result = await apiRequest(API_ROUTES.LOGIN, {
+    form: form.id,
     method: "POST",
     headers: getJsonHeaders(),
     body: JSON.stringify({ username, password }),
@@ -19,7 +20,7 @@ export async function loginHandler(username, password) {
 
 }
 
-export async function signupHandler(data) {
+export async function signupHandler(signupData, form) {
     showLoader();
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     
@@ -31,13 +32,13 @@ export async function signupHandler(data) {
                   'Accept': 'application/json',
                   'X-CSRF-TOKEN': csrfToken
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(signupData)
         });
 
         const result = await response.json();
 
         if (result.errors){
-            displayInputErrors(result.errors, '#signup-form');
+            displayInputErrors(result.errors, form);
             hideLoader();
             return;
         }

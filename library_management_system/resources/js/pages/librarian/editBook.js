@@ -1,216 +1,296 @@
+import { fetchGenresByCategory } from "../../api/genreHandler.js";
 import { editBookHandler } from "../../api/bookHandler.js";
-import { fetchGenresByCategory } from "../../api/genreHandler.js"; // ensure this exists in api
+import { initImagePreview } from "../librarian/imagePreview.js";
+import { showError } from "../../utils.js";
+import { clearInputError } from "../../helpers.js";
 
-// Single-form initializer. Call with the form element (scoped).
-export function initEditBookForm(form) {
-	// Avoid double initialization
-	if (!form || form.dataset.editInitialized === 'true') return;
-	form.dataset.editInitialized = 'true';
+export async function initializeEditForm(form, book) {
+    // Ensure the hidden book id is updated to the current book
+    const hiddenBookId = form.querySelector('#edit-book-id');
+    if (hiddenBookId) hiddenBookId.value = book.id ?? '';
+    form.setAttribute('data-book-id', book.id ?? '');
 
-	// Log missing handlers as warnings so they surface but don't stop other logic
-	if (typeof editBookHandler !== 'function') {
-		console.warn('editBookHandler is not a function — check import path: "../../api/bookHandler.js"');
-	}
-	if (typeof fetchGenresByCategory !== 'function') {
-		console.warn('fetchGenresByCategory is not a function — check import path: "../../api/genreHandler.js"');
-	}
+    // Grab fields
+    const editTitleField = form.querySelector('#title');
+    const editIsbnField = form.querySelector('#isbn');
+    const editDescriptionField = form.querySelector('#description');
+    const editPriceField = form.querySelector('#price');
 
-	try {
-		// Scoped element queries
-		const coverInputField = form.querySelector('#edit-cover-input');
-		const coverPreview = form.querySelector('#edit-cover-preview');
-		const coverPlaceholder = form.querySelector('#edit-cover-placeholder');
-		const coverErrorPlaceholder = form.querySelector('#edit-cover-error-placeholder');
-		const addAuthorBtn = form.querySelector('#edit-add-author-btn');
-		const authorsContainer = form.querySelector('#edit-authors-container');
+    // Author fields
+    const editAuthorFirstNameField = form.querySelector('#author_firstname');
+    const editAuthorLastNameField = form.querySelector('#author_lastname');
+    const editAuthorMiddleInitialField = form.querySelector('#author_middle_initial');
 
-		// Cover preview logic (scoped)
-		if (coverInputField) {
-			coverInputField.addEventListener('change', (e) => {
-				const file = e.target.files && e.target.files[0];
-				if (coverErrorPlaceholder) coverErrorPlaceholder.textContent = '';
-				if (!file) {
-					if (coverPreview) coverPreview.classList.add('hidden');
-					if (coverPlaceholder) coverPlaceholder.classList.remove('hidden');
-					return;
-				}
-				if (!file.type.startsWith('image/')) {
-					if (coverErrorPlaceholder) coverErrorPlaceholder.textContent = 'Invalid file type';
-					coverInputField.value = '';
-					return;
-				}
-				const reader = new FileReader();
-				reader.onload = () => {
-					if (coverPreview) {
-						coverPreview.src = reader.result;
-						coverPreview.classList.remove('hidden');
-					}
-					if (coverPlaceholder) coverPlaceholder.classList.add('hidden');
-				};
-				reader.readAsDataURL(file);
-			});
-		}
+    // Cover Image fields
+    const editCoverInputField = form.querySelector('#cover-input');
+    const editCoverImagePreview = form.querySelector('#cover-preview');
+    const editCoverPlaceholder = form.querySelector('#cover-placeholder');
+    const coverImagePreview = form.querySelector('#cover-preview');
+    const editCoverErrorPlaceholder = form.querySelector('#cover-error-placeholder');
 
-		// Dynamic author fields (scoped)
-		let dynamicAuthorIndex = authorsContainer ? authorsContainer.querySelectorAll('.author-group').length : 0;
-		if (addAuthorBtn && authorsContainer) {
-			addAuthorBtn.addEventListener('click', () => {
-				const newAuthorGroup = document.createElement('div');
-				newAuthorGroup.classList.add('author-group', 'dynamic', 'grid', 'grid-cols-1', 'md:grid-cols-3', 'gap-2', 'mt-2');
-				newAuthorGroup.innerHTML = `
-					<div class="flex items-center md:col-span-3 mb-1">
-						<span class="author-label font-medium mr-2">Author ${dynamicAuthorIndex + 1}</span>
-						<button type="button" class="remove-author-btn px-2 text-red-600 border border-red-600 rounded hover:bg-red-600 hover:text-white transition">Remove</button>
-					</div>
-					<div class="field-container flex flex-col">
-						<div class="error-placeholder" id="edit-authors[${dynamicAuthorIndex}][firstname]-error-placeholder"></div>
-						<input type="text" name="edit-authors[${dynamicAuthorIndex}][firstname]" placeholder="First Name" class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
-					</div>
-					<div class="field-container flex flex-col">
-						<div class="error-placeholder" id="edit-authors[${dynamicAuthorIndex}][lastname]-error-placeholder"></div>
-						<input type="text" name="edit-authors[${dynamicAuthorIndex}][lastname]" placeholder="Last Name" class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
-					</div>
-					<div class="field-container flex flex-col">
-						<div class="error-placeholder" id="edit-authors[${dynamicAuthorIndex}][middle_initial]-error-placeholder"></div>
-						<input type="text" name="edit-authors[${dynamicAuthorIndex}][middle_initial]" placeholder="M.I." class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
-					</div>
-				`;
-				authorsContainer.appendChild(newAuthorGroup);
-				dynamicAuthorIndex++;
+    // Publication fields
+    const editPublisherField = form.querySelector('#publisher');
+    const editPublicationYearField = form.querySelector('#publication_year');
+    const editCategorySelect = form.querySelector('#category');
+    const editGenreSelect = form.querySelector('#genre');
+    const editLanguageSelect = form.querySelector('#language');
+    
+    const editBookCopiesContainer = form.querySelector('#copies-table-container');
 
-				newAuthorGroup.querySelector('.remove-author-btn').addEventListener('click', () => {
-					newAuthorGroup.remove();
-					dynamicAuthorIndex = authorsContainer.querySelectorAll('.author-group').length;
-				});
-			});
-		}
+    // Fill form - determine category and selected genre
+    editTitleField.value = book.title || '';
+    const categoryId = book.genre?.category_id ?? '';
+    const selectedGenreId = book.genre_id ?? '';
+    editCategorySelect.value = categoryId;
 
-		// Form submission logic (scoped)
-		const editBookForm = form.querySelector('.edit-book-form') || form;
-		if (editBookForm) {
-			editBookForm.addEventListener('submit', async function (e) {
-				e.preventDefault();
-				e.stopPropagation();
+    editAuthorFirstNameField.value = book.author.firstname || '';
+    editAuthorLastNameField.value = book.author.lastname || '';
+    editAuthorMiddleInitialField.value = book.author.middle_initial || '';
 
-				try {
-					const fd = new FormData();
+    editIsbnField.value = book.isbn || '';
+    editPublicationYearField.value = book.publication_year || '';
+    editLanguageSelect.value = book.language || '';
+    editPublisherField.value = book.publisher || '';
+    editDescriptionField.value = book.description || '';
+    editPriceField.value = book.price || '';
+    
 
-					// CSRF + method spoofing
-					const meta = document.querySelector('meta[name="csrf-token"]');
-					if (meta && meta.getAttribute('content')) {
-						fd.append('_token', meta.getAttribute('content'));
-					}
-					fd.append('_method', 'PUT');
 
-					// include book id (from hidden input inside this form)
-					const bookIdEl = editBookForm.querySelector('#edit-book-id');
-					if (bookIdEl && bookIdEl.value) fd.set('book_id', bookIdEl.value);
+    const editGenreLoading = form.querySelector('#genre-loading') || null;
+   if (categoryId) {
+        await fetchGenresByCategory(editCategorySelect, editGenreSelect, editGenreLoading, categoryId, selectedGenreId);
+        // enable select if options were populated
+        if (editGenreSelect && editGenreSelect.options.length > 0) {
+        const categoryName = editCategorySelect.options[editCategorySelect.selectedIndex].text;
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = `Select ${categoryName} genres...`;
+        placeholderOption.disabled = true; // user cannot select it
+        editGenreSelect.insertAdjacentElement('afterbegin', placeholderOption);
 
-					// scalar fields (scoped lookups)
-					const scalarFields = [
-						'title','isbn','description','price','publisher',
-						'publication_year','genre_id','category_id','language','copies_available'
-					];
-					scalarFields.forEach(field => {
-						const element = editBookForm.querySelector('#edit-' + field);
-						const key = 'updated_' + field;
-						if (element) {
-							fd.set(key, element.value ?? '');
-						} else {
-							fd.set(key, '');
-						}
-					});
+        // Enable the select if real options exist
+        editGenreSelect.disabled = editGenreSelect.options.length <= 1;
+    }
+    }
 
-					// Cover file
-					const coverEl = editBookForm.querySelector('#edit-cover-input');
-					if (coverEl && coverEl.files && coverEl.files.length > 0) {
-						fd.set('updated_cover', coverEl.files[0]);
-					}
 
-					// Authors (scoped)
-					const authorInputs = authorsContainer
-						? authorsContainer.querySelectorAll('input[name^="edit-authors"], input[name^="authors"], input[name^="updated-authors"]')
-						: [];
-					authorInputs.forEach(input => {
-						fd.set(input.name, input.value ?? '');
-					});
+    // Handle cover preview
+    if (book.cover_image) {
+        coverImagePreview.src = `/storage/${book.cover_image}`;
+        coverImagePreview.classList.remove('hidden');
+        editCoverPlaceholder?.classList.add('hidden');
+    } else {
+        coverImagePreview.src = '';
+        coverImagePreview.classList.add('hidden');
+        editCoverPlaceholder?.classList.remove('hidden');
+    }
 
-					// call handler
+    if (editCoverInputField) {
+        initImagePreview(editCoverInputField, editCoverImagePreview, editCoverPlaceholder, editCoverErrorPlaceholder);
+    }
+    
 
-					await editBookHandler(fd);
-				
-				} catch (err) {
-					console.error('Error in edit form submit:', err);
-				}
-			});
-		} else {
-			console.warn('Scoped edit form not found.');
-		}
+    // Define a single reusable event handler
+    if (!form._categoryChangeHandler) {
+        form._categoryChangeHandler = async () => {
+            await handleCategoryChange(editCategorySelect, editGenreSelect, editGenreLoading);
+         };
+    }
 
-		// --- load genres for this form ---
-		const categorySelect = form.querySelector('#edit-category_id');
-		const genreSelect = form.querySelector('#edit-genre_id');
-		const genreLoading = form.querySelector('#edit-genre-loading');
+    renderCopiesTable(editBookCopiesContainer, book.copies);
 
-		if (genreSelect && (!genreSelect.dataset.selected || !categorySelect || !categorySelect.value)) {
-			genreSelect.disabled = true;
-		}
+    // Always remove before re-adding
+    editCategorySelect.removeEventListener('change', form._categoryChangeHandler);
+    editCategorySelect.addEventListener('change', form._categoryChangeHandler);
 
-		if (categorySelect && genreSelect) {
-			categorySelect.addEventListener('change', function () {
-				const categoryId = this.value;
-				genreSelect.innerHTML = '<option value="">Select Genre...</option>';
-				if (genreLoading) genreLoading.classList.remove('hidden');
-				if (!categoryId) {
-					if (genreLoading) genreLoading.classList.add('hidden');
-					genreSelect.disabled = true;
-					return;
-				}
-				if (typeof fetchGenresByCategory === 'function') {
-					fetchGenresByCategory(categorySelect, genreSelect, genreLoading, categoryId, null);
-				} else {
-					console.error('fetchGenresByCategory missing');
-					if (genreLoading) genreLoading.classList.add('hidden');
-				}
-			});
+    initializeErrorClearing(form);
 
-			const initialCategory = categorySelect.value;
-			const initialSelectedGenre = genreSelect ? genreSelect.dataset.selected || null : null;
-			if (initialCategory) {
-				if (typeof fetchGenresByCategory === 'function') {
-					fetchGenresByCategory(categorySelect, genreSelect, genreLoading, initialCategory, initialSelectedGenre);
-				} else {
-					console.error('fetchGenresByCategory missing for initial load');
-				}
-			}
-		}
-	} catch (err) {
-		console.error('Error initializing edit form:', err);
-	}
+
+    // Preload genres for this book’s category (if any)
+    const editBookForm = form.querySelector('.edit-book-form');
+    if (editBookForm && !editBookForm.dataset.submitBound) {
+        editBookForm.dataset.submitBound = 'true';
+        editBookForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            try {
+                const formData = new FormData(editBookForm);
+                formData.set('_method', 'PUT');
+                const meta = document.querySelector('meta[name="csrf-token"]');
+                if (meta) formData.set('_token', meta.getAttribute('content'));
+                const bookIdEl = editBookForm.querySelector('#book-id');
+                if (bookIdEl) formData.set('book_id', bookIdEl.value);
+
+               
+                if (!formData.has('genre')) {
+                    formData.set('genre', null);
+                }
+
+                await editBookHandler(formData, form.id);
+                // Optionally hide form and show table after success
+                // document.getElementById('books-table-container').classList.remove('hidden');
+                // document.getElementById('edit-book-form-container').classList.add('hidden');
+            } catch (err) {
+                console.error('Error submitting edit form:', err);
+                showError('Submission Error', err.message || 'An error occurred while submitting the form. Please try again.');
+            }
+        });
+    }
 }
 
-// Lazy initialization triggers:
-// 1) when user clicks an .edit-book-btn (uses data-book-id => container id)
-// 2) or when focus enters a form (focusin) — covers other flows that reveal the form
-document.addEventListener('click', (ev) => {
-	const btn = ev.target.closest('.edit-book-btn');
-	if (!btn) return;
-	const bookId = btn.getAttribute('data-book-id') || btn.dataset.bookId;
-	if (!bookId) return;
-	const container = document.getElementById(`edit-book-form-container-${bookId}`);
-	if (!container) return;
+export function renderCopiesTable(container, copies = []) {
+    if (!container) return;
+    container.innerHTML = ''; // Clear container
 
-	// find the form inside container (partial may be inside)
-	const form = container.querySelector('.edit-book-form');
-	if (form) {
-		initEditBookForm(form);
-	}
-});
+    if (!copies.length) {
+        const noCopiesEl = document.createElement('div');
+        noCopiesEl.className = 'h-40 flex items-center justify-center text-gray-500';
+        noCopiesEl.textContent = 'No copies found for this book.';
+        container.appendChild(noCopiesEl);
+        return;
+    }
 
-// Also initialize when user focuses into a form area (covers keyboard navigation or other triggers)
-document.addEventListener('focusin', (ev) => {
-	const form = ev.target.closest('.edit-book-form');
-	if (form) initEditBookForm(form);
-});
+    const table = document.createElement('table');
+    table.className = 'min-w-full text-sm text-left border-collapse';
+
+    table.innerHTML = `
+        <thead class="bg-gray-100 text-gray-700 uppercase text-xs font-semibold sticky top-0 z-10">
+            <tr>
+                <th class="px-4 py-3 border-b">Copy No.</th>
+                <th class="px-4 py-3 border-b">Status</th>
+                <th class="px-4 py-3 border-b">Date Added</th>
+                <th class="px-4 py-3 border-b">Action</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-gray-800">
+            ${copies.map(copy => {
+                const statusLower = copy.status?.toLowerCase() || '';
+                const statusColor = statusLower === 'available' ? 'text-green-600 font-semibold' : 'text-gray-800';
+                const possibleStatuses = ['available', 'lost', 'damaged', 'withdrawn'];
+
+                // Build options dynamically, exclude current status
+                const options = possibleStatuses
+                    .filter(s => s !== statusLower)
+                    .map(s => `<option value="${s}">Mark as ${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
+                    .join('');
+
+                return `
+                    <tr class="hover:bg-gray-50 transition" data-copy-id="${copy.id}">
+                        <td class="px-4 py-3 text-gray-600">${copy.copy_number}</td>
+                        <td class="px-4 py-3 copy-status ${statusColor}">${copy.status ?? 'Unknown'}</td>
+                        <td class="px-4 py-3 text-gray-500">${copy.created_at ? new Date(copy.created_at).toLocaleDateString() : ''}</td>
+                        <td class="px-4 py-3 text-right w-32 text-center">
+                            <select data-copy-id="${copy.id}" class="copy-action-select bg-secondary text-white w-full border rounded-md p-1 text-sm">
+                                <option value="" selected disabled>Change Status</option>
+                                ${options}
+                            </select>
+                            <!-- hidden input to ensure status is always submitted -->
+                            <input type="hidden" name="copies[${copy.id}]" value="${statusLower}">
+                        </td>
+                    </tr>
+                `;
+            }).join('')}
+        </tbody>
+    `;
+
+    container.appendChild(table);
+
+    // Add dynamic change listener to each select
+    table.querySelectorAll('.copy-action-select').forEach(select => {
+        select.addEventListener('change', e => {
+            const newStatus = e.target.value;
+            const row = e.target.closest('tr');
+            const statusCell = row.querySelector('.copy-status');
+
+            // Update status text
+            statusCell.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+            // Update color
+            statusCell.classList.remove('text-green-600', 'font-semibold', 'text-gray-800');
+            if (newStatus.toLowerCase() === 'available') {
+                statusCell.classList.add('text-green-600', 'font-semibold');
+            } else {
+                statusCell.classList.add('text-gray-800');
+            }
+
+            // Rebuild select options dynamically, exclude new current status
+            const possibleStatuses = ['available', 'lost', 'damaged', 'withdrawn'];
+            const filteredOptions = possibleStatuses
+                .filter(s => s !== newStatus.toLowerCase())
+                .map(s => `<option value="${s}">Mark as ${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
+                .join('');
+
+            // Reset select with disabled default
+            e.target.innerHTML = `<option value="" selected disabled>Change Status</option>${filteredOptions}`;
+
+            // Update corresponding hidden input value so FormData(form) includes the current status
+            const hiddenInput = row.querySelector(`input[type="hidden"][name="copies[${row.dataset.copyId}]"]`);
+            if (hiddenInput) {
+                hiddenInput.value = newStatus.toLowerCase();
+            } else {
+                // fallback: create/update hidden input
+                const newHidden = document.createElement('input');
+                newHidden.type = 'hidden';
+                newHidden.name = `copies[${row.dataset.copyId}]`;
+                newHidden.value = newStatus.toLowerCase();
+                e.target.insertAdjacentElement('afterend', newHidden);
+            }
+
+            // Ensure select keeps a name if you rely on select values too
+            e.target.name = `copies_select[${row.dataset.copyId}]`;
+        });
+    });
+}
 
 
+
+
+async function handleCategoryChange(editCategorySelect, editGenreSelect, editGenreLoading) {
+    const categoryId = editCategorySelect.value;
+
+    // Clear previous options and disable while loading
+    if (editGenreSelect) {
+        editGenreSelect.innerHTML = ''; // remove all
+        editGenreSelect.disabled = true;
+    }
+
+    if (!categoryId) {
+        if (editGenreLoading) editGenreLoading.classList.add('hidden');
+        return;
+    }
+
+    // Fetch genres for this new category
+    await fetchGenresByCategory(editCategorySelect, editGenreSelect, editGenreLoading, categoryId);
+
+    // Update placeholder text dynamically
+    const categoryName = editCategorySelect.options[editCategorySelect.selectedIndex].text;
+    if (editGenreSelect) {
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = `Select ${categoryName} genres...`;
+        placeholderOption.disabled = true; // user cannot select
+        placeholderOption.selected = true; // preselected
+
+        // Insert at the top
+        editGenreSelect.insertAdjacentElement('afterbegin', placeholderOption);
+
+        // Enable select only if there are other options
+        editGenreSelect.disabled = editGenreSelect.options.length <= 1;
+    }
+}
+     
+
+
+export function initializeErrorClearing(form) {
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    inputs.forEach(el => {
+        if (el.dataset.errorListenerAttached) return;
+        el.dataset.errorListenerAttached = 'true';
+
+        ['focus', 'input', 'change'].forEach(evt => {
+            el.addEventListener(evt, () => clearInputError(el));
+        });
+    });
+}

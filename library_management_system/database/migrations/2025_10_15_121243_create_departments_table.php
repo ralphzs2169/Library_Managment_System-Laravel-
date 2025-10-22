@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::table('departments')->truncate(); // clears all existing rows
+        // DB::table('departments')->truncate(); // clears all existing rows
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();

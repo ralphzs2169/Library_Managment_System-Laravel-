@@ -1,6 +1,5 @@
 import { clearInputError, autoCapitalizeOnBlur, autoCapitalizeWords, blurActiveElement } from '../helpers.js';
 import { signupHandler } from '../api/authHandler.js';
-import { showSuccessWithRedirect } from '../utils.js';
 
 const firstnameField = document.getElementById('firstname');
 const lastnameField = document.getElementById('lastname');
@@ -138,7 +137,7 @@ signupForm.addEventListener('submit', async function(e) {
                         formData.get('role') === 'teacher' ? formData.get('department') : null
     };
 
-    signupHandler(data);
+    signupHandler(data, form.id);
 });
 
     

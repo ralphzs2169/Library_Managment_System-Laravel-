@@ -34,7 +34,7 @@ export async function apiRequest(url, options = {}) {
         // Handle validation errors
         if (!response.ok) {
             if (response.status === VALIDATION_ERROR && result?.errors) {
-                displayInputErrors(result.errors);
+                displayInputErrors(result.errors, options.form);
                 return { errorHandled: true };
             }
 

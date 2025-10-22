@@ -43,5 +43,5 @@ loginForm.addEventListener('submit', function(event) {
         password: document.getElementById('password').value
     };
 
-    loginHandler(formData.username, formData.password);
+    loginHandler(formData.username, formData.password, loginForm.id);
 });

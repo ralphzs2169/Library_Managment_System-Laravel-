@@ -65,32 +65,28 @@
                 </div>
 
                 <!-- Author Information -->
-                <h2 class="flex items-center gap-2 font-semibold text-lg mb-3">
+                <h2 class="flex items-center gap-2 font-semibold text-lg mb-3 mt-8">
                     <span>Author Information</span>
-                    <button type="button" id="add-author-btn" class="px-2 py-1 border rounded text-accent hover:bg-accent hover:text-white transition">+</button>
                 </h2>
-                <div id="authors-container">
-                    <!-- First author row with full labels -->
-                    <div class="author-group grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="field-container flex flex-col">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                            <div class="error-placeholder flex-1 min-h-[1em]text-sm mb-1" id="authors[0][firstname]-error-placeholder"></div>
-                            <input type="text" name="authors[0][firstname]" placeholder="Author's First Name" class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
-                        </div>
-
-                        <div class="field-container flex flex-col">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                            <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="authors[0][lastname]-error-placeholder"></div>
-                            <input type="text" name="authors[0][lastname]" placeholder="Author's Last Name" class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
-                        </div>
-
-                        <div class="field-container flex flex-col">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Middle Initial</label>
-                            <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="authors[0][middle_initial]-error-placeholder"></div>
-                            <input type="text" name="authors[0][middle_initial]" placeholder="M.I." class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
-                        </div>
+                <!-- First author row with full labels -->
+                <div class="author-group grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="field-container flex flex-col">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <div class="error-placeholder flex-1 min-h-[1em]text-sm mb-1" id="author_firstname-error-placeholder"></div>
+                        <input type="text" id="author_firstname" placeholder="Author's First Name" class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
                     </div>
 
+                    <div class="field-container flex flex-col">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="author_lastname-error-placeholder"></div>
+                        <input type="text" id="author_lastname" placeholder="Author's Last Name" class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
+                    </div>
+
+                    <div class="field-container flex flex-col">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Middle Initial</label>
+                        <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="author_middle_initial-error-placeholder"></div>
+                        <input type="text" id="author_middle_initial" placeholder="M.I." class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent">
+                    </div>
                 </div>
 
 
@@ -115,9 +111,9 @@
                         </div>
                         {{-- Category Field --}}
                         <div class="field-container flex flex-col">
-                            <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                            <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="category_id-error-placeholder"></div>
-                            <select id="category_id" name="category_id" class="w-full border rounded-lg p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-accent" data-endpoint="{{ route('librarian.genres.by-category') }}">
+                            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="category-error-placeholder"></div>
+                            <select id="category" name="category" class="w-full border rounded-lg p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-accent" data-endpoint="{{ route('librarian.genres.by-category') }}">
                                 <option value="">Select Category...</option>
                                 @foreach ($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -129,10 +125,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
 
                         <div class="field-container">
-                            <label for="genre_id" class="block text-sm font-medium text-gray-700 mb-1">Genre</label>
-                            <div class="error-placeholder" id="genre_id-error-placeholder"></div>
+                            <label for="genre" class="block text-sm font-medium text-gray-700 mb-1">Genre</label>
+                            <div class="error-placeholder" id="genre-error-placeholder"></div>
                             <div class="relative">
-                                <select id="genre_id" name="genre_id" class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent" disabled>
+                                <select id="genre" name="genre" class="w-full border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-accent" disabled>
                                     <option value="">Select Genre...</option>
                                     @foreach ($genres as $genre)
                                     <option value="{{ $genre->id }}">{{ $genre->name }}</option>

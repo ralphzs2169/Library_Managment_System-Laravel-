@@ -18,11 +18,12 @@ class Book extends Model
         'language',
         'price',
         'genre_id',
+        'author_id',
     ];
 
-    public function authors()
+    public function author()
     {
-        return $this->belongsToMany(Author::class, 'author_books', 'book_id', 'author_id');
+        return $this->belongsTo(Author::class);
     }
 
     public function genre()

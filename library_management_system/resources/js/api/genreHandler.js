@@ -1,5 +1,5 @@
 import { API_ROUTES } from "../config.js";
-import { showSuccessWithRedirect, showConfirmation, showInfo, apiRequest, getJsonHeaders } from "../utils.js";
+import { showSuccessWithRedirect, showConfirmation, showInfo, apiRequest, getJsonHeaders, showError } from "../utils.js";
 
 
 export async function addGenreHandler(categoryId, genreName) {
@@ -84,54 +84,38 @@ export async function deleteGenreHandler(genreId) {
 }
 
 export async function fetchGenresByCategory(categorySelect, genreSelect, genreLoading, categoryId, selectedId = null) {
-    console.log('fetchGenresByCategory called');
-	try {
-		const endpoint = categorySelect.getAttribute('data-endpoint');
-		if (genreLoading) genreLoading.classList.remove('hidden');
-		genreSelect.disabled = true;
-		genreSelect.innerHTML = '<option value="">Select Genre...</option>';
+    try {
+        const endpoint = categorySelect.getAttribute('data-endpoint');
 
-		const resp = await fetch(`${endpoint}?category_id=${encodeURIComponent(categoryId)}`, {
-			headers: { 'Accept': 'application/json' }
-		});
-		if (!resp.ok) throw new Error('Failed to fetch genres');
+        if (genreLoading) genreLoading.classList.remove('hidden');
+    
+        const resp = await fetch(`${endpoint}?category_id=${encodeURIComponent(categoryId)}`, {
+            headers: { 'Accept': 'application/json' }
+        });
 
-		const data = await resp.json();
+        if (!resp.ok) throw new Error('Failed to fetch genres');
 
-		// Normalize different response shapes into an array of { id, name }
-		let genres = [];
-		if (Array.isArray(data)) {
-			genres = data;
-		} else if (Array.isArray(data.data)) {
-			genres = data.data;
-		} else if (Array.isArray(data.genres)) {
-			genres = data.genres;
-		} else if (data && typeof data === 'object') {
-			const entries = Object.entries(data);
-			if (entries.length && typeof entries[0][1] === 'string') {
-				genres = entries.map(([id, name]) => ({ id, name }));
-			} else {
-				const firstArrayProp = Object.values(data).find(v => Array.isArray(v));
-				if (firstArrayProp) genres = firstArrayProp;
-			}
-		}else if (Array.isArray(data.data?.genres)) {
-            genres = data.data.genres;
-        }
+        const data = await resp.json();
+        const genres = data.genres ?? [];
 
-		(genres || []).forEach(g => {
-			const opt = document.createElement('option');
-			opt.value = g.id ?? g.value ?? '';
-			opt.textContent = g.name ?? g.label ?? g.title ?? String(g);
-			if (selectedId && String(g.id ?? g.value) === String(selectedId)) opt.selected = true;
-			genreSelect.appendChild(opt);
-		});
+        genres.forEach(genre => {
+            const opt = document.createElement('option');
+            opt.value = genre.id;
+            opt.textContent = genre.name;
 
-		genreSelect.disabled = genreSelect.options.length <= 1;
-	} catch (e) {
-		console.error('loadGenresByCategory error', e);
-		showError('Something went wrong', 'Failed to fetch genres. Please try again later.');
-	} finally {
-		if (genreLoading) genreLoading.classList.add('hidden');
-		genreSelect.disabled = genreSelect.options.length <= 1;
-	}
+            // Only preselect on initial form load
+            if (selectedId && String(genre.id) === String(selectedId)) {
+                opt.selected = true;
+            }
+
+            genreSelect.appendChild(opt);
+        });
+
+        genreSelect.disabled = genres.length === 0;
+    } catch (e) {
+        console.error(e);
+        showError('Something went wrong', 'Failed to fetch genres.');
+    } finally {
+        if (genreLoading) genreLoading.classList.add('hidden');
+    }
 }

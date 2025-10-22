@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\BookCopy;
-use App\Models\AuthorBook; // added import for AuthorBook
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\ActivityLog;
 use App\Models\Category;
 use App\Models\Genre;
+use Illuminate\Support\Facades\Log;
+
 use Illuminate\Support\Facades\Validator;
 
 class BookController extends Controller
@@ -30,7 +31,7 @@ class BookController extends Controller
         }
 
         $books = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
-        $books->load('authors', 'genre', 'copies');
+        $books->load('author', 'genre', 'copies');
 
         if ($request->ajax()) {
             return view('pages.librarian.books-list', compact('books', 'categories'))->render();
@@ -54,26 +55,29 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
+        // Accept edit-prefixed author fields (from edit form) and normalize to expected keys
+
+
         if ($request->boolean('validate_only')) {
 
             $validator = Validator::make($request->all(), [
                 'title' => 'required|string|max:255',
                 'isbn' => 'required|string|unique:books,isbn|max:13',
                 'description' => 'nullable|string',
-                'cover' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'cover' => 'nullable|mimetypes:image/jpeg,image/png,image/webp,image/gif,image/bmp,image/svg+xml|max:2048',
 
-                'authors' => 'required|array|min:1',
-                'authors.*.firstname' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z]+$/'],
-                'authors.*.lastname' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z]+$/'],
-                'authors.*.middle_initial' => ['nullable', 'string', 'max:1', 'regex:/^[a-zA-Z]$/'],
+                'author_firstname' => ['required', 'string', 'max:45', 'regex:/^[A-Za-z\s]+$/'],
+                'author_lastname' => ['required', 'string', 'max:45', 'regex:/^[A-Za-z\s]+$/'],
+                'author_middle_initial' => ['nullable', 'string', 'max:1', 'regex:/^[a-zA-Z]$/'],
+
 
                 'publisher' => 'nullable|string|max:255',
                 'publication_year' => 'nullable|digits:4|integer|min:1901|max:' . date('Y'),
                 'copies_available' => 'required|integer|min:1',
                 'language' => 'required|in:English,Filipino,Spanish,Chinese,Others',
                 'price' => 'nullable|numeric|min:0',
-                'genre_id' => 'required|exists:genres,id',
-                'category_id' => 'required|exists:categories,id',
+                'genre' => 'required|exists:genres,id',
+                'category' => 'required|exists:categories,id',
             ]);
 
             if ($validator->fails()) {
@@ -88,6 +92,13 @@ class BookController extends Controller
 
         try {
             DB::transaction(function () use ($request) {
+
+                $author = Author::create([
+                    'firstname' => $request->author_firstname,
+                    'lastname' => $request->author_lastname,
+                    'middle_initial' => $request->author_middle_initial ?? null,
+                ]);
+
                 $book = Book::create([
                     'title' => $request->title,
                     'isbn' => $request->isbn,
@@ -97,27 +108,16 @@ class BookController extends Controller
                     'publication_year' => $request->publication_year,
                     'language' => $request->language,
                     'price' => $request->price,
-                    'genre_id' => $request->genre_id,
-                    'category_id' => $request->category_id,
+                    'genre_id' => $request->genre,
+                    'author_id' => $author->id,
                 ]);
 
-                // Create all authors and link to the book
-                foreach ($request->input('authors') as $authorData) {
-                    $author = Author::create([
-                        'firstname' => $authorData['firstname'],
-                        'lastname' => $authorData['lastname'],
-                        'middle_initial' => $authorData['middle_initial'] ?? null,
-                    ]);
-
-                    AuthorBook::create([
-                        'book_id' => $book->id,
-                        'author_id' => $author->id,
-                    ]);
-                }
+                $nextCopyNumber = BookCopy::where('book_id', $book->id)->max('copy_number') + 1;
 
                 for ($i = 0; $i < $request->copies_available; $i++) {
                     BookCopy::create([
                         'book_id' => $book->id,
+                        'copy_number' => $nextCopyNumber + $i,
                         'status' => 'available'
                     ]);
                 }
@@ -151,7 +151,11 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        //
+        $book->load('author', 'genre', 'copies');
+        $categories = Category::all();
+        $genres = Genre::all();
+
+        return response()->json(['status' => 'success', 'book' => $book, 'categories' => $categories, 'genres' => $genres]);
     }
 
     /**
@@ -159,6 +163,8 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
+        // Accept edit-prefixed author fields and normalize to expected keys before any validation/diffing
+
         $changes = [];
 
         if ($request->boolean('validate_only')) {
@@ -170,59 +176,122 @@ class BookController extends Controller
                 'publication_year',
                 'language',
                 'price',
-                'genre_id',
-                'category_id'
+                'genre',
+                'category',
+                'cover',
+                'author_firstname',
+                'author_lastname',
+                'author_middle_initial'
             ];
 
             $normalize = function ($field, $value) {
                 if ($value === '' || $value === null) return null;
-                if (str_ends_with($field, '_id')) return (int)$value;
                 if ($field === 'publication_year') return (int)$value;
                 if ($field === 'price') return is_numeric($value) ? (float)$value : null;
                 return is_string($value) ? trim($value) : $value;
             };
 
             foreach ($fields as $field) {
-                // detect presence in request (handles updated_*, edit-*, edit_-, or raw keys)
+                // detect presence in request (handles edited keys)
                 $possibleKeys = [
-                    'updated_' . $field,
-                    'updated-' . $field,
+                    'edit-' . $field,
                     $field
                 ];
-
                 $found = false;
-                $newRaw = null;
+                $updatedValue = null;
+
                 foreach ($possibleKeys as $key) {
                     if ($request->exists($key)) {
                         $found = true;
-                        $newRaw = $request->input($key);
+                        $updatedValue = $request->input($key);
                         break;
                     }
                 }
+                if (! $found) continue;
 
-                // if not provided, skip comparison for this field
-                if (! $found) {
+                // Special handling for category and genre: compare by id
+                if ($field === 'category') {
+                    $oldId = $book->category_id ?? ($book->genre && $book->genre->category ? $book->genre->category->id : null);
+                    $newId = ($updatedValue === '' || $updatedValue === null) ? null : (int)$updatedValue;
+                    if ($oldId !== $newId) {
+                        $changes[$field] = ['old' => $oldId, 'new' => $newId];
+                    }
                     continue;
                 }
 
-                // derive old raw value, with special handling for category_id:
-                $oldRaw = $book->$field;
-                if ($field === 'category_id' && ($oldRaw === null || $oldRaw === '')) {
-                    $oldRaw = $book->genre && $book->genre->category ? $book->genre->category->id : null;
-                }
-                // similarly, derive genre_id from relations if needed (optional)
-                if ($field === 'genre_id' && ($oldRaw === null || $oldRaw === '')) {
-                    $oldRaw = $book->genre ? $book->genre->id : null;
+                if ($field === 'genre') {
+                    $oldId = $book->genre_id ?? ($book->genre ? $book->genre->id : null);
+                    $newId = ($updatedValue === '' || $updatedValue === null) ? null : (int)$updatedValue;
+                    if ($oldId !== $newId) {
+                        $changes[$field] = ['old' => $oldId, 'new' => $newId];
+                    }
+                    continue;
                 }
 
-                $old = $normalize($field, $oldRaw);
-                $new = $normalize($field, $newRaw);
+                if ($field === 'cover') {
+                    $uploaded = $request->file('edit-cover') ?? $request->file('cover') ?? null;
 
+                    if (!$uploaded) {
+                        continue; // no new file, skip
+                    }
+
+                    $oldCoverPath = $book->cover_image ? storage_path('app/public/' . ltrim($book->cover_image, '/')) : null;
+                    $oldSize = $oldCoverPath && file_exists($oldCoverPath) ? filesize($oldCoverPath) : null;
+                    $newSize = $uploaded->getSize();
+
+                    $sizeChanged = $oldSize !== $newSize;
+                    $hashChanged = false;
+
+                    if (!$sizeChanged) {
+                        // Only compute hash if file sizes are equal
+                        $oldHash = $oldCoverPath && file_exists($oldCoverPath) ? @md5_file($oldCoverPath) : null;
+                        $newHash = @md5_file($uploaded->getRealPath());
+                        $hashChanged = $oldHash !== $newHash;
+                    }
+
+                    if ($sizeChanged || $hashChanged) {
+                        $changes[$field] = [
+                            'old' => $book->cover_image ?? null,
+                            'new' => $uploaded->getClientOriginalName()
+                        ];
+                    }
+
+                    continue;
+                }
+
+                $copiesInput = $request->input('copies', []); // e.g. ['1'=>'lost','2'=>'damaged']
+
+                foreach ($copiesInput as $copyId => $newStatus) {
+                    $copy = $book->copies()->find($copyId);
+                    if (!$copy) continue; // skip invalid copy IDs
+
+                    $oldStatus = $copy->status;
+
+                    if ($oldStatus !== $newStatus) {
+                        $changes["copies.$copyId"] = ['old' => $oldStatus, 'new' => $newStatus];
+                    }
+                }
+
+                // Normalize and compare other fields
+                if (in_array($field, ['author_firstname', 'author_lastname', 'author_middle_initial'])) {
+                    $oldAuthor = $book->author; // get related Author record
+                    if ($oldAuthor) {
+                        $oldValue = match ($field) {
+                            'author_firstname' => $oldAuthor->firstname,
+                            'author_lastname' => $oldAuthor->lastname,
+                            'author_middle_initial' => $oldAuthor->middle_initial,
+                        };
+                    } else {
+                        $oldValue = null;
+                    }
+                } else {
+                    $oldValue = $book->$field;
+                }
+
+                $old = $normalize($field, $oldValue);
+                $new = $normalize($field, $updatedValue);
                 if ($old !== $new) {
-                    $changes[$field] = [
-                        'old' => $oldRaw,
-                        'new' => $newRaw
-                    ];
+                    $changes[$field] = ['old' => $oldValue, 'new' => $updatedValue];
                 }
             }
 
@@ -230,6 +299,7 @@ class BookController extends Controller
                 return response()->json(['status' => 'unchanged', 'message' => 'No changes detected.']);
             }
         }
+
 
         $request->validate([
             'title' => 'sometimes|required|string|max:255',
@@ -240,11 +310,55 @@ class BookController extends Controller
             'publication_year' => 'sometimes|nullable|digits:4|integer|min:1901|max:' . date('Y'),
             'language' => 'sometimes|required|in:English,Filipino,Spanish,Chinese,Others',
             'price' => 'sometimes|nullable|numeric|min:0',
-            'genre_id' => 'sometimes|required|exists:genres,id',
-            'category_id' => 'sometimes|required|exists:categories,id',
+            'genre' => 'sometimes|required|exists:genres,id',
+            'category' => 'sometimes|required|exists:categories,id',
+
+            'author_firstname' => 'sometimes|required|string|max:45|regex:/^[A-Za-z\s]+$/',
+            'author_lastname' => 'sometimes|required|string|max:45|regex:/^[A-Za-z\s]+$/',
+            'author_middle_initial' => 'sometimes|nullable|string|max:1|regex:/^[a-zA-Z]$/'
         ]);
 
-        return response()->json(['status' => 'success', 'changes' => $changes]);
+        try {
+            DB::transaction(function () use ($request, $book) {
+
+                // Update Author
+                $author = $book->author;
+                if ($author) {
+                    $author->update([
+                        'firstname' => $request->input('author_firstname', $author->firstname),
+                        'lastname' => $request->input('author_lastname', $author->lastname),
+                        'middle_initial' => $request->input('author_middle_initial', $author->middle_initial),
+                    ]);
+                }
+
+                // Update Book
+                $book->update([
+                    'title' => $request->input('title', $book->title),
+                    'isbn' => $request->input('isbn', $book->isbn),
+                    'description' => $request->input('description', $book->description),
+                    'cover_image' => $request->hasFile('cover') ? $request->file('cover')->store('covers', 'public') : $book->cover_image,
+                    'publisher' => $request->input('publisher', $book->publisher),
+                    'publication_year' => $request->input('publication_year', $book->publication_year),
+                    'language' => $request->input('language', $book->language),
+                    'price' => $request->input('price', $book->price),
+                    'genre_id' => $request->input('genre', $book->genre_id),
+                ]);
+
+                // Update Book Copies status
+                $copiesInput = $request->input('copies', []);
+
+                foreach ($copiesInput as $copyId => $newStatus) {
+                    $copy = $book->copies()->find($copyId);
+                    if ($copy && $copy->status !== $newStatus) {
+                        $copy->update(['status' => $newStatus]);
+                    }
+                }
+            });
+            return response()->json(['status' => 'success', 'changes' => $changes]);
+        } catch (\Exception $e) {
+            Log::error('Book update failed: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Failed to update book.'], 500);
+        }
     }
 
     /**

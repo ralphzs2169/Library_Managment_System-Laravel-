@@ -26,7 +26,7 @@ class CategorySeeder extends Seeder
             'Health & Wellness'
         ];
 
-        DB::table('categories')->truncate(); // clears all existing rows
+        // DB::table('categories')->truncate(); // clears all existing rows
 
         foreach ($categories as $category) {
             DB::table('categories')->insert([

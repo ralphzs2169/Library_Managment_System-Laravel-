@@ -2,10 +2,11 @@
 
 
 
-export function displayInputErrors(errors) {
+export function displayInputErrors(errors, form) {
     // Clear previous errors and reset all placeholders
+
     const errorPlaceholders = Array.from(document.querySelectorAll('.error-placeholder'));
-  
+    console.log('Found error placeholders:', errorPlaceholders);
     errorPlaceholders.forEach((placeholder, i) => {
         placeholder.textContent = '';
         placeholder.classList.remove('visible');
@@ -16,42 +17,6 @@ export function displayInputErrors(errors) {
     let inputElement, errorPlaceholder;
     let friendlyMessage;
 
-    if (field.startsWith('authors.')) {
-        // Split authors.0.firstname
-        const parts = field.split('.');
-        const index = parseInt(parts[1], 10); // 0-based
-        const subfield = parts[2]; // firstname, lastname, middle_initial
-
-        // Find input element by name
-        inputElement = document.querySelector(`input[name="authors[${index}][${subfield}]"]`);
-        if (!inputElement) continue;
-
-        // Create or reuse error placeholder
-        errorPlaceholder = inputElement.parentElement.querySelector('.error-placeholder');
-        if (!errorPlaceholder) {
-            errorPlaceholder = document.createElement('div');
-            errorPlaceholder.classList.add('error-placeholder', 'text-red-600', 'text-sm', 'mt-1');
-            inputElement.parentElement.appendChild(errorPlaceholder);
-        }
-
-        // Friendly field names mapping
-        const fieldNames = {
-            firstname: 'First Name',
-            lastname: 'Last Name',
-            middle_initial: 'Middle Initial'
-        };
-        const nameText = fieldNames[subfield] || subfield;
-
-        // Prefix with Author number if not the first
-        const authorText = index === 0 ? 'Author' : `Author ${index + 1}`;
-
-        // Laravel error messages are arrays, join them
-        const rawMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
-
-        // Replace the original field mention with friendly text
-        friendlyMessage = rawMessage.replace(new RegExp(`authors\\.\\d+\\.${subfield}`, 'g'), `${authorText} ${nameText}`);
-
-    } else {
         // Non-author fields
         const fieldMapping = {
             student_no: 'id_number',
@@ -59,10 +24,10 @@ export function displayInputErrors(errors) {
         };
         const inputId = fieldMapping[field] || field;
         inputElement = document.getElementById(inputId);
+        console.log('Processing field:', field, 'Mapped input ID:', inputId, 'Input element:', inputElement);
         errorPlaceholder = document.getElementById(inputId + '-error-placeholder');
 
-        friendlyMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
-    }
+        friendlyMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field]
 
     if (inputElement && errorPlaceholder) {
         inputElement.classList.add('invalid-input');
@@ -82,7 +47,7 @@ export function displayInputErrors(errors) {
     }
 
     normalizePlaceholdersByRow();
-    scrollToFirstError();
+    scrollToFirstError(form);
 }
 
 // Clear errors; optional recompute to avoid repeated recompute per field
@@ -144,21 +109,45 @@ export function normalizePlaceholdersByRow() {
     });
 }
 
-// Smooth-scroll to first invalid input, focus and briefly highlight it
-export function scrollToFirstError() {
-	const firstInvalid = document.querySelector('#signup-form .invalid-input');
-	if (!firstInvalid) return;
+// Smooth-scroll to first visible error placeholder
+export function scrollToFirstError(formSelector = null) {
+    if (!formSelector) return;
+    const form = document.querySelector('#' + formSelector);
+    if (!form) return;
 
-	// Try to account for a fixed header if present
-	const header = document.querySelector('header, .site-header');
-	const headerHeight = header ? header.getBoundingClientRect().height + 50 : 80;
+    const firstError = form.querySelector('.error-placeholder:not(:empty)');
+    if (!firstError) return;
 
-	const rect = firstInvalid.getBoundingClientRect();
-	const scrollY = window.pageYOffset + rect.top - headerHeight;
+    // Optional: adjust for fixed header height if needed
+    const header = document.querySelector('header, .site-header');
+    const headerHeight = header ? header.getBoundingClientRect().height + 20 : 60;
 
-	// Smooth scroll
-	window.scrollTo({ top: Math.max(0, scrollY), behavior: 'smooth' });
+    const rect = firstError.getBoundingClientRect();
+    const scrollY = window.pageYOffset + rect.top - headerHeight;
+
+    window.scrollTo({ top: Math.max(0, scrollY), behavior: 'smooth' });
 }
+
+//clear all errors in a form
+export function clearAllErrors(form) {
+    if (!form) return;
+
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    inputs.forEach(input => {
+        const errorPlaceholder = document.getElementById(input.id + '-error-placeholder');
+        if (errorPlaceholder) {
+            errorPlaceholder.textContent = '';
+            errorPlaceholder.classList.remove('visible');
+            errorPlaceholder.style.height = '';
+        }
+
+        input.classList.remove('invalid-input');
+        input.style.borderColor = ''; // reset to default
+        input.style.backgroundColor = ''; // optional if used for errors
+    });
+}
+
 
 // ============= AUTO-CAPITALIZATION ==============
 export function autoCapitalizeWords(field) {
