@@ -12,11 +12,7 @@ export async function loginHandler(username, password, form) {
 
   if (result?.errorHandled) return;
 
-  if (result.role === 'librarian') {
-    window.location.href = BASE_URL + 'librarian/dashboard';
-  } else {
-    window.location.href = BASE_URL;
-  }
+  window.location.href = BASE_URL + result.data[0];
 
 }
 

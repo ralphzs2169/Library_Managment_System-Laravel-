@@ -1,8 +1,8 @@
-import { fetchGenresByCategory } from "../../api/genreHandler.js";
 import { editBookHandler } from "../../api/bookHandler.js";
 import { initImagePreview } from "../librarian/imagePreview.js";
 import { showError } from "../../utils.js";
 import { clearInputError } from "../../helpers.js";
+import { handleCategoryChange } from "./addNewBook.js";
 
 export async function initializeEditForm(form, book) {
     // Ensure the hidden book id is updated to the current book
@@ -57,22 +57,11 @@ export async function initializeEditForm(form, book) {
 
 
     const editGenreLoading = form.querySelector('#genre-loading') || null;
-   if (categoryId) {
-        await fetchGenresByCategory(editCategorySelect, editGenreSelect, editGenreLoading, categoryId, selectedGenreId);
-        // enable select if options were populated
-        if (editGenreSelect && editGenreSelect.options.length > 0) {
-        const categoryName = editCategorySelect.options[editCategorySelect.selectedIndex].text;
-        const placeholderOption = document.createElement('option');
-        placeholderOption.value = '';
-        placeholderOption.textContent = `Select ${categoryName} genres...`;
-        placeholderOption.disabled = true; // user cannot select it
-        editGenreSelect.insertAdjacentElement('afterbegin', placeholderOption);
-
-        // Enable the select if real options exist
-        editGenreSelect.disabled = editGenreSelect.options.length <= 1;
+    
+    if (categoryId) {
+        await handleCategoryChange(editCategorySelect, editGenreSelect, editGenreLoading);
+        editGenreSelect.value = selectedGenreId || '';
     }
-    }
-
 
     // Handle cover preview
     if (book.cover_image) {
@@ -246,39 +235,6 @@ export function renderCopiesTable(container, copies = []) {
 
 
 
-async function handleCategoryChange(editCategorySelect, editGenreSelect, editGenreLoading) {
-    const categoryId = editCategorySelect.value;
-
-    // Clear previous options and disable while loading
-    if (editGenreSelect) {
-        editGenreSelect.innerHTML = ''; // remove all
-        editGenreSelect.disabled = true;
-    }
-
-    if (!categoryId) {
-        if (editGenreLoading) editGenreLoading.classList.add('hidden');
-        return;
-    }
-
-    // Fetch genres for this new category
-    await fetchGenresByCategory(editCategorySelect, editGenreSelect, editGenreLoading, categoryId);
-
-    // Update placeholder text dynamically
-    const categoryName = editCategorySelect.options[editCategorySelect.selectedIndex].text;
-    if (editGenreSelect) {
-        const placeholderOption = document.createElement('option');
-        placeholderOption.value = '';
-        placeholderOption.textContent = `Select ${categoryName} genres...`;
-        placeholderOption.disabled = true; // user cannot select
-        placeholderOption.selected = true; // preselected
-
-        // Insert at the top
-        editGenreSelect.insertAdjacentElement('afterbegin', placeholderOption);
-
-        // Enable select only if there are other options
-        editGenreSelect.disabled = editGenreSelect.options.length <= 1;
-    }
-}
      
 
 

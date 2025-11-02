@@ -74,10 +74,6 @@ class ActivityLogController extends Controller
         $activity_logs = $query->paginate(10)->withQueryString();
         $activity_logs->load('user');
 
-        if ($request->ajax()) {
-            return view('pages.librarian.activity-logs-table', compact('activity_logs'))->render();
-        }
-
         return view('pages.librarian.activity-logs', compact('activity_logs'));
     }
 

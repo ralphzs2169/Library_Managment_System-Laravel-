@@ -2,10 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use App\Models\Genre;
 
@@ -26,6 +28,7 @@ Route::prefix('librarian')
     ->middleware(['auth', 'role:librarian'])
     ->name('librarian.')
     ->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'librarianDashboard'])->name('dashboard');
 
         Route::get('/books/index', [BookController::class, 'index'])->name('books.index');
         Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
@@ -48,7 +51,14 @@ Route::prefix('librarian')
         // AJAX: Get genres by category for add-book page
         Route::get('/genres/by-category', [CategoryController::class, 'genresByCategory'])->name('genres.by-category');
     });
-// Route::get('/librarian/dashboard', [DashboardController::class, 'index'])->name('librarian.dashboard');
 
+Route::prefix('staff')
+    ->middleware(['auth', 'role:staff'])
+    ->name('staff.')
+    ->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])->name('dashboard');
+        Route::get('/books/available', [BookController::class, 'showAvailableBooks'])->name('books.available');
+        Route::get('borrower/{user}', [UserController::class, 'borrowerDetails'])->name('borrower.details');
+    });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

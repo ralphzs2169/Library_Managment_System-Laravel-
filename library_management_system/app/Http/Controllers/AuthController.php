@@ -50,8 +50,27 @@ class AuthController extends Controller
 
             try {
                 Auth::login($user);
+                $foundUser = Auth::user();
 
-                return $this->jsonResponse('success', 'Login successful', 200, [$user->role]);
+                switch ($foundUser->role) {
+                    case 'librarian':
+                        $redirectUrl = 'librarian/dashboard';
+                        break;
+                    case 'staff':
+                        $redirectUrl = 'staff/dashboard';
+                        break;
+                    case 'teacher':
+                        $redirectUrl = 'teacher/dashboard';
+                        break;
+                    case 'student':
+                        $redirectUrl = 'student/dashboard';
+                        break;
+                    default:
+                        $redirectUrl = '/';
+                        break;
+                }
+
+                return $this->jsonResponse('success', 'Login successful', 200, [$redirectUrl]);
             } catch (\Exception $e) {
                 return $this->jsonResponse('error', 'Something went wrong', 500);
             }
@@ -112,7 +131,7 @@ class AuthController extends Controller
                 'middle_initial' => $request->middle_initial,
                 'username' => $request->username,
                 'contact_number' => $request->contact_number,
-                'role' => $request->role,
+                'role' => 'staff',
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);

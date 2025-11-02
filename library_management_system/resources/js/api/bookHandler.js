@@ -54,6 +54,27 @@ export async function addBookHandler(bookDetails, form) {
     showSuccessWithRedirect('Success', 'Book added successfully!', window.location.href);
 }
 
+export async function fetchAllBooks() {
+    try {
+        const response = await fetch(`/staff/books/available`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+            showError('Something went wrong', 'Failed to load books.');
+            return;
+        }
+
+        return result.books.data;
+    } catch (error) {
+        showError('Network Error', 'Unable to load books. Please try again later.');
+    }
+}
+
 export async function editBookHandler(bookDetails, form) {
     // Make sure validate_only is set after all other fields
     bookDetails.set('validate_only', 1);

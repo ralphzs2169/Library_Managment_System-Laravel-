@@ -11,6 +11,7 @@
           --font-sans: 'Roboto', sans-serif;
   --color-primary: #202020;
   --color-secondary: #393E46;
+  --color-secondary-light: #4A515B;
   --color-accent: #00ADB5;
   --color-background: #EEEEEE;
   --color-background-unfocused: #0000009f;
@@ -153,3 +154,8 @@
     width: 40px;
     height:40px;
   }
+
+  .sidebar-active {
+    background-color: var(--accent) !important;
+    color: white !important;
+}

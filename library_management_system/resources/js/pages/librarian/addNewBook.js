@@ -1,7 +1,7 @@
 import { addBookHandler } from "../../api/bookHandler.js";
 import { blurActiveElement, clearInputError } from "../../helpers.js";
-import { fetchGenresByCategory } from "../../api/genreHandler.js";
 import { initImagePreview } from "../librarian/imagePreview.js";
+import { fetchGenresByCategory } from "../../api/genreHandler.js";
 
 // Individual element references (no refs object)
 const addBookform = document.getElementById('add-book-form');
@@ -61,22 +61,35 @@ const genreLoading = document.getElementById('genre-loading');
 // Disable genre select initially
 if (genreSelect) genreSelect.disabled = true;
 
-if (categorySelect && genreSelect) {
+if (categorySelect && genreSelect && document.body.contains(document.getElementById('add-book-form'))) {
     categorySelect.addEventListener('change', async function () {
-        const categoryId = this.value;
-
-        if (!categoryId) {
-            genreSelect.innerHTML = '<option value="">Select Genre...</option>';
-            genreSelect.disabled = true;
-            if (genreLoading) genreLoading.classList.add('hidden');
-            return;
-        }
-
-        await fetchGenresByCategory(categorySelect, genreSelect, genreLoading, categoryId);
-
-        const categoryName = categorySelect.options[categorySelect.selectedIndex].text;
-        genreSelect.options[0].text = `Select ${categoryName} genres...`;
+        await handleCategoryChange(categorySelect, genreSelect, genreLoading);
     });
+}
+
+export async function handleCategoryChange(categorySelect, genreSelect, genreLoading) {
+    const categoryId = categorySelect.value;
+
+    // Always clear previous options first
+       genreSelect.innerHTML = '';
+    genreSelect.innerHTML = '<option value="">Select Genre...</option>';
+    genreSelect.disabled = true;
+
+    if (!categoryId) {
+        if (genreLoading) genreLoading.classList.add('hidden');
+        return;
+    }
+
+    // Fetch and populate genres
+    await fetchGenresByCategory(categorySelect, genreSelect, genreLoading, categoryId);
+
+    // Update placeholder text dynamically
+    const categoryName = categorySelect.options[categorySelect.selectedIndex].text;
+    const placeholderOption = genreSelect.options[0];
+    placeholderOption.textContent = `Select ${categoryName} genres...`;
+
+    // Enable if actual options exist
+    genreSelect.disabled = genreSelect.options.length <= 1;
 }
 
 

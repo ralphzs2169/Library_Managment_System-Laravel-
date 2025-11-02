@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Validator;
 
+use function Pest\Laravel\json;
+
 class BookController extends Controller
 {
     /**
@@ -38,6 +40,32 @@ class BookController extends Controller
         }
 
         return view('pages.librarian.books-list', compact('books', 'categories'));
+    }
+
+    public function showAvailableBooks(Request $request)
+    {
+        $query = Book::whereHas('copies', function ($q) {
+            $q->where('status', 'available');
+        });
+
+        // Apply search filter if provided
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Paginate and eager load relations
+        $books = $query->with(['author', 'genre', 'copies'])
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+                    ->withQueryString();
+
+        // Compute copies_available for each book
+        $books->getCollection()->transform(function ($book) {
+            $book->copies_available = $book->copies->where('status', 'available')->count();
+            return $book;
+        });
+
+        return response()->json(['books' => $books]);
     }
 
     /**
