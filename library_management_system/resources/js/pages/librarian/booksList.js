@@ -19,7 +19,7 @@ editButtons.forEach(btn => {
     btn.addEventListener('click', async function (e) {
         e.preventDefault();
         const bookId = this.getAttribute('data-book-id');
-        console.log('Edit button clicked for book ID:', bookId);
+       
         editForm.setAttribute('data-book-id', bookId);
 
         const book = await fetchBookDetails({ id: bookId });

@@ -1,59 +1,6 @@
 import { fetchAllBooks } from '../../api/bookHandler.js';
 import { closeBorrowerModal, initializeBorrowerProfileModal } from './borrowers.js';
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const dropdownButton = document.getElementById('searchFilterButton');
-  const dropdownMenu   = document.getElementById('searchFilterMenu');
-  const filterOptions  = document.querySelectorAll('.search-filter-option');
-  const selectedFilter = document.getElementById('searchSelectedFilter');
-  const searchInput    = document.getElementById('searchInput');
-
-  if (!dropdownButton || !dropdownMenu || !selectedFilter || !searchInput) {
-    // safety: if any element is missing, bail out
-    console.warn('Dropdown: missing required elements');
-    return;
-  }
-
-  // ensure the menu displays above everything
-  dropdownMenu.style.zIndex = 9999;
-
-  // Toggle dropdown — stop propagation so document click doesn't immediately close it
-  dropdownButton.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle('hidden');
-  });
-
-  // Each option: set label, update placeholder, close menu
-  filterOptions.forEach(option => {
-    option.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      const filter = option.dataset.filter;
-      selectedFilter.textContent = filter;
-      dropdownMenu.classList.add('hidden');
-
-      // change placeholder
-      if (filter === 'All') {
-        searchInput.placeholder = 'Search books by title, author, or ISBN…';
-      } else {
-        searchInput.placeholder = `Search books by ${filter.toLowerCase()}…`;
-      }
-
-      // put focus back in input for convenience
-      searchInput.focus();
-    });
-  });
-
-  // Close when clicking anywhere else
-  document.addEventListener('click', () => {
-    dropdownMenu.classList.add('hidden');
-  });
-
-  // Close on Escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') dropdownMenu.classList.add('hidden');
-  });
-});
+import { openConfirmBorrowModal } from './confirmBorrow.js';
 
 export function showBorrowBookContent(modal, borrower) {
     const modalContent = modal.querySelector('#borrower-profile-content');
@@ -69,9 +16,7 @@ export function showBorrowBookContent(modal, borrower) {
         <div class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <button id="back-to-profile-button" class="cursor-pointer text-gray-600 hover:text-gray-800 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
+                    <img src="${window.location.origin}/build/assets/icons/back-gray.svg" alt="Back" class="w-6 h-6">
                 </button>
                 <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
                     <img src="${window.location.origin}/build/assets/icons/borrow-book-accent.svg" alt="Borrow Book Icon" class="w-8 h-8">
@@ -123,9 +68,7 @@ export function showBorrowBookContent(modal, borrower) {
         <!-- Books Section with Fixed Height -->
         <div class="px-6 py-6 overflow-y-auto flex-1" style="min-height: 500px; max-height: calc(90vh - 200px);">
             <div class="flex items-center gap-2 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+                <img src="${window.location.origin}/build/assets/icons/available-books.svg" alt="Books" class="w-7 h-7">
                 <h3 class="text-gray-800 font-semibold text-md">Available Books</h3>
             </div>
 
@@ -145,9 +88,7 @@ export function showBorrowBookContent(modal, borrower) {
                         <!-- Empty state with fixed height -->
                         <tr class="empty-state">
                             <td colspan="6" class="py-20 text-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
+                                
                                 <p class="text-gray-500 text-sm">Loading available books...</p>
                             </td>
                         </tr>
@@ -195,7 +136,7 @@ async function loadAvailableBooks(borrower) {
 
     const tbody = document.getElementById('books-table-body');
     if (!tbody) return;
-    console.log(books);
+
     // Populate with actual books
     tbody.innerHTML = books.map((book) => `
         <tr class="hover:bg-gray-50 transition">
@@ -210,14 +151,12 @@ async function loadAvailableBooks(borrower) {
                 <td class="px-4 py-3 text-gray-700">${book.publication_year || 'N/A'}</td>
                 <td class="px-4 py-3">
                     <span class="inline-flex items-center gap-1 text-green-600 font-medium text-xs">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        
                         ${book.copies_available || 0} Available
                     </span>
                 </td>
                 <td class="px-4 py-3 text-center">
-                    <button class="borrow-book-btn  cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg text-xs font-medium transition-all shadow-sm hover:shadow" data-book-id="${book.id}">
+                    <button class="borrow-book-btn  cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg text-xs font-medium transition-all shadow-sm hover:shadow" data-book="${encodeURIComponent(JSON.stringify(book))}">
                         <img src="${window.location.origin}/build/assets/icons/add-white.svg" alt="Borrow" class="w-4 h-4">
                         Borrow
                     </button>
@@ -228,18 +167,16 @@ async function loadAvailableBooks(borrower) {
         // Attach borrow handlers
         tbody.querySelectorAll('.borrow-book-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                const bookId = this.dataset.bookId;
-                handleBorrowBook(borrower.id, bookId);
+               const book = JSON.parse(decodeURIComponent(this.dataset.book));
+
+                closeBorrowerModal();
+                openConfirmBorrowModal(borrower, book);
             });
         });
         
 }
 
-// Handle borrow book action
-function handleBorrowBook(userId, bookId) {
-    console.log(`Borrowing book ${bookId} for user ${userId}`);
-    // TODO: Implement actual borrow logic
-}
+
 
 export function restoreProfileContent(modal, borrower) {
     const modalContent = modal.querySelector('#borrower-profile-content');
@@ -289,13 +226,21 @@ function initializeSearchFilter() {
         });
     });
 
-    document.addEventListener('click', () => {
-        dropdownMenu.classList.add('hidden');
-    });
+    // Close dropdown when clicking outside (use capturing phase to prevent conflicts)
+    const closeDropdown = (e) => {
+        if (dropdownMenu && !dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.add('hidden');
+        }
+    };
+    document.addEventListener('click', closeDropdown);
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') dropdownMenu.classList.add('hidden');
-    });
+    // Close on Escape
+    const handleEscape = (e) => {
+        if (e.key === 'Escape' && dropdownMenu) {
+            dropdownMenu.classList.add('hidden');
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
 }
 
 

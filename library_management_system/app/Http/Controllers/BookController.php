@@ -54,7 +54,7 @@ class BookController extends Controller
         }
 
         // Paginate and eager load relations
-        $books = $query->with(['author', 'genre', 'copies'])
+        $books = $query->with(['author', 'genre.category', 'copies'])
                     ->orderBy('created_at', 'desc')
                     ->paginate(10)
                     ->withQueryString();
@@ -62,6 +62,7 @@ class BookController extends Controller
         // Compute copies_available for each book
         $books->getCollection()->transform(function ($book) {
             $book->copies_available = $book->copies->where('status', 'available')->count();
+            $book->category_name = optional($book->genre->category)->name ?? 'N/A';
             return $book;
         });
 

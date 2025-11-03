@@ -1,16 +1,17 @@
 import { restoreProfileContent, showBorrowBookContent } from './borrowBook.js';
 import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
 
-const borrowerModalRecords = document.querySelectorAll('.open-borrower-modal');
 const closeBorrowerModalBtn = document.getElementById('close-borrower-modal');
 const borrowerModal = document.getElementById('borrower-profile-modal');
 
-borrowerModalRecords.forEach(btn => {
-    btn.addEventListener('click', async function (e) {
+// Use event delegation for dynamically loaded content
+document.addEventListener('click', async function(e) {
+    const borrowerBtn = e.target.closest('.open-borrower-modal');
+    if (borrowerBtn) {
         e.preventDefault();
-        const userId = this.getAttribute('data-user-id');
+        const userId = borrowerBtn.getAttribute('data-user-id');
         openBorrowerProfileModal(userId);
-    });
+    }
 });
 
 closeBorrowerModalBtn.addEventListener('click', function (e) {
@@ -25,7 +26,8 @@ document.addEventListener('click', function(event) {
 });
 
 export function initializeBorrowerProfileModal(modal, borrower) {
-    console.log(borrower);
+
+    if (!borrower) return;
     
     // Main profile name
     const fullName = modal.querySelector('#borrower-name');
@@ -174,6 +176,6 @@ export function closeBorrowerModal() {
     // Hide modal after animation completes
     setTimeout(() => {
         borrowerModal.classList.add('hidden');
-         restoreProfileContent(borrowerModal, null);
+        restoreProfileContent(borrowerModal, null);
     }, 150);
 }

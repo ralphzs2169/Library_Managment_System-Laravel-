@@ -82,11 +82,11 @@
                                 Borrow a Book
                             </button>
                             <button id="approve-reservation-button" class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
-                                <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Approve Icon" class="w-5 h-5">
+                                {{-- <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Approve Icon" class="w-5 h-5"> --}}
                                 Approve Reservation
                             </button>
                             <button id="mark-as-cleared-button" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
-                                <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Mark as Cleared Icon" class="w-5 h-5">
+                                {{-- <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Mark as Cleared Icon" class="w-5 h-5"> --}}
                                 Mark as Cleared
                             </button>
                         </div>
