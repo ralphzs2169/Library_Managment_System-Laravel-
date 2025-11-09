@@ -2,11 +2,11 @@
 
 
 
-export function displayInputErrors(errors, form) {
+export function displayInputErrors(errors, form, allowScroll = true) {
     // Clear previous errors and reset all placeholders
 
     const errorPlaceholders = Array.from(document.querySelectorAll('.error-placeholder'));
-    console.log('Found error placeholders:', errorPlaceholders);
+  
     errorPlaceholders.forEach((placeholder, i) => {
         placeholder.textContent = '';
         placeholder.classList.remove('visible');
@@ -24,7 +24,6 @@ export function displayInputErrors(errors, form) {
         };
         const inputId = fieldMapping[field] || field;
         inputElement = document.getElementById(inputId);
-        console.log('Processing field:', field, 'Mapped input ID:', inputId, 'Input element:', inputElement);
         errorPlaceholder = document.getElementById(inputId + '-error-placeholder');
 
         friendlyMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field]
@@ -47,7 +46,10 @@ export function displayInputErrors(errors, form) {
     }
 
     normalizePlaceholdersByRow();
-    scrollToFirstError(form);
+
+    if (allowScroll) {
+        scrollToFirstError(form);
+    }
 }
 
 // Clear errors; optional recompute to avoid repeated recompute per field

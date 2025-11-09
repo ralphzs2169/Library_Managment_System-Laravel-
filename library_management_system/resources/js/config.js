@@ -20,4 +20,12 @@ export const API_ROUTES ={
     // Add other API routes as needed
 };
 
+export const SEMESTER_ROUTES = {
+    CREATE: '/librarian/semester-management/create',
+    STORE: '/librarian/semester-management',
+    EDIT: (id) => `/librarian/semester-management/${id}/edit`,
+    UPDATE: (id) => `/librarian/semester-management/${id}`,
+    ACTIVATE: (id) => `/librarian/semester-management/${id}/activate`,
+};
+
 export const VALIDATION_ERROR = 422;

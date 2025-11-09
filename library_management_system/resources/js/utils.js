@@ -208,6 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+export function formatLastNameFirst(firstname, lastname, middle_initial){
+  return `${lastname}, ${firstname}${middle_initial ? ' ' + middle_initial + '.' : ''}`;
+}
+
 export function highlightSearchMatches(searchTerm, containerSelector = '#members-table-container', columnIndexes = [1, 2]) {
     if (!searchTerm || searchTerm.trim().length === 0) return;
     
@@ -270,3 +274,13 @@ function highlightTextInCell(cell, searchTerm) {
         node.parentNode.replaceChild(fragment, node);
     });
 }
+
+// Debounce helper
+export function debounce(fn, delay) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
+

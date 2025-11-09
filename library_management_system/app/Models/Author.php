@@ -18,6 +18,16 @@ class Author extends Model
         return $this->belongsToMany(Book::class);
     }
 
+    public function getFullNameAttribute()
+    {
+        return "{$this->firstname} " . ($this->middle_initial ? "{$this->middle_initial}. " : '') . "{$this->lastname}";
+    }
+
+    public function getFormalNameAttribute()
+    {
+        return "{$this->lastname}, {$this->firstname}" . ($this->middle_initial ? " {$this->middle_initial}." : '');
+    }
+
     /** @use HasFactory<\Database\Factories\AuthorFactory> */
     use HasFactory;
 }

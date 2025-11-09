@@ -1,4 +1,4 @@
-import { showBorrowBookContent } from './borrowBook.js';
+import { showBorrowBookContent, restoreProfileContent } from './borrowBook.js';
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
 // Store borrower data for navigation
@@ -148,6 +148,7 @@ function closeConfirmBorrowModal() {
     // Hide modal after animation completes
     setTimeout(() => {
         modal.classList.add('hidden');
+        restoreProfileContent(document.getElementById('borrower-profile-modal'), null);
     }, 150);
 }
 
@@ -172,8 +173,8 @@ function returnToBorrowBookModal() {
                 borrowerModalContent.classList.add('scale-100', 'opacity-100');
             });
             
-            // Show borrow book content
-            showBorrowBookContent(borrowerModal, currentBorrower);
+            // Show borrow book content with restored state (pass true)
+            showBorrowBookContent(borrowerModal, currentBorrower, true);
         }
     }, 150); // Wait for close animation to complete
 }

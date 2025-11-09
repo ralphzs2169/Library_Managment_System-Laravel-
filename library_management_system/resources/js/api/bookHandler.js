@@ -2,9 +2,9 @@ import { API_ROUTES, VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors, scrollToFirstError } from "../helpers.js";
 import { showSuccessWithRedirect, showWarning, showConfirmation, showError, showInfo } from "../utils.js";
 
-export async function addBookHandler(bookDetails, form) {
+export async function addBookHandler(bookData, form) {
     // Step 1: Validate only
-    bookDetails.append('validate_only', 1);
+    bookData.append('validate_only', 1);
     let response = await fetch(API_ROUTES.ADD_BOOK, {
         method: 'POST',
         // Indicate we expect JSON so the server returns JSON errors instead of HTML redirects
@@ -12,7 +12,7 @@ export async function addBookHandler(bookDetails, form) {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
         },
-        body: bookDetails
+        body: bookData
     });
     
     const result = await response.json();
@@ -35,15 +35,15 @@ export async function addBookHandler(bookDetails, form) {
         'Yes, add it!'
     );
     if (!isConfirmed) return;
-    bookDetails.delete('validate_only');
-    // Step 3: Add Bo
+    bookData.delete('validate_only');
+    // Step 3: Add Book
     response = await fetch(API_ROUTES.ADD_BOOK, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
         },
-        body: bookDetails
+        body: bookData
     });
 
     if (!response.ok) {
@@ -54,9 +54,16 @@ export async function addBookHandler(bookDetails, form) {
     showSuccessWithRedirect('Success', 'Book added successfully!', window.location.href);
 }
 
-export async function fetchAllBooks() {
+export async function fetchAllBooks({ search = '' , sort = 'title_asc', page = 1 } = {}) {
     try {
-        const response = await fetch(`/staff/books/available`, {
+
+         const params = new URLSearchParams({
+            search,
+            sort,
+            page
+        });
+        
+        const response = await fetch(`/staff/books/available?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -69,7 +76,7 @@ export async function fetchAllBooks() {
             return;
         }
 
-        return result.books.data;
+         return { data: result.data, meta: result.meta };
     } catch (error) {
         showError('Network Error', 'Unable to load books. Please try again later.');
     }
@@ -111,11 +118,11 @@ export async function editBookHandler(bookDetails, form) {
         'Are you sure you want to save changes to this book?',
         'Yes, save'
     );
+    
     if (!isConfirmed) return;
     bookDetails.delete('validate_only');
 
     // Step 3: Submit update
-   
     response = await fetch(`${API_ROUTES.UPDATE_BOOK}/${bookDetails.get('book_id')}`, {
         method: 'POST',
         headers: {

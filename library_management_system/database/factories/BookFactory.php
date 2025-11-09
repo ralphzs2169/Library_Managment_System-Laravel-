@@ -23,7 +23,6 @@ class BookFactory extends Factory
             'description' => fake()->paragraph(),
             'publisher' => fake()->company(),
             'publication_year' => fake()->year(),
-            'copies_available' => fake()->numberBetween(1, 20),
             'language' => fake()->randomElement(['English', 'Filipino', 'Spanish', 'Chinese', 'Others']),
             'price' => fake()->randomFloat(2, 5, 100),
             'genre_id' => fake()->numberBetween(1, 10),

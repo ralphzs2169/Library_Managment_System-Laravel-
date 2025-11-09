@@ -4,26 +4,33 @@ import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
 const closeBorrowerModalBtn = document.getElementById('close-borrower-modal');
 const borrowerModal = document.getElementById('borrower-profile-modal');
 
-// Use event delegation for dynamically loaded content
-document.addEventListener('click', async function(e) {
-    const borrowerBtn = e.target.closest('.open-borrower-modal');
-    if (borrowerBtn) {
-        e.preventDefault();
-        const userId = borrowerBtn.getAttribute('data-user-id');
-        openBorrowerProfileModal(userId);
-    }
-});
+// Prevent duplicate event listener attachment
+if (!window._borrowerEventsInitialized) {
+    window._borrowerEventsInitialized = true;
 
-closeBorrowerModalBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    closeBorrowerModal();
-});
+    // Use event delegation for dynamically loaded content
+    document.addEventListener('click', async function(e) {
+        const borrowerBtn = e.target.closest('.open-borrower-modal');
+        if (borrowerBtn) {
+            e.preventDefault();
+            const userId = borrowerBtn.getAttribute('data-user-id');
+            openBorrowerProfileModal(userId);
+        }
+    });
 
-document.addEventListener('click', function(event) {
-    if (event.target === borrowerModal) {
-        closeBorrowerModal();
+    if (closeBorrowerModalBtn) {
+        closeBorrowerModalBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            closeBorrowerModal();
+        });
     }
-});
+
+    document.addEventListener('click', function(event) {
+        if (event.target === borrowerModal) {
+            closeBorrowerModal();
+        }
+    });
+}
 
 export function initializeBorrowerProfileModal(modal, borrower) {
 
@@ -145,6 +152,7 @@ export function initializeBorrowerProfileModal(modal, borrower) {
 }
 
 async function openBorrowerProfileModal(userId) {
+    console.log('Here   in openBorrowerProfileModal');
     const modal = document.getElementById('borrower-profile-modal');
     const modalContent = document.getElementById('borrower-profile-content');
     

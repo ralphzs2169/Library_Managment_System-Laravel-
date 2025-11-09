@@ -97,4 +97,4 @@
 @vite('resources/js/pages/staff/borrowers.js')
 @vite('resources/js/pages/staff/borrowBook.js')
 @vite('resources/js/pages/staff/confirmBorrow.js')
-@vite('resources/js/pages/staff/membersPagination.js')
+@vite('resources/js/pages/staff/borrowersPagination.js')

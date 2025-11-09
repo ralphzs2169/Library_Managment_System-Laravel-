@@ -8,6 +8,7 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SemesterController;
 use Illuminate\Http\Request;
 use App\Models\Genre;
 
@@ -48,7 +49,13 @@ Route::prefix('librarian')
 
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs');
 
-        // AJAX: Get genres by category for add-book page
+        Route::get('/semester-management', [SemesterController::class, 'index'])->name('semester-management');
+        Route::post('/semester-management', [SemesterController::class, 'store'])->name('semester-management.store');
+        Route::get('/semester-management/create', [SemesterController::class, 'create'])->name('semester-management.create');
+        Route::get('/semester-management/{id}/edit', [SemesterController::class, 'edit'])->name('semester-management.edit');
+        Route::put('/semester-management/{id}', [SemesterController::class, 'update'])->name('semester-management.update');
+        Route::post('/semester-management/{id}/activate', [SemesterController::class, 'activate'])->name('semester-management.activate');
+
         Route::get('/genres/by-category', [CategoryController::class, 'genresByCategory'])->name('genres.by-category');
     });
 

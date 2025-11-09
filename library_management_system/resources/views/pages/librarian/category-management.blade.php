@@ -63,7 +63,7 @@
                                 <span class="text-white ml-1.5">Delete</span>
                             </button>
                             @if ($category->genres()->exists())
-                            <div class="delete-tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                                 Cannot delete category<br>with existing genres
                                 <div class="absolute top-full right-6 border-4 border-transparent border-t-white"></div>
                             </div>
@@ -119,14 +119,6 @@
 
         @include('modals.modal-category-management')
     </section>
-
-    <style>
-        button[disabled]:hover+.delete-tooltip,
-        button[data-has-genres="true"]:hover+.delete-tooltip {
-            opacity: 1;
-        }
-
-    </style>
 
     @vite('resources/js/pages/librarian/categoryGenre.js')
 </x-layout>

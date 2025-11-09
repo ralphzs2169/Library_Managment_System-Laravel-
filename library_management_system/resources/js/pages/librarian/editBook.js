@@ -53,8 +53,6 @@ export async function initializeEditForm(form, book) {
     editPublisherField.value = book.publisher || '';
     editDescriptionField.value = book.description || '';
     editPriceField.value = book.price || '';
-    
-
 
     const editGenreLoading = form.querySelector('#genre-loading') || null;
     
@@ -115,7 +113,7 @@ export async function initializeEditForm(form, book) {
                 if (!formData.has('genre')) {
                     formData.set('genre', null);
                 }
-
+                console.log('Submitting edit form for book ID:', bookIdEl?.value);
                 await editBookHandler(formData, form.id);
                 // Optionally hide form and show table after success
                 // document.getElementById('books-table-container').classList.remove('hidden');
@@ -231,12 +229,6 @@ export function renderCopiesTable(container, copies = []) {
         });
     });
 }
-
-
-
-
-     
-
 
 export function initializeErrorClearing(form) {
     const inputs = form.querySelectorAll('input, select, textarea');

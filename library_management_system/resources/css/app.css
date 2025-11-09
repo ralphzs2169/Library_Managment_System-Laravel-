@@ -18,6 +18,7 @@
 }
 
 
+
   .field-container {
     position: relative;
     margin-bottom: 4px;
@@ -158,4 +159,18 @@
   .sidebar-active {
     background-color: var(--accent) !important;
     color: white !important;
+}
+
+button[disabled]:hover+.tooltip{
+  opacity: 1;
+}
+
+/* Show tooltip on button hover */
+.relative:hover .tooltip {
+  opacity: 1;
+}
+
+/* Prevent tooltip from blocking hover */
+.tooltip {
+  pointer-events: none;
 }
