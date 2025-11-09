@@ -26,7 +26,9 @@ export function displayInputErrors(errors, form, allowScroll = true) {
         inputElement = document.getElementById(inputId);
         errorPlaceholder = document.getElementById(inputId + '-error-placeholder');
 
-        friendlyMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field]
+        // Clean the error message by removing "edit_" prefix
+        friendlyMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
+        friendlyMessage = friendlyMessage.replace(/\bedit_/gi, '').replace(/\bedit /gi, '');
 
     if (inputElement && errorPlaceholder) {
         inputElement.classList.add('invalid-input');
@@ -39,7 +41,9 @@ export function displayInputErrors(errors, form, allowScroll = true) {
 
             if (confirmPasswordElement && confirmPasswordPlaceholder) {
                 confirmPasswordElement.classList.add('invalid-input');
-                confirmPasswordPlaceholder.textContent = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
+                let cleanMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
+                cleanMessage = cleanMessage.replace(/\bedit_/gi, '').replace(/\bedit /gi, '');
+                confirmPasswordPlaceholder.textContent = cleanMessage;
                 confirmPasswordPlaceholder.classList.add('visible');
             }
         }
@@ -114,7 +118,9 @@ export function normalizePlaceholdersByRow() {
 // Smooth-scroll to first visible error placeholder
 export function scrollToFirstError(formSelector = null) {
     if (!formSelector) return;
-    const form = document.querySelector('#' + formSelector);
+    const form = typeof formSelector === 'string' 
+        ? document.querySelector(`#${formSelector}`) 
+        : formSelector;
     if (!form) return;
 
     const firstError = form.querySelector('.error-placeholder:not(:empty)');

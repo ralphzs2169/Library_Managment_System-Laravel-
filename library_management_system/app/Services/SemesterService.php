@@ -21,7 +21,7 @@ class SemesterService
             ]);
 
             ActivityLog::create([
-                'action' => 'Create',
+                'action' => 'created',
                 'details' => 'Created semester: ' . $semester->name,
                 'entity_type' => 'Semester',
                 'entity_id' => $semester->id,
@@ -64,7 +64,7 @@ class SemesterService
             $semester->save();
 
             ActivityLog::create([
-                'action' => 'Activate',
+                'action' => 'activated',
                 'details' => 'Activated semester: ' . $semester->name,
                 'entity_type' => 'Semester',
                 'entity_id' => $semester->id,
@@ -75,9 +75,42 @@ class SemesterService
         });
     }
 
-    public function getAllSemesters()
+    public function getAllSemesters($filters = [])
     {
-        return Semester::orderBy('start_date', 'desc')->get();
+        $query = Semester::query();
+
+        // Apply search filter
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        // Apply status filter
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
+        }
+
+        // Apply sort filter
+        if (!empty($filters['sort'])) {
+            $sort = $filters['sort'];
+            switch ($sort) {
+                case 'oldest':
+                    $query->orderBy('start_date', 'asc');
+                    break;
+                case 'name_asc':
+                    $query->orderBy('name', 'asc');
+                    break;
+                case 'name_desc':
+                    $query->orderBy('name', 'desc');
+                    break;
+                default: // newest
+                    $query->orderBy('start_date', 'desc');
+            }
+        } else {
+            $query->orderBy('start_date', 'desc'); // default sort
+        }
+
+        return $query->paginate(10)->withQueryString();
     }
 
     public function getActiveSemester()
@@ -87,34 +120,64 @@ class SemesterService
 
     public function updateSemester(int $semesterId, Request $request)
     {
-        return DB::transaction(function () use ($semesterId, $request) {
-            $semester = Semester::findOrFail($semesterId);
-            
+        $semester = Semester::findOrFail($semesterId);
+        $changes = '';
+
+        if ($request->boolean('validate_only')) {
             // Only allow updating inactive semesters
             if ($semester->status === 'active') {
                 throw new \Exception('Cannot update active semester');
             }
 
-            // Detect changes if validate_only
-            if ($request->boolean('validate_only')) {
-                $changes = $this->detectSemesterChanges($request, $semester);
-                
-                if (empty($changes)) {
-                    return ['status' => 'unchanged', 'message' => 'No changes detected.'];
-                }
-                
-                return ['status' => 'success', 'message' => 'Validation passed'];
+            $changes = $this->detectSemesterChanges($request, $semester);
+            
+            if (empty($changes)) {
+                return ['status' => 'unchanged', 'message' => 'No changes detected.'];
             }
             
-            $semester->update([
-                'name' => $request->semester_name,
-                'start_date' => $request->semester_start,
-                'end_date' => $request->semester_end,
-            ]);
+            return ['status' => 'success', 'message' => 'Validation passed'];
+        }
+
+        try {
+            return DB::transaction(function () use ($semester, $request) {
+                $semester->update([
+                    'name' => $request->input('edit_semester_name'),
+                    'start_date' => $request->input('edit_semester_start'),
+                    'end_date' => $request->input('edit_semester_end'),
+                ]);
+
+                ActivityLog::create([
+                    'action' => 'updated',
+                    'details' => 'Updated semester: ' . $semester->name,
+                    'entity_type' => 'Semester',
+                    'entity_id' => $semester->id,
+                    'user_id' => $request->user()->id,
+                ]);
+
+                return $semester->fresh();
+            });
+        } catch (\Exception $e) {
+            return ['status' => 'error', 'message' => $e->getMessage()];
+        }
+    }
+
+    public function deactivateSemester(int $semesterId, Request $request)
+    {
+        return DB::transaction(function () use ($semesterId, $request) {
+            $semester = Semester::findOrFail($semesterId);
+            
+            // Only allow deactivating active semesters
+            if ($semester->status !== 'active') {
+                throw new \Exception('Only active semesters can be deactivated');
+            }
+            
+            // Deactivate the semester
+            $semester->status = 'inactive';
+            $semester->save();
 
             ActivityLog::create([
-                'action' => 'Update',
-                'details' => 'Updated semester: ' . $semester->name,
+                'action' => 'deactivated',
+                'details' => 'Deactivated semester: ' . $semester->name,
                 'entity_type' => 'Semester',
                 'entity_id' => $semester->id,
                 'user_id' => $request->user()->id,
@@ -134,27 +197,27 @@ class SemesterService
         };
 
         // Check semester name
-        if ($request->has('semester_name')) {
+        if ($request->has('edit_semester_name')) {
             $oldName = $normalize($semester->name);
-            $newName = $normalize($request->semester_name);
+            $newName = $normalize($request->input('edit_semester_name'));
             if ($oldName !== $newName) {
-                $changes['semester_name'] = ['old' => $semester->name, 'new' => $request->semester_name];
+                $changes['semester_name'] = ['old' => $semester->name, 'new' => $request->input('edit_semester_name')];
             }
         }
 
         // Check start date
-        if ($request->has('semester_start')) {
+        if ($request->has('edit_semester_start')) {
             $oldStart = $semester->start_date;
-            $newStart = $request->semester_start;
+            $newStart = $request->input('edit_semester_start');
             if ($oldStart !== $newStart) {
                 $changes['semester_start'] = ['old' => $oldStart, 'new' => $newStart];
             }
         }
 
         // Check end date
-        if ($request->has('semester_end')) {
+        if ($request->has('edit_semester_end')) {
             $oldEnd = $semester->end_date;
-            $newEnd = $request->semester_end;
+            $newEnd = $request->input('edit_semester_end');
             if ($oldEnd !== $newEnd) {
                 $changes['semester_end'] = ['old' => $oldEnd, 'new' => $newEnd];
             }

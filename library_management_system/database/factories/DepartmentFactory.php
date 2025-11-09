@@ -17,7 +17,7 @@ class DepartmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->company()
+            'name' => fake('en_US')->unique()->company()
         ];
     }
 }

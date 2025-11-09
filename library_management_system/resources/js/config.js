@@ -21,11 +21,13 @@ export const API_ROUTES ={
 };
 
 export const SEMESTER_ROUTES = {
+    INDEX: '/librarian/semester-management',
     CREATE: '/librarian/semester-management/create',
     STORE: '/librarian/semester-management',
     EDIT: (id) => `/librarian/semester-management/${id}/edit`,
     UPDATE: (id) => `/librarian/semester-management/${id}`,
     ACTIVATE: (id) => `/librarian/semester-management/${id}/activate`,
+    DEACTIVATE: (id) => `/librarian/semester-management/${id}/deactivate`,
 };
 
 export const VALIDATION_ERROR = 422;

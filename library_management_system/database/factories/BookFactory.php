@@ -16,12 +16,21 @@ class BookFactory extends Factory
      */
     public function definition(): array
     {
+          $covers = [
+            'aHcq6K7Iz13P47rDrNzDFwmpZlfFPBLmWsWUtBCZ.jpg',
+            'zR7HyJPFGa5RE1J4m72Q98Su3uYRsjhF5oHFTFCk.jpg',
+            'nZu7jDhUbXAqmpAZw3Lto9lfuIzXqnMLgc5VXXHX.jpg',
+            'pfMXpuzu2wROMCV9C9iX8XVKLSQMcbYK9mXOu3R4.jpg',
+            'djVWtopfed7NyT3D7oC6eba2ufniAgcQycAN9kMV.jpg',
+            'IcwlAT1ijnCI2Yk6U5HsOH5fsA3IkHzMe5gyw4Xv.jpg'
+        ];
+
         return [
-            'cover_image' => 'covers/' . fake()->image(storage_path('app/public/covers'), 200, 300, null, false),
-            'title' => fake()->sentence(3),
+            'cover_image' => 'covers/' . fake()->randomElement($covers),
+            'title' => fake('en_US')->sentence(3),
             'isbn' => fake()->unique()->isbn13(),
-            'description' => fake()->paragraph(),
-            'publisher' => fake()->company(),
+            'description' => fake('en_US')->paragraph(),
+            'publisher' => fake('en_US')->company(),
             'publication_year' => fake()->year(),
             'language' => fake()->randomElement(['English', 'Filipino', 'Spanish', 'Chinese', 'Others']),
             'price' => fake()->randomFloat(2, 5, 100),

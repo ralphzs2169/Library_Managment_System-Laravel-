@@ -19,7 +19,6 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('publisher')->nullable();
             $table->year('publication_year')->nullable();
-            $table->integer('copies_available')->default(0);
             $table->enum('language', ['English', 'Filipino', 'Spanish', 'Chinese', 'Others'])->default('English');
             $table->float('price')->nullable();
             $table->foreignId('author_id')->constrained('authors')->onDelete('cascade');

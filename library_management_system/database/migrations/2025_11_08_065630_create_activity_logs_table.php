@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id();
             $table->string('entity_type');
-            $table->string('action');
-            $table->string('details');
+            $table->enum('action', ['created','updated','deleted','activated','deactivated', 'borrowed', 'reserved', 'paid']);
+            $table->string('details')->nullable();
             $table->unsignedBigInteger('entity_id');
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('semester_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
         });
     }

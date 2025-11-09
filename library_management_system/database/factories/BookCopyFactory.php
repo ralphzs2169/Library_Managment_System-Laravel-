@@ -27,19 +27,5 @@ class BookCopyFactory extends Factory
         ];
     }
 
-    public function forBook(Book $book, int $count)
-    {
-        $count = $count ?? fake()->numberBetween(1, 5);
-
-        // Create multiple copies with unique copy_number for this book
-        return collect(range(1, $count))->map(function ($i) use ($book) {
-            return self::new()->state([
-                'book_id' => $book->id,
-                'copy_number' => $i,
-                'status' => 'available',
-                'is_archived' => false,
-            ]);
-        });
-    }
 
 }

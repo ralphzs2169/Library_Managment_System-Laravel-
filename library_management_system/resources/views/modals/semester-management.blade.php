@@ -127,6 +127,7 @@
                 </div>
             </div>
 
+
             <!-- Modal Footer -->
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" id="cancel-edit-semester" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">

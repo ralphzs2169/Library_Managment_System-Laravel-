@@ -1,6 +1,7 @@
 import { showError, showInfo, showWarning, showConfirmation, showSuccessWithRedirect } from "../utils.js";
 import { SEMESTER_ROUTES, VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
+import { highlightSearchMatches } from "../utils.js";
 
 export async function getCreateSemesterForm() {
     try {
@@ -182,7 +183,7 @@ export async function updateSemester(semesterId, semesterData, form) {
 
     if (!response.ok) {
         if (response.status === VALIDATION_ERROR) { 
-            displayInputErrors(result.errors, form.id, false); 
+            displayInputErrors(result.errors, 'edit-semester-form', false); 
             return;
         }
         showError('Something went wrong', 'Failed to update semester. Please try again.');
@@ -221,4 +222,101 @@ export async function updateSemester(semesterId, semesterData, form) {
     }
 
     showSuccessWithRedirect('Success', 'Semester updated successfully!', window.location.href);
+}
+
+export async function deactivateSemester(semesterId, semesterName) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const formData = new FormData();
+    formData.append('_token', csrfToken);
+
+    // Step 1: Validate only
+    formData.append('validate_only', 1);
+    let response = await fetch(SEMESTER_ROUTES.DEACTIVATE(semesterId), {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+        },
+        body: formData
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        if (response.status === VALIDATION_ERROR) { 
+            showWarning('Action not allowed', 'This semester cannot be deactivated.');
+            return;
+        }
+        showError('Something went wrong', 'Please try again.');
+        return;
+    }
+
+    // Step 2: Show confirmation
+    const isConfirmed = await showConfirmation(
+        'Deactivate Semester?',
+        `Are you sure you want to deactivate "${semesterName}"? No semester will be active after this action.`,
+        'Yes, deactivate it!'
+    );
+    if (!isConfirmed) return;
+    
+    formData.delete('validate_only');
+
+    // Step 3: Deactivate Semester
+    response = await fetch(SEMESTER_ROUTES.DEACTIVATE(semesterId), {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: formData
+    });
+
+    if (!response.ok) {
+        showError('Something went wrong', 'Please try again.');
+        return;
+    }
+
+    showSuccessWithRedirect('Success', 'Semester deactivated successfully!', window.location.href);
+}
+
+export async function loadSemesters(page = 1) {
+    try {
+        const searchInput = document.querySelector('#semester-search');
+        const sortSelect = document.querySelector('#semester-sort');
+        const statusFilter = document.querySelector('#semester-status-filter');
+
+        const params = new URLSearchParams({
+            page,
+            search: searchInput?.value || '',
+            sort: sortSelect?.value || 'newest',
+            status: statusFilter?.value || 'all'
+        });
+
+        const response = await fetch(`${SEMESTER_ROUTES.INDEX}?${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+
+        const html = await response.text();
+
+        if (!response.ok) {
+            showError('Something went wrong', 'Failed to load semesters.');
+            return;
+        }
+
+        const container = document.getElementById('semesters-table-container');
+        if (container) {
+            container.innerHTML = html;
+        }
+
+        // Highlight search matches
+        const searchTerm = searchInput?.value?.trim();
+        if (searchTerm) {
+            highlightSearchMatches(searchTerm, '#semesters-table-container', [1]);
+        }
+    } catch (error) {
+        showError('Network Error', 'Unable to load semesters. Please try again later.');
+    }
 }

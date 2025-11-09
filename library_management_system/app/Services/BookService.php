@@ -115,7 +115,7 @@ class BookService {
             }
 
             ActivityLog::create([
-                'action' => 'create',
+                'action' => 'created',
                 'details' => 'Created book: ' . $book->title,
                 'entity_type' => 'book',
                 'entity_id' => $book->id,
@@ -150,7 +150,7 @@ class BookService {
                 $this->updateBookRecord($request, $book);
                 $this->updateCopies($request, $book);
                 ActivityLog::create([
-                    'action' => 'update',
+                    'action' => 'updated',
                     'details' => 'Updated book: ' . $book->title,
                     'entity_type' => 'Book',
                     'entity_id' => $book->id,
@@ -160,7 +160,7 @@ class BookService {
 
             return ['status' => 'success', 'changes' => $changes];
         } catch (\Exception $e) {
-            return ['status' => 'error', 'message' => 'Failed to update book.'];
+            return ['status' => 'error', 'message' =>  $e->getMessage()];
         }
     }
 

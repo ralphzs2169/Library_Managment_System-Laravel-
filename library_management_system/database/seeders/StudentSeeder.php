@@ -15,9 +15,7 @@ class StudentSeeder extends Seeder
       public function run(): void
     {
         // Get all users with role = 'student' between ID 53–92
-        $studentUsers = User::where('role', 'student')
-            ->whereBetween('id', [53, 92])
-            ->get();
+        $studentUsers = User::where('role', 'student')->get();
 
         foreach ($studentUsers as $user) {
             Student::create([

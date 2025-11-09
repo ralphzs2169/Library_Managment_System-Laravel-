@@ -15,9 +15,7 @@ class TeacherSeeder extends Seeder
     public function run(): void
     {
         // Get all users with role = 'teacher' between ID 53–92
-        $teacherUsers = User::where('role', 'teacher')
-            ->whereBetween('id', [53, 92])
-            ->get();
+        $teacherUsers = User::where('role', 'teacher')->get();
 
         foreach ($teacherUsers as $user) {
             Teacher::create([

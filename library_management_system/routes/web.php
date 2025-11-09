@@ -55,6 +55,7 @@ Route::prefix('librarian')
         Route::get('/semester-management/{id}/edit', [SemesterController::class, 'edit'])->name('semester-management.edit');
         Route::put('/semester-management/{id}', [SemesterController::class, 'update'])->name('semester-management.update');
         Route::post('/semester-management/{id}/activate', [SemesterController::class, 'activate'])->name('semester-management.activate');
+        Route::post('/semester-management/{id}/deactivate', [SemesterController::class, 'deactivate'])->name('semester-management.deactivate');
 
         Route::get('/genres/by-category', [CategoryController::class, 'genresByCategory'])->name('genres.by-category');
     });

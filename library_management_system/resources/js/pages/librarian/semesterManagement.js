@@ -1,4 +1,4 @@
-import { getCreateSemesterForm, storeNewSemester, activateSemester, fetchSemesterDetails, updateSemester } from '../../api/semesterHandler.js';
+import { getCreateSemesterForm, storeNewSemester, activateSemester, fetchSemesterDetails, updateSemester, deactivateSemester } from '../../api/semesterHandler.js';
 import { clearInputError } from '../../helpers.js';
 
 const addSemesterModal = document.getElementById('add-semester-modal');
@@ -57,6 +57,14 @@ document.addEventListener('click', async (e) => {
             editSemesterModal.classList.remove('hidden');
         }
     }
+
+    if (e.target.closest('.deactivate-semester')) {
+        const button = e.target.closest('.deactivate-semester');
+        const semesterId = button.dataset.semesterId;
+        const semesterName = button.closest('tr').querySelector('.font-semibold').textContent;
+        
+        await deactivateSemester(semesterId, semesterName);
+    }
 });
 
 // Handle edit form submission
@@ -65,9 +73,9 @@ editSemesterForm.addEventListener('submit', async (e) => {
 
     const semesterId = document.getElementById('edit_semester_id').value;
     const formData = new FormData();
-    formData.append('semester_name', document.getElementById('edit_semester_name').value);
-    formData.append('semester_start', document.getElementById('edit_semester_start').value);
-    formData.append('semester_end', document.getElementById('edit_semester_end').value);
+    formData.append('edit_semester_name', document.getElementById('edit_semester_name').value);
+    formData.append('edit_semester_start', document.getElementById('edit_semester_start').value);
+    formData.append('edit_semester_end', document.getElementById('edit_semester_end').value);
 
     await updateSemester(semesterId, formData, editSemesterForm);
 });
