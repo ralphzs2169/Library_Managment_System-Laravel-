@@ -71,7 +71,7 @@ export async function handleCategoryChange(categorySelect, genreSelect, genreLoa
     const categoryId = categorySelect.value;
 
     // Always clear previous options first
-       genreSelect.innerHTML = '';
+    genreSelect.innerHTML = '';
     genreSelect.innerHTML = '<option value="">Select Genre...</option>';
     genreSelect.disabled = true;
 

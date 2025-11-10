@@ -115,7 +115,14 @@ class SemesterService
 
     public function getActiveSemester()
     {
-        return Semester::where('status', 'active')->first();
+        $activeSemester = Semester::where('status', 'active')->first();
+        return $activeSemester ? $activeSemester : null;
+    }
+
+    public static function getActiveSemesterId()
+    {
+        $activeSemester = Semester::where('status', 'active')->first();
+        return $activeSemester ? $activeSemester->id : null;
     }
 
     public function updateSemester(int $semesterId, Request $request)

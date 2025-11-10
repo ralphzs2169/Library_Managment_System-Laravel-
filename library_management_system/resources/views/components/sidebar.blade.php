@@ -70,7 +70,7 @@
             </li>
 
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2.5 px-3">
-                <img src="{{ asset('build/assets/icons/semester.svg') }}" alt="Settings Icon" class="inline-block w-5 h-5 mr-3">
+                <img src="{{ asset('build/assets/icons/semester.svg') }}" alt="Semester Management Icon" class="inline-block w-5 h-5 mr-3">
                 <a href="{{ asset('librarian/semester-management') }}" class="sidebar-link">Semester Management</a>
             </li>
         </ul>

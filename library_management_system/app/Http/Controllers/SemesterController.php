@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\SemesterService;
 use App\Models\Semester;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -72,7 +71,6 @@ class SemesterController extends Controller
     public function activate(Request $request, $id)
     {
         if ($request->validate_only) {
-
             $eligibleForActivation = $this->semesterService->isSemesterEligibleForActivation($id);
             if (!$eligibleForActivation) {
                 return $this->jsonResponse('invalid', 'Another active semester exists', 422);
@@ -107,7 +105,7 @@ class SemesterController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
+    {   
         if ($request->validate_only) {
             $request->validate([
                 'edit_semester_name' => 'required|string|max:255|unique:semesters,name,' . $id,
@@ -137,7 +135,6 @@ class SemesterController extends Controller
     public function deactivate(Request $request, $id)
     {
         if ($request->validate_only) {
-            // Check if this is the active semester
             $semester = Semester::findOrFail($id);
             if ($semester->status !== 'active') {
                 return $this->jsonResponse('invalid', 'Only active semesters can be deactivated', 422);

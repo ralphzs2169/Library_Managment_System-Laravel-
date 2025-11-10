@@ -69,14 +69,16 @@
 
             <!-- Copy Number and Due Date Selection Row -->
             <!-- Copy Number Selection -->
+            <!-- Copy Number Selection -->
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mt-4">
-                <label for="confirm-copy-number" class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <label for="book_copy_id" class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                     </svg>
                     Copy Number
                 </label>
-                <select id="confirm-copy-number" name="copy_number" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition">
+                <div id="book_copy_id-error-placeholder" class="error-placeholder"></div>
+                <select id="book_copy_id" name="book_copy_id" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition">
                     <option value="">Loading...</option>
                 </select>
                 <p class="text-xs text-gray-600 mt-2">
@@ -86,13 +88,14 @@
 
             <!-- Due Date Selection -->
             <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mt-4">
-                <label for="confirm-due-date" class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <label for="due_date" class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Due Date
                 </label>
-                <input type="date" id="confirm-due-date" value="2025-08-10" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition">
+                <div id="due_date-error-placeholder" class="error-placeholder"></div>
+                <input type="date" id="due_date" name="due_date" value="2025-08-10" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition">
                 <p class="text-xs text-gray-600 mt-2">Standard: 14 days from today</p>
             </div>
         </div>

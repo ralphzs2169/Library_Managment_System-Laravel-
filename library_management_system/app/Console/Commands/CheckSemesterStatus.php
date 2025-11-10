@@ -39,7 +39,7 @@ class CheckSemesterStatus extends Command
                         'entity_id' => $activeSemester->id,
                         'action' => 'auto_ended',
                         'details' => "'{$activeSemester->name}' automatically marked as ended on {$today->toDateString()}.",
-                        'user_id' => null, // system action
+                        'user_id' => null, 
                     ]);
                 });
 

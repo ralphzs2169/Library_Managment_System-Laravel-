@@ -1,5 +1,4 @@
 <x-layout>
-
     <section class="md:pl-78 p-6 pt-4 min-h-screen bg-background">
 
         <!-- Header -->

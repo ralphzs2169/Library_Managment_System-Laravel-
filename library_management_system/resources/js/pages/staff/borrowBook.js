@@ -186,12 +186,17 @@ async function loadAvailableBooks(borrower, { search = '', sort = 'title_asc', p
 
         tbody.querySelectorAll('.borrow-book-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-               const book = JSON.parse(decodeURIComponent(this.dataset.book));
-                const borrowerModal = document.getElementById('borrower-profile-modal');
-                if (borrowerModal) {
-                    borrowerModal.classList.add('hidden');
+                try {
+                    const book = JSON.parse(decodeURIComponent(this.dataset.book));
+                    const borrowerModal = document.getElementById('borrower-profile-modal');
+                    if (borrowerModal) {
+                        borrowerModal.classList.add('hidden');
+                    }
+                    // Pass borrower and book to confirm modal
+                    openConfirmBorrowModal(borrower, book);
+                } catch (error) {
+                    showError('Something went wrong', 'Failed to load book information.');
                 }
-                openConfirmBorrowModal(borrower, book);
             });
         });
         

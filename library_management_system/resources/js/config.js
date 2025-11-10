@@ -28,6 +28,15 @@ export const SEMESTER_ROUTES = {
     UPDATE: (id) => `/librarian/semester-management/${id}`,
     ACTIVATE: (id) => `/librarian/semester-management/${id}/activate`,
     DEACTIVATE: (id) => `/librarian/semester-management/${id}/deactivate`,
+    
+    CHECK_ACTIVE: '/staff/check-active-semester',
 };
 
+export const BORROW_TRANSACTION_ROUTES = {
+    INDEX: '/staff/borrow-transaction',
+    BORROW: '/staff/borrow-transaction/borrow',
+    RETURN: '/staff/borrow-transaction/return',
+}
+
 export const VALIDATION_ERROR = 422;
+export const AUTHORIZATION_ERROR = 403;

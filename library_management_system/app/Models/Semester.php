@@ -11,4 +11,14 @@ class Semester extends Model
         'start_date',
         'end_date'
     ];
+
+    public function borrowTransactions()
+    {
+        return $this->hasMany(BorrowTransaction::class);
+    }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
 }

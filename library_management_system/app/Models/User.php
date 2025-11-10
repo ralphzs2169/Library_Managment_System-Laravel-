@@ -72,4 +72,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Teacher::class, 'user_id');
     }
+
+    public function borrowTransactions()
+    {
+        return $this->hasMany(BorrowTransaction::class, 'user_id');
+    }
 }

@@ -284,3 +284,62 @@ export function debounce(fn, delay) {
     };
 }
 
+
+export function resetButton(button) {
+    // Remove disabled state
+    button.disabled = false;
+    button.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+    button.classList.add('hover:bg-accent/80', 'bg-accent', 'cursor-pointer');
+    button.style.backgroundColor = ''; // Clear inline styles
+    
+    // Remove any existing tooltip
+    const existingTooltip = button.parentElement.querySelector('.tooltip');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+    
+    // Unwrap button if it's in a wrapper
+    const parent = button.parentElement;
+    if (parent && parent.classList.contains('relative') && parent.classList.contains('inline-block')) {
+        const grandparent = parent.parentElement;
+        grandparent.insertBefore(button, parent);
+        parent.remove();
+    }
+    
+    // Remove any existing click handlers
+    button.onclick = null;
+}
+
+export function disableButton(button, msg = '') {
+    button.disabled = true;
+    button.classList.remove('bg-accent', 'hover:bg-accent/80', 'cursor-pointer');
+    button.classList.add('opacity-50', 'cursor-not-allowed');
+    button.style.backgroundColor = '#9ca3af'; // Force gray background via inline style to override all classes
+    
+    // Wrap in relative container
+    const wrapper = document.createElement('div');
+    wrapper.className = 'relative inline-block';
+    button.parentNode.insertBefore(wrapper, button);
+    wrapper.appendChild(button);
+    
+    // Add tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg border border-gray-300 pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap z-50';
+    tooltip.innerHTML = `
+        ${msg}
+        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-white"></div>
+    `;
+    
+    wrapper.appendChild(tooltip);
+    
+    // Show/hide tooltip
+    wrapper.addEventListener('mouseenter', () => {
+        tooltip.classList.remove('opacity-0');
+        tooltip.classList.add('opacity-100');
+    });
+    
+    wrapper.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('opacity-100');
+        tooltip.classList.add('opacity-0');
+    });
+}

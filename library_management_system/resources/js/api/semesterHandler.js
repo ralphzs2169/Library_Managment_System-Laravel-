@@ -320,3 +320,20 @@ export async function loadSemesters(page = 1) {
         showError('Network Error', 'Unable to load semesters. Please try again later.');
     }
 }
+
+export async function checkActiveSemester() {
+    try {
+        const response = await fetch(SEMESTER_ROUTES.CHECK_ACTIVE, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        return result.has_active_semester || false;
+    } catch (error) {
+        showError('Something went wrong', 'Please try again later.');
+        return false;
+    }
+}

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
     <title>{{ isset($title) ? $title . ' | SMART Library Web System' : 'SMART Library Web System' }}</title>
 
     <link rel="icon" href="{{ asset('build/assets/images/logo-no-bg.png') }}" type="image/x-icon">
@@ -17,15 +17,15 @@
     @include('components/header')
 
     @auth
-        @can('view-admin-sidebar')
-            @include('components/sidebar')
-        @endcan
+    @can('view-admin-sidebar')
+    @include('components/sidebar')
+    @endcan
     @endauth
 
     {{ $slot }}
 
     @can('view-footer')
-        @include('components/footer')
+    @include('components/footer')
     @endcan
 </body>
 </html>

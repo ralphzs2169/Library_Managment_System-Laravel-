@@ -50,9 +50,11 @@ class ActivityLog extends Model
     {
         return $this->morphTo();
     }
-    // public function librarian()
-    // {
-    //     return $this->belongsTo(Librarian::class);
-    // }
+    
+    public function semester()
+    {
+        return $this->belongsTo(Semester::class, 'semester_id');
+    }
+    
     use HasFactory;
 }

@@ -85,7 +85,7 @@
 
             <!-- Responsive Table Container -->
             <div id="members-table-container">
-                @include('partials.staff.members-table', ['users' => $users])
+                @include('partials.staff.borrowers-table', ['users' => $users])
             </div>
         </div>
     </div>

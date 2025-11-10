@@ -63,4 +63,12 @@ class UserPolicy
     {
         return false;
     }
+
+    /**
+     * Determine whether the user can manage borrow transactions.
+     */
+    public function manageBorrowTransactions(User $user): bool
+    {
+        return $user->role === 'staff' || $user->role === 'librarian';
+    }
 }

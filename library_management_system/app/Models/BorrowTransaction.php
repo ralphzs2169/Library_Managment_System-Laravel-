@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class BorrowTransaction extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'book_copy_id',
+        'semester_id',
+        'borrowed_at',
+        'returned_at',
+        'due_at',
+    ];
+
+    public function markAsBorrowed()
+    {
+        $this->status = 'borrowed';
+        $this->save();
+    }
+
+    public function markAsReturned()
+    {
+        $this->status = 'returned';
+        $this->returned_at = now();
+        $this->save();
+    }
+
+    public function semester()
+    {
+        return $this->belongsTo(Semester::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function bookCopy()
+    {
+         return $this->belongsTo(BookCopy::class, 'book_copy_id');
+    }
+}

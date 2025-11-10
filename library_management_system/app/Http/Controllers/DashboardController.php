@@ -52,7 +52,7 @@ class DashboardController extends Controller
         
         // If AJAX request, return only the table partial
         if ($request->ajax()) {
-            return view('partials.staff.members-table', compact('users'))->render();
+            return view('partials.staff.borrowers-table', compact('users'))->render();
         }
 
         return view('pages.staff.dashboard', compact('users'));

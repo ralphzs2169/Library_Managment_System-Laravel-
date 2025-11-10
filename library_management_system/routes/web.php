@@ -47,8 +47,6 @@ Route::prefix('librarian')
         Route::put('/category-management/genres/{genre}', [GenreController::class, 'update'])->name('category-management.genres.update');
         Route::delete('/category-management/genres/{genre}', [GenreController::class, 'destroy'])->name('category-management.genres.destroy');
 
-        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs');
-
         Route::get('/semester-management', [SemesterController::class, 'index'])->name('semester-management');
         Route::post('/semester-management', [SemesterController::class, 'store'])->name('semester-management.store');
         Route::get('/semester-management/create', [SemesterController::class, 'create'])->name('semester-management.create');
@@ -56,6 +54,8 @@ Route::prefix('librarian')
         Route::put('/semester-management/{id}', [SemesterController::class, 'update'])->name('semester-management.update');
         Route::post('/semester-management/{id}/activate', [SemesterController::class, 'activate'])->name('semester-management.activate');
         Route::post('/semester-management/{id}/deactivate', [SemesterController::class, 'deactivate'])->name('semester-management.deactivate');
+
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs');
 
         Route::get('/genres/by-category', [CategoryController::class, 'genresByCategory'])->name('genres.by-category');
     });
@@ -67,6 +67,13 @@ Route::prefix('staff')
         Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])->name('dashboard');
         Route::get('/books/available', [BookController::class, 'showAvailableBooks'])->name('books.available');
         Route::get('borrower/{user}', [UserController::class, 'borrowerDetails'])->name('borrower.details');
+        Route::get('/check-active-semester', function () {
+            $hasActive = \App\Models\Semester::where('status', 'active')->exists();
+            return response()->json(['has_active_semester' => $hasActive]);
+        });
+
+        Route::post('/borrow-transaction/borrow', [UserController::class, 'borrowBook'])->name('borrow-transaction.borrow');
+        Route::post('/borrow-transaction/return', [UserController::class, 'returnBook'])->name('borrow-transaction.return');
     });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

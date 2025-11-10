@@ -60,7 +60,14 @@
                     </span>
                 </td>
                 <td class="py-3 px-4">
-                    <span class="text-gray-700 font-medium text-xs">3 books</span>
+                    @if ($user->borrowTransactions->count() === 1) <span class="text-gray-700 font-medium text-xs">
+                        {{ $user->borrowTransactions->count() }} book
+                    </span>
+                    @else
+                    <span class="text-gray-700 font-medium text-xs">
+                        {{ $user->borrowTransactions->count() }} books
+                    </span>
+                    @endif
                 </td>
                 <td class="py-3 px-4 text-gray-500 text-xs">—</td>
                 <td class="py-3 px-4 text-gray-500 text-xs">None</td>

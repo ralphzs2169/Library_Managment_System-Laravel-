@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchTerm = searchInput?.value?.trim();
     
     if (searchTerm) {
-        highlightSearchMatches(searchTerm, '#members-table-container', [1, 2]);
+        highlightSearchMatches(searchTerm, '#borrowers-table-container', [1, 2]);
     }
 });
 

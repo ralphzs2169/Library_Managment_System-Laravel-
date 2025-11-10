@@ -1,9 +1,15 @@
 import { showBorrowBookContent, restoreProfileContent } from './borrowBook.js';
+import { borrowBook } from '../../api/borrowTransactionHandler.js';
+import { clearInputError } from '../../helpers.js';
+
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
 // Store borrower data for navigation
 let currentBorrower = null;
 let currentBook = null;
+
+const copySelect = document.getElementById('book_copy_id');
+const dueDateInput = document.getElementById('due_date');
 
 export function initializeConfirmBorrowModal(modal, borrower, book) {
     currentBorrower = borrower;
@@ -32,7 +38,7 @@ export function initializeConfirmBorrowModal(modal, borrower, book) {
         const bookCategory = modal.querySelector('#confirm-book-category');
         const bookGenre = modal.querySelector('#confirm-book-genre');
         
-        if (bookCover) bookCover.src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
+        if (bookCover) bookCover.src = `/storage/${book.cover_image}`;
         if (bookTitle) bookTitle.textContent = book.title || 'Untitled';
         if (bookAuthor) bookAuthor.textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
         if (bookIsbn) bookIsbn.textContent = book.isbn || 'N/A';
@@ -43,10 +49,36 @@ export function initializeConfirmBorrowModal(modal, borrower, book) {
         // Populate copy number dropdown
         populateCopyNumbers(modal, book);
     }
+
+    // Attach clear error logic to input fields
+    const copySelect = modal.querySelector('#book_copy_id');
+    const dueDateInput = modal.querySelector('#due_date');
+
+    if (copySelect) {
+        copySelect.addEventListener('change', () => clearInputError(copySelect));
+    }
+
+    if (dueDateInput) {
+        dueDateInput.addEventListener('change', () => clearInputError(dueDateInput));
+        dueDateInput.addEventListener('input', () => clearInputError(dueDateInput));
+    }
+
+    // Attach confirm button event listener here
+    const confirmBorrowBtn = modal.querySelector('#confirm-borrow-button');
+    if (confirmBorrowBtn) {
+        // Remove any existing listeners
+        const newBtn = confirmBorrowBtn.cloneNode(true);
+        confirmBorrowBtn.parentNode.replaceChild(newBtn, confirmBorrowBtn);
+        
+        newBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            await handleConfirmBorrow();
+        });
+    }
 }
 
 function populateCopyNumbers(modal, book) {
-    const copySelect = modal.querySelector('#confirm-copy-number');
+    const copySelect = modal.querySelector('#book_copy_id');
     const copiesAvailableText = modal.querySelector('#copies-available-text');
     
     if (!copySelect) return;
@@ -135,9 +167,12 @@ export function openConfirmBorrowModal(borrower, book) {
     initializeConfirmBorrowModal(modal, borrower, book);
 }
 
-function closeConfirmBorrowModal() {
+export function closeConfirmBorrowModal() {
     const modalContent = document.getElementById('confirm-borrow-content');
     const modal = document.getElementById('confirm-borrow-modal');
+
+    clearInputError(dueDateInput);
+    clearInputError(copySelect);
 
     // Start closing animation
     modal.classList.remove('bg-opacity-50');
@@ -177,4 +212,39 @@ function returnToBorrowBookModal() {
             showBorrowBookContent(borrowerModal, currentBorrower, true);
         }
     }, 150); // Wait for close animation to complete
+}
+
+async function handleConfirmBorrow() {
+    const copySelect = document.getElementById('book_copy_id');
+    const dueDateInput = document.getElementById('due_date');
+    
+    const selectedCopyId = copySelect?.value;
+    const dueDate = dueDateInput?.value;
+    
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('book_copy_id', selectedCopyId);
+    formData.append('borrower_id', currentBorrower.id);
+    formData.append('due_date', dueDate);
+    
+    // Call the borrow handler
+    await borrowBook(formData);
+}
+
+//Add listener to clear input errors
+if (copySelect) {
+    copySelect.addEventListener('change', function() {
+        clearInputError(copySelect);
+    });
+}
+
+if (dueDateInput) {
+    dueDateInput.addEventListener('focus', function() {
+        clearInputError(dueDateInput);
+    });
+}
+if (dueDateInput) {
+    dueDateInput.addEventListener('change', function() {
+        clearInputError(dueDateInput);
+    }); 
 }

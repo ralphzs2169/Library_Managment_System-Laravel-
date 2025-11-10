@@ -4,7 +4,7 @@
 
 export function displayInputErrors(errors, form, allowScroll = true) {
     // Clear previous errors and reset all placeholders
-
+    console.log("hello");
     const errorPlaceholders = Array.from(document.querySelectorAll('.error-placeholder'));
   
     errorPlaceholders.forEach((placeholder, i) => {
@@ -134,6 +134,33 @@ export function scrollToFirstError(formSelector = null) {
     const scrollY = window.pageYOffset + rect.top - headerHeight;
 
     window.scrollTo({ top: Math.max(0, scrollY), behavior: 'smooth' });
+}
+
+export function scrollToFirstErrorInModal() {
+    const modal = document.getElementById('confirm-borrow-modal');
+    if (!modal) return;
+
+    // Find the scrollable container within the modal
+    const scrollContainer = modal.querySelector('.overflow-y-auto');
+    if (!scrollContainer) return;
+
+    // Find first visible error
+    const firstError = modal.querySelector('.error-placeholder:not(:empty)');
+    if (!firstError) return;
+
+    // Get the parent input container
+    const inputContainer = firstError.closest('.bg-blue-50, .bg-yellow-50') || firstError.parentElement;
+    if (!inputContainer) return;
+
+    // Scroll the modal's scrollable container to show the error
+    const containerTop = scrollContainer.getBoundingClientRect().top;
+    const errorTop = inputContainer.getBoundingClientRect().top;
+    const offset = errorTop - containerTop - 20; // 20px padding from top
+
+    scrollContainer.scrollBy({
+        top: offset,
+        behavior: 'smooth'
+    });
 }
 
 //clear all errors in a form
