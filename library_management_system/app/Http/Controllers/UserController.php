@@ -35,11 +35,13 @@ class UserController extends Controller
                       ->orderBy('borrowed_at', 'desc');
             }
         ])->findOrFail($userId);
-
+        
+        $daysBeforeDue = config('settings.notifications.reminder_days_before_due', 3);
         $user->full_name = $user->full_name; 
 
         return response()->json([
-            'user' => $user
+            'user' => $user,
+            'days_before_due' => $daysBeforeDue,
         ]);
     }
 

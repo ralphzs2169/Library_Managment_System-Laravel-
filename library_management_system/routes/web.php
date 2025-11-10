@@ -9,8 +9,11 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SemesterController;
+use App\Http\Controllers\SettingsController;
+
 use Illuminate\Http\Request;
 use App\Models\Genre;
+use App\Models\Settings;
 
 Route::get('/', function () {
     return view('pages.welcome');
@@ -56,8 +59,11 @@ Route::prefix('librarian')
         Route::post('/semester-management/{id}/deactivate', [SemesterController::class, 'deactivate'])->name('semester-management.deactivate');
 
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs');
-
         Route::get('/genres/by-category', [CategoryController::class, 'genresByCategory'])->name('genres.by-category');
+
+        Route::get('/settings', [SettingsController::class, 'index'])->name('librarian.settings');
+        Route::put('/settings', [SettingsController::class, 'update'])->name('librarian.settings.update');
+
     });
 
 Route::prefix('staff')

@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\CategoryGenre;
 use App\Models\User;
 use App\Models\Department;
+use App\Models\Settings;
+
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -27,6 +29,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             TeacherSeeder::class,
             StudentSeeder::class,
+            SettingsSeeder::class,
         ]);
     }
 }

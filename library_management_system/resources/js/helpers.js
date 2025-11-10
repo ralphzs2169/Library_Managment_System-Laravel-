@@ -4,7 +4,7 @@
 
 export function displayInputErrors(errors, form, allowScroll = true) {
     // Clear previous errors and reset all placeholders
-    console.log("hello");
+    console.log(errors);
     const errorPlaceholders = Array.from(document.querySelectorAll('.error-placeholder'));
   
     errorPlaceholders.forEach((placeholder, i) => {

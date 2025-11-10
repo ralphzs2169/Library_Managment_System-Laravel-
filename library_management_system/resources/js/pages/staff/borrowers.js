@@ -34,7 +34,7 @@ if (!window._borrowerEventsInitialized) {
     });
 }
 
-export async function initializeBorrowerProfileModal(modal, borrower) {
+export async function initializeBorrowerProfileModal(modal, borrower, dueReminderThreshold) {
     if (!borrower) return;
     
     populateBasicInfo(modal, borrower);
@@ -42,8 +42,7 @@ export async function initializeBorrowerProfileModal(modal, borrower) {
     populateStatusBadge(modal, borrower);
     populateContactDetails(modal, borrower);
     populatePlaceholderData(modal);
-    populateCurrentlyBorrowedBooks(modal, borrower);
-    
+    populateCurrentlyBorrowedBooks(modal, borrower, dueReminderThreshold);
     await setupBorrowBookButton(modal, borrower);
 }
 
@@ -158,7 +157,7 @@ function populatePlaceholderData(modal) {
     if (reservation) reservation.textContent = 'None';
 }
 
-function populateCurrentlyBorrowedBooks(modal, borrower) {
+function populateCurrentlyBorrowedBooks(modal, borrower, dueReminderThreshold) {
     const tbody = modal.querySelector('#currently-borrowed-tbody');
     const borrowedCount = modal.querySelector('#borrowed-count');
     
@@ -192,20 +191,26 @@ function populateCurrentlyBorrowedBooks(modal, borrower) {
         const dueDate = new Date(transaction.due_at);
         const status = transaction.status;
         const today = new Date();
-        const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+
+        
+        // normalize to midnight to ignore time differences
+        const due = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+        const now = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+        const daysUntilDue = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
         
         let statusBadge = '';
         let statusIcon = '';
         let borderClass = '';
         let showRenewButton = false;
         let dueDateText = dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        
+        console.log(daysUntilDue + ' vs ' + dueReminderThreshold);
         // Status-based badge rendering
         if (status === 'overdue') {
             borderClass = 'border-l-4 border-l-red-500';
             statusIcon = '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-700"> <img src="/build/assets/icons/overdue-badge.svg" alt="Overdue Icon" class="w-3.5 h-3.5"></span>';
             statusBadge = `<span class="text-red-700 font-medium">${Math.abs(daysUntilDue)} days overdue</span>`;
-        } else if (status === 'borrowed' && daysUntilDue <= 3) {
+        } else if (status === 'borrowed' && daysUntilDue <= dueReminderThreshold) {
             borderClass = 'border-l-4 border-l-yellow-400';
             statusIcon = '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-100 text-yellow-700"> <img src="/build/assets/icons/due-soon-badge.svg" alt="Due Soon Icon" class="w-3.5 h-3.5"></span>';
             statusBadge = `<span class="text-yellow-700 font-medium">Due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}</span>`;
@@ -355,9 +360,9 @@ async function openBorrowerProfileModal(userId) {
         modalContent.classList.remove('scale-95', 'opacity-0');
         modalContent.classList.add('scale-100', 'opacity-100');
     });
-    
-    const borrower = await fetchBorrowerDetails(userId);
-    initializeBorrowerProfileModal(modal, borrower);    
+
+    const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(userId);
+    initializeBorrowerProfileModal(modal, borrower, dueReminderThreshold);
 }
 
 // Close modal with animation

@@ -40,3 +40,7 @@ export const BORROW_TRANSACTION_ROUTES = {
 
 export const VALIDATION_ERROR = 422;
 export const AUTHORIZATION_ERROR = 403;
+
+export const SETTINGS_ROUTES = {
+    UPDATE: '/librarian/settings',
+};

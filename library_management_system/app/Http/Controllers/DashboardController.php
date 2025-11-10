@@ -49,7 +49,7 @@ class DashboardController extends Controller
         }
 
         $users = $query->paginate(20)->withQueryString();
-        
+
         // If AJAX request, return only the table partial
         if ($request->ajax()) {
             return view('partials.staff.borrowers-table', compact('users'))->render();
