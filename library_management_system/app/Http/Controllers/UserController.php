@@ -8,6 +8,7 @@ use App\Models\BorrowTransaction;
 use App\Models\Book;
 use App\Services\UserService;
 use App\Models\Semester;
+use App\Models\BookCopy;
 
 class UserController extends Controller
 {
@@ -27,21 +28,12 @@ class UserController extends Controller
 
     public function borrowerDetails(Request $request, $userId)
     {
-        $user = User::with([
-            'students.department',
-            'teachers.department',
-            'borrowTransactions' => function ($query) {
-                $query->with(['bookCopy.book.author'])
-                      ->orderBy('borrowed_at', 'desc');
-            }
-        ])->findOrFail($userId);
-        
-        $daysBeforeDue = config('settings.notifications.reminder_days_before_due', 3);
-        $user->full_name = $user->full_name; 
+        $data = $this->userService->getBorrowerDetails($userId);
 
+        // Return both the user model (for server rendering) and explicit collections for API clients
         return response()->json([
-            'user' => $user,
-            'days_before_due' => $daysBeforeDue,
+            'user' => $data['user'], // model (will be serialized)
+            'due_reminder_threshold' => $data['due_reminder_threshold'] ?? null
         ]);
     }
 
@@ -96,43 +88,20 @@ class UserController extends Controller
     public function borrowBook(Request $request)
     {
         if ($request->validate_only) {
-            // Get the borrower to check their role
-            $borrower = User::findOrFail($request->borrower_id);
-            
-            // 1. Check for penalties first
-            $hasPenalty = BorrowTransaction::where('user_id', $borrower->id)
-                ->whereIn('status', ['overdue', 'lost', 'damaged'])
-                ->exists();
-            if ($hasPenalty) {
-                return $this->jsonResponse('invalid', 'Borrowing suspended due to an outstanding penalty.', 422);
-            }
+            $result = $this->userService->validateBorrowRequest($request);
 
-            // 2. If student, check active semester
-            if ($borrower->role === 'student') {
-                $hasActive = Semester::where('status', 'active')->exists();
-                if (!$hasActive) {
-                    return $this->jsonResponse('invalid', 'No active semester found. Students can only borrow during an active semester.', 422);
+            if ($result['status'] === 'invalid') {
+                // business rule failure with message
+                if (isset($result['message'])) {
+                    return $this->jsonResponse('invalid', $result['message'], 422);
                 }
 
-                // 3. Check borrow limit
-                $borrowTransactions = BorrowTransaction::where('user_id', $borrower->id)
-                    ->where('status', 'borrowed')
-                    ->count();  
-
-                if ($borrowTransactions >= 3) {
-                    return $this->jsonResponse('invalid', 'Borrower has reached the maximum limit of 3 borrowed books.', 422);
-                }
+                // validation errors
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => $result['errors'] ?? []
+                ], 422);
             }
-
-
-            $request->validate([
-                'book_copy_id' => 'required|exists:book_copies,id',
-                'borrower_id' => 'required|exists:users,id',
-                'due_date' => 'required|date|after:today',
-                'semester_id' => 'nullable|exists:semesters,id',
-            ]);
-
-
 
             return $this->jsonResponse('valid', 'Validation passed', 200);
         }
@@ -147,17 +116,21 @@ class UserController extends Controller
 
     public function returnBook(Request $request)
     {
-        $transaction = BorrowTransaction::where('user_id', $request->user()->id)
-            ->where('book_id', $request->input('book_id'))
-            ->whereNull('returned_at')
-            ->first();
+        if ($request->validate_only) {
+            $result = $this->userService->validateReturnRequest($request);
 
-        if (!$transaction) {
-            return response()->json(['message' => 'No active borrow transaction found'], 404);
+            if ($result['status'] === 'invalid') {
+                return $this->jsonResponse('invalid', $result['message'], 422);
+            }
+
+            return $this->jsonResponse('valid', 'Validation passed', 200);
         }
 
-        $transaction->markAsReturned();
-
-        return response()->json(['message' => 'Book returned successfully'], 200);
+        try {
+            $transaction = $this->userService->returnBook($request);
+            return $this->jsonResponse('success', 'Book returned successfully', 200, ['transaction' => $transaction]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', 'Failed to return book: ' . $e->getMessage(), 500);
+        }
     }
 }

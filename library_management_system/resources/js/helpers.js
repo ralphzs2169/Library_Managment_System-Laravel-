@@ -6,7 +6,7 @@ export function displayInputErrors(errors, form, allowScroll = true) {
     // Clear previous errors and reset all placeholders
     console.log(errors);
     const errorPlaceholders = Array.from(document.querySelectorAll('.error-placeholder'));
-  
+    console.log(errorPlaceholders);
     errorPlaceholders.forEach((placeholder, i) => {
         placeholder.textContent = '';
         placeholder.classList.remove('visible');
@@ -14,28 +14,40 @@ export function displayInputErrors(errors, form, allowScroll = true) {
     });
 
     for (const field in errors) {
-    let inputElement, errorPlaceholder;
-    let friendlyMessage;
+        let inputElement, errorPlaceholder;
+        let friendlyMessage;
 
         // Non-author fields
         const fieldMapping = {
             student_no: 'id_number',
             employee_no: 'id_number'
         };
+
         const inputId = fieldMapping[field] || field;
+        // Try by id first
         inputElement = document.getElementById(inputId);
+        // Fallback: try to find input by name attribute if id not present
+        if (!inputElement) {
+            inputElement = document.querySelector(`[name="${inputId}"]`);
+        }
         errorPlaceholder = document.getElementById(inputId + '-error-placeholder');
 
         // Clean the error message by removing "edit_" prefix
         friendlyMessage = Array.isArray(errors[field]) ? errors[field].join(', ') : errors[field];
         friendlyMessage = friendlyMessage.replace(/\bedit_/gi, '').replace(/\bedit /gi, '');
+        console.log(inputId);
+        console.log(inputElement);
+        if (inputElement && errorPlaceholder) {
+            inputElement.classList.add('invalid-input');
+            errorPlaceholder.textContent = friendlyMessage;
+            errorPlaceholder.classList.add('visible');
+        } else if (errorPlaceholder) {
+            // Input missing but placeholder exists - still show message
+            errorPlaceholder.textContent = friendlyMessage;
+            errorPlaceholder.classList.add('visible');
+        }
 
-    if (inputElement && errorPlaceholder) {
-        inputElement.classList.add('invalid-input');
-        errorPlaceholder.textContent = friendlyMessage;
-        errorPlaceholder.classList.add('visible');
-    }
-      if (field === 'password') {
+        if (field === 'password') {
             const confirmPasswordElement = document.getElementById('confirm_password');
             const confirmPasswordPlaceholder = document.getElementById('confirm_password-error-placeholder');
 

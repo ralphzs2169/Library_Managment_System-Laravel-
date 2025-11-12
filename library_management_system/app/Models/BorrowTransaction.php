@@ -15,6 +15,14 @@ class BorrowTransaction extends Model
         'due_at',
     ];
 
+    protected $casts = [
+        'current_penalty' => 'float',
+        'days_overdue' => 'integer',
+        'borrowed_at' => 'datetime',
+        'due_at' => 'datetime',
+        'returned_at' => 'datetime',
+    ];
+
     public function markAsBorrowed()
     {
         $this->status = 'borrowed';
@@ -41,5 +49,10 @@ class BorrowTransaction extends Model
     public function bookCopy()
     {
          return $this->belongsTo(BookCopy::class, 'book_copy_id');
+    }
+
+    public function penalties()
+    {
+        return $this->hasMany(Penalty::class);
     }
 }

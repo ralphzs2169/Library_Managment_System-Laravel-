@@ -8,4 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('semesters:check-status')->dailyAt('00:10');
+Schedule::command('semesters:check-status')->everyMinute();
+Schedule::command('borrows:check-overdue')->everyMinute();

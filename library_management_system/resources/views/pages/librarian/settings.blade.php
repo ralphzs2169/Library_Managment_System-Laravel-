@@ -1,4 +1,3 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\librarian\settings.blade.php --}}
 <x-layout>
     <section class="md:pl-78 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
@@ -24,26 +23,26 @@
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Max Books (Student) -->
-                        <div class="field-container">
+                        <div class="field-container flex flex-col">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Max Books per Student</label>
-                            <input type="number" name="max_books_per_student" value="{{ $settings['borrowing.max_books_per_student'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="10">
-                            <div class="error-placeholder" id="max_books_per_student-error-placeholder"></div>
+                            <div class="error-placeholder flex-1 text-sm" id="max_books_per_student-error-placeholder"></div>
+                            <input id="max_books_per_student" type="number" name="max_books_per_student" value="{{ $settings['borrowing.max_books_per_student'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="10">
                             <p class="mt-1 text-xs text-gray-500">Maximum number of books a student can borrow</p>
                         </div>
 
                         <!-- Max Books (Teacher) -->
-                        <div class="field-container">
+                        <div class="field-container flex flex-col">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Max Books per Teacher</label>
-                            <input type="number" name="max_books_per_teacher" value="{{ $settings['borrowing.max_books_per_teacher'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="20">
-                            <div class="error-placeholder" id="max_books_per_teacher-error-placeholder"></div>
+                            <div class="error-placeholder flex-1 text-sm" id="max_books_per_teacher-error-placeholder"></div>
+                            <input id="max_books_per_teacher" type="number" name="max_books_per_teacher" value="{{ $settings['borrowing.max_books_per_teacher'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="20">
                             <p class="mt-1 text-xs text-gray-500">Maximum number of books a teacher can borrow</p>
                         </div>
 
                         <!-- Borrow Duration -->
-                        <div class="field-container">
+                        <div class="field-container flex flex-col">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Borrow Duration (Days)</label>
-                            <input type="number" name="borrow_duration" value="{{ $settings['borrowing.borrow_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
-                            <div class="error-placeholder" id="borrow_duration-error-placeholder"></div>
+                            <div class="error-placeholder flex-1 text-sm" id="borrow_duration-error-placeholder"></div>
+                            <input id="borrow_duration" type="number" name="borrow_duration" value="{{ $settings['borrowing.borrow_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
                             <p class="mt-1 text-xs text-gray-500">Default number of days for book borrowing</p>
                         </div>
                     </div>
@@ -61,46 +60,46 @@
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <!-- Rate Per Day -->
-                        <div class="field-container">
+                        <div class="field-container flex flex-col">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Overdue Rate (₱/day)</label>
+                            <div class="error-placeholder flex-1  text-sm" id="rate_per_day-error-placeholder"></div>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₱</span>
-                                <input type="number" step="0.01" name="rate_per_day" value="{{ $settings['penalty.rate_per_day'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="0" max="100">
+                                <input id="rate_per_day" type="number" step="0.01" name="rate_per_day" value="{{ $settings['penalty.rate_per_day'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="0" max="100">
                             </div>
-                            <div class="error-placeholder" id="rate_per_day-error-placeholder"></div>
                             <p class="mt-1 text-xs text-gray-500">Penalty charged per day overdue</p>
                         </div>
 
                         <!-- Max Penalty -->
-                        <div class="field-container">
+                        <div class="field-container flex flex-col">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Penalty (₱)</label>
+                            <div class="error-placeholder flex-1  text-sm" id="max_amount-error-placeholder"></div>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₱</span>
-                                <input type="number" step="0.01" name="max_amount" value="{{ $settings['penalty.max_amount'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="0">
+                                <input id="max_amount" type="number" step="0.01" name="max_amount" value="{{ $settings['penalty.max_amount'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="0">
                             </div>
-                            <div class="error-placeholder" id="max_amount-error-placeholder"></div>
                             <p class="mt-1 text-xs text-gray-500">Maximum penalty amount cap</p>
                         </div>
 
                         <!-- Lost Book Multiplier -->
-                        <div class="field-container">
+                        <div class="field-container flex flex-col">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Lost Book Multiplier</label>
+                            <div class="error-placeholder flex-1  text-sm" id="lost_fee_multiplier-error-placeholder"></div>
                             <div class="relative">
-                                <input type="number" step="0.01" name="lost_fee_multiplier" value="{{ $settings['penalty.lost_fee_multiplier'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="0" max="5">
+                                <input id="lost_fee_multiplier" type="number" step="0.01" name="lost_fee_multiplier" value="{{ $settings['penalty.lost_fee_multiplier'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="0" max="5">
                                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">×</span>
                             </div>
-                            <div class="error-placeholder" id="lost_fee_multiplier-error-placeholder"></div>
                             <p class="mt-1 text-xs text-gray-500">Multiply book price for lost items</p>
                         </div>
 
                         <!-- Damaged Book Multiplier -->
-                        <div class="field-container">
+                        <div class="field-container flex flex-col">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Damaged Book Multiplier</label>
+                            <div class="error-placeholder flex-1  text-sm" id="damaged_fee_multiplier-error-placeholder"></div>
                             <div class="relative">
-                                <input type="number" step="0.01" name="damaged_fee_multiplier" value="{{ $settings['penalty.damaged_fee_multiplier'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="0" max="5">
+                                <input id="damaged_fee_multiplier" type="number" step="0.01" name="damaged_fee_multiplier" value="{{ $settings['penalty.damaged_fee_multiplier'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="0" max="5">
                                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">×</span>
                             </div>
-                            <div class="error-placeholder" id="damaged_fee_multiplier-error-placeholder"></div>
                             <p class="mt-1 text-xs text-gray-500">Multiply book price for damaged items</p>
                         </div>
                     </div>
@@ -122,8 +121,8 @@
                         <!-- Reminder Days Before Due -->
                         <div class="field-container">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Reminder Days Before Due</label>
-                            <input type="number" name="reminder_days_before_due" value="{{ $settings['notifications.reminder_days_before_due'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="14">
-                            <div class="error-placeholder" id="reminder_days_before_due-error-placeholder"></div>
+                            <div class="error-placeholder mb-1" id="reminder_days_before_due-error-placeholder"></div>
+                            <input id="reminder_days_before_due" type="number" name="reminder_days_before_due" value="{{ $settings['notifications.reminder_days_before_due'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="14">
                             <p class="mt-1 text-xs text-gray-500">Days before due date to send reminder</p>
                         </div>
 
@@ -131,7 +130,7 @@
                         <div class="field-container flex items-center h-full">
                             <label class="flex items-center gap-3 cursor-pointer group">
                                 <div class="relative">
-                                    <input type="checkbox" name="enable_borrower_notifications" value="1" {{ ($settings['notifications.enable_borrower_notifications'] ?? false) ? 'checked' : '' }} class="sr-only peer">
+                                    <input id="enable_borrower_notifications" type="checkbox" name="enable_borrower_notifications" value="1" {{ ($settings['notifications.enable_borrower_notifications'] ?? false) ? 'checked' : '' }} class="sr-only peer">
                                     <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-accent transition-colors"></div>
                                     <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
                                 </div>

@@ -49,6 +49,13 @@ class SettingsController extends Controller
                 'reminder_days_before_due.required' => 'The reminder days field is required.',
             ]);
 
+            // Check for changes
+            $changes = $this->settingsService->detectChanges($request);
+            
+            if (empty($changes)) {
+                return $this->jsonResponse('unchanged', 'No changes detected', 200);
+            }
+
             return $this->jsonResponse('valid', 'Validation passed', 200);
         }
 

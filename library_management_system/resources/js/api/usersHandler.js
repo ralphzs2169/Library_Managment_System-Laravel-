@@ -1,5 +1,6 @@
-import { showError, highlightSearchMatches } from "../utils.js";
+import { showError } from "../utils.js";
 import { getCurrentFilters } from "../pages/staff/borrowersPagination.js";
+import { highlightSearchMatches } from "../tableControls.js";
 
 // Load borrowers with filters
 export async function loadBorrowers(page = 1) {

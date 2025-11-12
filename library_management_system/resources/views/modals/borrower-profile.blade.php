@@ -36,7 +36,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
-                                Penalty
+
                             </span>
                         </div>
 
@@ -49,7 +49,7 @@
                                 <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Email</p>
                                 <p id="borrower-email" class="font-medium text-gray-800 truncate"></p>
                             </div>
-                            <div>
+                            <div id="borrower-year-level-container" class="block">
                                 <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Year Level</p>
                                 <p id="borrower-year-level" class="font-semibold text-gray-800"></p>
                             </div>
@@ -66,8 +66,8 @@
                                 <p id="borrower-member-since" class="font-medium text-gray-800"></p>
                             </div>
                             <div>
-                                <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Penalties</p>
-                                <p id="borrower-penalties" class="font-bold text-red-600"></p>
+                                <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Total Unpaid Fine</p>
+                                <p id="borrower-total-fine-ampount" class="font-bold text-red-600"></p>
                             </div>
                             <div>
                                 <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Reservations</p>
@@ -95,7 +95,7 @@
             </div>
 
             <!-- Currently Borrowed Section -->
-            <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
 
@@ -119,7 +119,6 @@
                                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Book</th>
                                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Date Borrowed</th>
                                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Due Date</th>
-                                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Penalties</th>
                                 <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
                             </tr>
                         </thead>
@@ -133,12 +132,55 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Active Penalties Section -->
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Unpaid Penalties
+                        <span id="penalties-count" class="text-gray-500 text-sm font-normal ml-1">(0)</span>
+                    </h3>
+                    <button class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-xs font-medium transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Penalty History
+                    </button>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto rounded-xl border border-gray-200">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">No.</th>
+                                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Book</th>
+                                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Returned On</th>
+                                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Reason</th>
+                                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Amount</th>
+                                <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-penalties-tbody" class="bg-white divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="6" class="py-10 text-center text-gray-500 text-sm">
+                                    No active penalties
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-
-        <div class="pagination flex justify-between items-center mt-4"></div>
-
-
     </div>
+
+    <div class="pagination flex justify-between items-center mt-4"></div>
+
+
+</div>
 
 
 </div>

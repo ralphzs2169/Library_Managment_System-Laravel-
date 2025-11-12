@@ -1,5 +1,5 @@
 {{-- filepath: c:\Users\Angela\library_management_system\resources\views\components\sidebar.blade.php --}}
-<aside class="bg-secondary text-white w-72 min-h-screen p-3 hidden md:block fixed text-sm overflow-y-auto">
+<aside class="bg-secondary text-white w-66 min-h-screen p-3 hidden md:block fixed text-sm overflow-y-auto">
     <nav aria-label="Sidebar navigation">
         <ul class="space-y-1">
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3">
@@ -16,7 +16,7 @@
 
                 <ul class="mt-0.5 space-y-0">
                     <li class="hover:bg-secondary-light hover:text-white rounded py-1.5 px-3 pl-11 transition-colors duration-100 text-[#8593A6]">
-                        <a href="{{ route('librarian.books.index') }}" class="sidebar-link block ">All Books</a>
+                        <a href="{{ route('librarian.books.index') }}" class="sidebar-link block ">Book Catalog</a>
                     </li>
                     <li class="hover:bg-secondary-light hover:text-white rounded py-1.5 px-3 pl-11 transition-colors duration-100 text-[#8593A6]">
                         <a href="{{ route('librarian.books.create') }}" class="sidebar-link block">Add New Book</a>
@@ -52,7 +52,6 @@
                 <div class="flex items-center rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3 collapsible-trigger">
                     <img src="{{ asset('build/assets/icons/users.svg') }}" alt="User Management Icon" class="inline-block w-5 h-5 mr-3">
                     <span>User Management</span>
-                    <img src="{{ asset('build/assets/icons/dropdown-white.svg') }}" alt="Expand Icon" class="inline-block w-5 h-5 ml-auto dropdown-icon transition-transform duration-300">
                 </div>
 
                 <ul class="mt-0.5 space-y-0">

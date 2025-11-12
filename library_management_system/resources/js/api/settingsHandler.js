@@ -1,12 +1,12 @@
 import { SETTINGS_ROUTES, VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
-import { showSuccessWithRedirect, showWarning, showConfirmation } from "../utils.js";
+import { showSuccessWithRedirect, showWarning, showConfirmation, showInfo } from "../utils.js";
 
 export async function updateSettingsHandler(settingsData, form) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     settingsData.append('_token', csrfToken);
     settingsData.append('_method', 'PUT');
-
+    console.log('Settings Data:', Array.from(settingsData.entries())); // Debug log
     // Step 1: Validate only
     settingsData.append('validate_only', 1);
     let response = await fetch(SETTINGS_ROUTES.UPDATE, {
@@ -26,6 +26,12 @@ export async function updateSettingsHandler(settingsData, form) {
             return;
         }
         showWarning('Something went wrong', 'Please try again.');
+        return;
+    }
+
+    // Check if no changes detected
+    if (result.status === 'unchanged') {
+        showInfo('No changes detected', 'You didn\'t make any modifications to update.');
         return;
     }
 

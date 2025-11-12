@@ -77,7 +77,7 @@
                     <select name="status" class="px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
                         <option value="">Status: All</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Status: Active</option>
-                        <option value="penalty" {{ request('status') === 'penalty' ? 'selected' : '' }}>Status: Penalty</option>
+                        <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Status: Suspended</option>
                         <option value="cleared" {{ request('status') === 'cleared' ? 'selected' : '' }}>Status: Cleared</option>
                     </select>
                 </div>
@@ -91,10 +91,12 @@
     </div>
 
     @include('modals.confirm-borrow')
+    @include('modals.confirm-return')
     @include('modals.borrower-profile')
 </x-layout>
 
-@vite('resources/js/pages/staff/borrowers.js')
+@vite('resources/js/pages/staff/borrower/borrowerProfileModal.js')
 @vite('resources/js/pages/staff/borrowBook.js')
 @vite('resources/js/pages/staff/confirmBorrow.js')
+@vite('resources/js/pages/staff/confirmReturn.js')
 @vite('resources/js/pages/staff/borrowersPagination.js')

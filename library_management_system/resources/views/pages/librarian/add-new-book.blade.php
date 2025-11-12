@@ -29,13 +29,13 @@
                                 {{-- Title Field --}}
                                 <div class="field-container flex flex-col">
                                     <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Book Title</label>
-                                    <div class="error-placeholder  flex-1  text-smmin-h-[1em] mb-1" id="title-error-placeholder"></div>
+                                    <div class="error-placeholder  flex-1  text-sm " id="title-error-placeholder"></div>
                                     <input type="text" id="title" name="title" placeholder="Enter the complete book title" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                                 </div>
                                 {{-- ISBN Field --}}
                                 <div class="field-container flex flex-col">
                                     <label for="isbn" class="block text-sm font-medium text-gray-700 mb-1">ISBN</label>
-                                    <div class="error-placeholder  flex-1  text-smmin-h-[1em] mb-1" id="isbn-error-placeholder"></div>
+                                    <div class="error-placeholder  flex-1  text-sm " id="isbn-error-placeholder"></div>
                                     <input type="text" id="isbn" name="isbn" placeholder="123-4-567891-23-4" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                                 </div>
                             </div>
@@ -72,19 +72,19 @@
                 <div class="author-group grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="field-container flex flex-col">
                         <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                        <div class="error-placeholder flex-1 min-h-[1em]text-sm mb-1" id="author_firstname-error-placeholder"></div>
+                        <div class="error-placeholder flex-1 text-sm" id="author_firstname-error-placeholder"></div>
                         <input type="text" id="author_firstname" placeholder="Author's First Name" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                     </div>
 
                     <div class="field-container flex flex-col">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                        <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="author_lastname-error-placeholder"></div>
+                        <div class="error-placeholder flex-1 mtext-sm" id="author_lastname-error-placeholder"></div>
                         <input type="text" id="author_lastname" placeholder="Author's Last Name" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                     </div>
 
                     <div class="field-container flex flex-col">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Middle Initial</label>
-                        <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="author_middle_initial-error-placeholder"></div>
+                        <div class="error-placeholder flex-1 mtext-sm" id="author_middle_initial-error-placeholder"></div>
                         <input type="text" id="author_middle_initial" placeholder="M.I." class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                     </div>
                 </div>
@@ -100,19 +100,19 @@
                         {{-- Publisher Field --}}
                         <div class="field-container flex flex-col">
                             <label for="publisher" class="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
-                            <div class="error-placeholder flex-1  text-smmin-h-[1em] mb-1" id="publisher-error-placeholder"></div>
+                            <div class="error-placeholder flex-1  text-sm" id="publisher-error-placeholder"></div>
                             <input type="text" id="publisher" name="publisher" placeholder="Publishing Company Name" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
                         {{-- Publication Year Field --}}
                         <div class="field-container flex flex-col">
                             <label for="publication_year" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                            <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="publication_year-error-placeholder"></div>
+                            <div class="error-placeholder flex-1 text-sm " id="publication_year-error-placeholder"></div>
                             <input type="number" id="publication_year" name="publication_year" placeholder="2025" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
                         {{-- Category Field --}}
                         <div class="field-container flex flex-col">
                             <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                            <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="category-error-placeholder"></div>
+                            <div class="error-placeholder flex-1 text-sm " id="category-error-placeholder"></div>
                             <select id="category" name="category" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" data-endpoint="{{ route('librarian.genres.by-category') }}">
                                 <option value="">Select Category...</option>
                                 @foreach ($categories as $category)
@@ -126,7 +126,7 @@
 
                         <div class="field-container flex flex-col">
                             <label for="genre" class="block text-sm font-medium text-gray-700 mb-1">Genre</label>
-                            <div class="error-placeholder  flex-1 text-sm min-h-[1em] mb-1" id="genre-error-placeholder"></div>
+                            <div class="error-placeholder  flex-1 text-sm " id="genre-error-placeholder"></div>
                             <div class="relative">
                                 <select id="genre" name="genre" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" disabled>
                                     <option value="">Select Genre...</option>
@@ -145,7 +145,7 @@
                         {{-- Language Field --}}
                         <div class="field-container flex flex-col">
                             <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                            <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="language-error-placeholder"></div>
+                            <div class="error-placeholder flex-1 text-sm " id="language-error-placeholder"></div>
                             <select id="language" name="language" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                                 <option value="">Select Language...</option>
                                 <option value="English">English</option>
@@ -158,7 +158,7 @@
                         {{-- Initail number of Copies Field --}}
                         <div class="field-container flex flex-col">
                             <label for="copies_available" class="block text-sm font-medium text-gray-700 mb-1">No. of Initial Copies</label>
-                            <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="copies_available-error-placeholder"></div>
+                            <div class="error-placeholder flex-1 text-sm " id="copies_available-error-placeholder"></div>
                             <input type="number" id="copies_available" name="copies_available" placeholder="Number of Copies" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
                     </div>

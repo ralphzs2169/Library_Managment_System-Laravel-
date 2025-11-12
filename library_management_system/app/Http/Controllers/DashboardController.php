@@ -43,7 +43,7 @@ class DashboardController extends Controller
             $query->where('role', $request->role);
         }
 
-        // Apply status filter
+        // Apply stabtus filter
         if ($request->filled('status')) {
             $query->where('library_status', $request->status);
         }

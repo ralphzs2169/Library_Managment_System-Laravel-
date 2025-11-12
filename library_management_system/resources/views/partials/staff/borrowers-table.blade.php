@@ -55,22 +55,38 @@
                     @endif
                 </td>
                 <td class="py-3 px-4">
+                    @if ($user->library_status === 'active')
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700">
                         {{$user->library_status}}
                     </span>
-                </td>
-                <td class="py-3 px-4">
-                    @if ($user->borrowTransactions->count() === 1) <span class="text-gray-700 font-medium text-xs">
-                        {{ $user->borrowTransactions->count() }} book
-                    </span>
-                    @else
-                    <span class="text-gray-700 font-medium text-xs">
-                        {{ $user->borrowTransactions->count() }} books
+                    @elseif ($user->library_status === 'suspended')
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">
+                        {{$user->library_status}}
                     </span>
                     @endif
                 </td>
-                <td class="py-3 px-4 text-gray-500 text-xs">—</td>
-                <td class="py-3 px-4 text-gray-500 text-xs">None</td>
+                <td class="py-3 px-4">
+                    @if ($user->active_borrowings_count === 1) <span class="text-gray-700 font-medium text-xs">
+                        {{ $user->active_borrowings_count }} book
+                    </span>
+                    @else
+                    <span class="text-gray-700 font-medium text-xs">
+                        {{ $user->active_borrowings_count }} books
+                    </span>
+                    @endif
+                </td>
+                <td class="py-3 px-4">
+                    @if ($user->total_unpaid_fines > 0)
+                    <span class="text-red-700 text-xs font-bold">{{ '₱ ' . number_format($user->total_unpaid_fines, 2) }}</span>
+                    @else
+                    <span class="text-gray-500 text-xs">None</span>
+                    @endif
+                </td>
+                <td class="py-3 px-4">
+                    @if ($user->active_borrowings_count === 0)
+                    <span class="text-gray-500 text-xs">None</span>
+                    @endif
+                </td>
             </tr>
             @endforeach
             @endif

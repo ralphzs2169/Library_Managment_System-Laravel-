@@ -1,6 +1,8 @@
 import { API_ROUTES, VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors, scrollToFirstError } from "../helpers.js";
 import { showSuccessWithRedirect, showWarning, showConfirmation, showError, showInfo } from "../utils.js";
+import { BOOKS_ROUTES, BOOK_CATALOG_SEARCH_COLUMN_INDEXES } from "../config.js";
+import { highlightSearchMatches } from "../tableControls.js";
 
 export async function addBookHandler(bookData, form) {
     // Step 1: Validate only
@@ -99,6 +101,12 @@ export async function editBookHandler(bookDetails, form) {
 
     if (!response.ok) {
         if (response.status === VALIDATION_ERROR) {
+            // Check for invalid status (business rule violation)
+            if (result.status === 'invalid') {
+                showWarning('Invalid Status Change', result.message);
+                return;
+            }
+            
             displayInputErrors(result.errors, form);
             return;
         }
@@ -106,10 +114,9 @@ export async function editBookHandler(bookDetails, form) {
         return;
     }
     
-
     if (result.status === 'unchanged') {
-            showInfo('No changes detected', 'You didn’t make any modifications to update.');
-            return;
+        showInfo('No changes detected', 'You didn’t make any modifications to update.');
+        return;
     }
 
     // Step 2: Show confirmation
@@ -159,5 +166,51 @@ export async function fetchBookDetails(book) {
         return data.book;
     } catch (error) {
         showError('Network Error', 'Unable to load book details. Please try again later.');
+    }
+}
+
+export async function loadBooks(page = 1) {
+    try {
+        const searchInput = document.querySelector('#books-search');
+        const sortSelect = document.querySelector('#books-sort');
+        const categoryFilter = document.querySelector('#books-category-filter');
+        const statusFilter = document.querySelector('#books-status-filter');
+
+        const params = new URLSearchParams({
+            page,
+            search: searchInput?.value || '',
+            sort: sortSelect?.value || 'newest',
+            category: categoryFilter?.value || '',
+            status: statusFilter?.value || 'all'
+        });
+
+        const response = await fetch(`${BOOKS_ROUTES.INDEX}?${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+
+        const html = await response.text();
+
+        if (!response.ok) {
+            showError('Something went wrong', 'Failed to load books.');
+            return;
+        }
+
+        const container = document.getElementById('books-table-container');
+        if (container) {
+            container.innerHTML = html;
+        }
+
+        // Highlight search matches
+        const searchTerm = searchInput?.value?.trim();
+        if (searchTerm) {
+            highlightSearchMatches(searchTerm, '#books-table-container', BOOK_CATALOG_SEARCH_COLUMN_INDEXES);
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+        showError('Something went wrong', error.message || 'Failed to load books.');
     }
 }

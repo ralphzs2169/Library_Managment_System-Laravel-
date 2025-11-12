@@ -35,17 +35,84 @@ class BookController extends Controller
 
         // Apply filters based on request parameters
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                ->orWhere('isbn', 'like', "%{$search}%")
+                ->orWhereHas('author', function ($q2) use ($search) {
+                    $q2->where('firstname', 'like', "%{$search}%")
+                        ->orWhere('lastname', 'like', "%{$search}%")
+                        ->orWhere('middle_initial', 'like', "%{$search}%")
+                        ->orWhereRaw(
+                            "CONCAT(lastname, ', ', firstname, ' ', COALESCE(CONCAT(middle_initial, '.'), '')) LIKE ?",
+                            ["%{$search}%"]
+                        );
+                });
+            });
         }
 
-        $books = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
-        $books->load('author', 'genre', 'copies');
+
+        // Apply category filter
+        if ($request->filled('category')) {
+            $query->whereHas('genre', function ($q) use ($request) {
+                $q->where('category_id', $request->category);
+            });
+        }
+
+        // Apply status filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->whereHas('copies', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
+        // Apply sort
+        $sort = $request->input('sort', 'newest');
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'title_asc':
+                $query->orderBy('title', 'asc');
+                break;
+            case 'title_desc':
+                $query->orderBy('title', 'desc');
+                break;
+            case 'author_asc':
+                $query->join('authors', 'books.author_id', '=', 'authors.id')
+                      ->orderBy('authors.lastname', 'asc')
+                      ->orderBy('authors.firstname', 'asc')
+                      ->select('books.*');
+                break;
+            case 'author_desc':
+                $query->join('authors', 'books.author_id', '=', 'authors.id')
+                      ->orderBy('authors.lastname', 'desc')
+                      ->orderBy('authors.firstname', 'desc')
+                      ->select('books.*');
+                break;
+            case 'copies_asc':
+                $query->withCount('copies')
+                      ->orderBy('copies_count', 'asc');
+                break;
+            case 'copies_desc':
+                $query->withCount('copies')
+                      ->orderBy('copies_count', 'desc');
+                break;
+            default: // newest
+                $query->orderBy('created_at', 'desc');
+        }
+
+        $books = $query->with(['author', 'genre.category', 'copies'])
+                       ->paginate(10)
+                       ->withQueryString();
 
         if ($request->ajax()) {
-            return view('pages.librarian.books-list', compact('books', 'categories'))->render();
+            // Return only the table partial for dynamic updates
+            return view('partials.librarian.book-catalog-table', compact('books'))->render();
         }
 
-        return view('pages.librarian.books-list', compact('books', 'categories'));
+        return view('pages.librarian.book-catalog', compact('books', 'categories'));
     }
 
     public function showAvailableBooks(Request $request)
@@ -145,9 +212,15 @@ class BookController extends Controller
     /**
      * Update the specified resource in storage.
      */
-     public function update(Request $request, Book $book)
+    public function update(Request $request, Book $book)
     {
         $result = $this->bookService->updateBook($request, $book);
+        
+        // Handle invalid status (business rule violations)
+        if (isset($result['status']) && $result['status'] === 'invalid') {
+            return response()->json($result, 422);
+        }
+        
         return response()->json($result);
     }
 

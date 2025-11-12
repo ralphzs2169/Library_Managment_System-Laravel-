@@ -1,11 +1,28 @@
 <!-- Main Content Area -->
 <div class="bg-white shadow-sm rounded-xl p-6 mt-5">
-    <div class="flex justify-end mb-4">
-        <button type="button" id="cancel-edit-book" class="cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-accent text-white rounded-lg shadow hover:bg-accent-dark transition text-sm font-semibold" title="Return to Books List">
+    {{-- Book Summary Header with Back Button --}}
+    <div class="mb-6 border border-gray-200 rounded-lg p-3 flex items-center justify-between bg-gray-50">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-16 rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white flex-shrink-0">
+                <img id="edit-summary-cover" src="" alt="Cover" class="w-full h-full object-cover hidden">
+                <div id="edit-summary-cover-placeholder" class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-[10px] text-center px-1">No Cover</div>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 font-medium">Editing</p>
+                <p id="edit-summary-title" class="font-bold text-gray-900">—</p>
+                <p class="text-xs text-gray-600 mt-0.5">
+                    <span class="font-medium">ISBN:</span> <span id="edit-summary-isbn" class="font-mono">—</span>
+                    <span class="mx-2 text-gray-400">•</span>
+                    <span class="font-medium">Author:</span> <span id="edit-summary-author">—</span>
+                </p>
+            </div>
+        </div>
+
+        <button type="button" id="cancel-edit-book" class="cursor-pointer flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg transition text-sm font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span>Return</span>
+            <span>Back to Catalog</span>
         </button>
     </div>
 
@@ -15,166 +32,240 @@
 
         {{-- Book id for AJAX updates --}}
         <input type="hidden" id="edit-book-id" name="book_id" value="{{ $book->id }}">
-        <!-- Book Information -->
-        <div>
-            <h2 class="flex items-center gap-2 font-semibold text-lg mb-3">
-                <img src="{{ asset('/build/assets/icons/add-book-information.svg') }}" alt="Book Info Icon" class="w-8 h-8">
-                <span>Edit Book Information</span>
+
+        {{-- Book Information Card --}}
+        <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
+                <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                    <img src="{{ asset('/build/assets/icons/add-book-information.svg') }}" alt="Book Info Icon" class="w-5 h-5">
+                </div>
+                <span>Book Information</span>
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                <div class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-[#E8FCFF] text-gray-600 hover:bg-[#DFF9FF] transition relative">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {{-- Cover Upload --}}
+                <div class="flex flex-col items-center justify-center border-2 border-dashed border-accent/30 rounded-xl bg-accent/5 hover:bg-accent/10 transition relative group">
                     <input type="file" id="cover-input" name="cover" accept="image/*" class="hidden">
-                    <label for="cover-input" id="cover-drop-area" class="w-full h-full flex flex-col items-center justify-center cursor-pointer p-6">
-                        <img id="cover-preview" alt="Cover preview" class="w-32 h-40 object-cover rounded-md mb-2">
-                        <span id="cover-placeholder" class="text-center ">Click to upload cover</span>
+                    <label for="cover-input" id="cover-drop-area" class="w-full h-full flex flex-col items-center justify-center cursor-pointer p-6 min-h-[280px]">
+                        <img id="cover-preview" alt="Cover preview" class="w-36 h-48 object-cover rounded-lg mb-3 shadow-md border-2 border-white">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span id="cover-placeholder" class="text-sm text-gray-600 font-medium">Click to upload cover</span>
+                            <p class="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+                        </div>
                     </label>
                     <div id="cover-error-placeholder" class="error-placeholder absolute left-4 bottom-2"></div>
                 </div>
 
-                <div class="md:col-span-2 flex flex-col gap-4">
+                {{-- Book Fields --}}
+                <div class="md:col-span-2 flex flex-col gap-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Title Field --}}
                         <div class="field-container flex flex-col">
-                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Book Title</label>
-                            <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="title-error-placeholder"></div>
-                            <input type="text" id="title" name="title" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <label for="title" class="block text-sm font-semibold text-gray-700 mb-2">Book Title</label>
+                            <input type="text" id="title" name="title" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
+                            <div class="error-placeholder text-xs mt-1" id="title-error-placeholder"></div>
                         </div>
                         {{-- ISBN Field --}}
                         <div class="field-container flex flex-col">
-                            <label for="isbn" class="block text-sm font-medium text-gray-700 mb-1">ISBN</label>
-                            <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="isbn-error-placeholder"></div>
-                            <input type="text" id="isbn" name="isbn" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <label for="isbn" class="block text-sm font-semibold text-gray-700 mb-2">ISBN</label>
+                            <input type="text" id="isbn" name="isbn" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm font-mono">
+                            <div class="error-placeholder text-xs mt-1" id="isbn-error-placeholder"></div>
                         </div>
                     </div>
-                    {{-- Description and Price Fields --}}
+                    {{-- Description --}}
                     <div class="field-container">
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Book Description</label>
-                        <div class="error-placeholder" id="description-error-placeholder"></div>
-                        <textarea id="description" name="description" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"></textarea>
+                        <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">Book Description</label>
+                        <textarea id="description" name="description" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm"></textarea>
+                        <div class="error-placeholder text-xs mt-1" id="description-error-placeholder"></div>
                     </div>
-                    <div class="field-container">
-                        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Book Price</label>
-                        <div class="error-placeholder" id="price-error-placeholder"></div>
-                        <input type="number" step="0.01" id="price" name="price" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                    {{-- Price and Language Row --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="field-container">
+                            <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">Book Price</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₱</span>
+                                <input type="number" step="0.01" id="price" name="price" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
+                            </div>
+                            <div class="error-placeholder text-xs mt-1" id="price-error-placeholder"></div>
+                        </div>
+
+                        <div class="field-container flex flex-col">
+                            <label for="language" class="block text-sm font-semibold text-gray-700 mb-2">Language</label>
+                            <select id="language" name="language" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
+                                <option value="">Select Language...</option>
+                                <option value="English">English</option>
+                                <option value="Filipino">Filipino</option>
+                                <option value="Spanish">Spanish</option>
+                                <option value="Chinese">Chinese</option>
+                                <option value="Others">Others</option>
+                            </select>
+                            <div class="error-placeholder text-xs mt-1" id="language-error-placeholder"></div>
+                        </div>
                     </div>
                 </div>
-
-
-
             </div>
         </div>
 
-        <!-- Author Information -->
-        <h2 class="flex items-center gap-2 font-semibold text-lg mb-3">
-            <span>Edit Author Information</span>
-
-        </h2>
-
-
-        <div class="author-group grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="field-container flex flex-col">
-                <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="author_firstname-error-placeholder"></div>
-                <input type="text" id="author_firstname" name="author_firstname" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" placeholder="Author's First Name">
-            </div>
-            <div class="field-container flex flex-col">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="author_lastname-error-placeholder"></div>
-                <input type="text" id="author_lastname" name="author_lastname" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" placeholder="Author's Last Name">
-            </div>
-            <div class="field-container flex flex-col">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Middle Initial</label>
-                <div class="error-placeholder flex-1 min-h-[1em] text-sm mb-1" id="author_middle_initial-error-placeholder"></div>
-                <input type="text" id="author_middle_initial" name="author_middle_initial" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" placeholder="M.I.">
-            </div>
-        </div>
-
-
-        <!-- Publication Details -->
-        <div class="mt-8">
-            <h2 class="flex items-center gap-2 font-semibold text-lg mb-3">
-                <span>Edit Publication Details</span>
+        {{-- Classification Card - OPTIMIZED LAYOUT --}}
+        <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
+                <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                </div>
+                <span>Category & Genre</span>
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {{-- Publisher Field --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="field-container flex flex-col">
-                    <label for="publisher" class="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
-                    <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="publisher-error-placeholder"></div>
-                    <input type="text" id="publisher" name="publisher" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
-                </div>
-                {{-- Publication Year Field --}}
-                <div class="field-container flex flex-col">
-                    <label for="publication_year" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                    <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="publication_year-error-placeholder"></div>
-                    <input type="number" id="publication_year" name="publication_year" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
-                </div>
-                {{-- Category Field --}}
-                <div class="field-container flex flex-col">
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="category-error-placeholder"></div>
-                    <select id="category" name="category" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" data-endpoint="{{ route('librarian.genres.by-category') }}">
+                    <label for="category" class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                    <select id="category" name="category" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" data-endpoint="{{ route('librarian.genres.by-category') }}">
                         <option disabled value="">Select Category...</option>
                         @foreach ($categories as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
                     </select>
+                    <div class="error-placeholder text-xs mt-1" id="category-error-placeholder"></div>
                 </div>
-            </div>
-
-            <div class=" grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-
                 <div class="field-container flex flex-col">
-                    <label for="genre" class="block text-sm font-medium text-gray-700 mb-1">Genre</label>
-                    <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="genre-error-placeholder"></div>
+                    <label for="genre" class="block text-sm font-semibold text-gray-700 mb-2">Genre</label>
                     <div class="relative">
-                        <select id="genre" name="genre" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" {{ $book->genre_id ? '' : 'disabled' }}>
-
-
-                        </select>
-                        <span id="genre-loading" class="absolute right-3 top-3 hidden">
+                        <select id="genre" name="genre" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" {{ $book->genre_id ? '' : 'disabled' }}></select>
+                        <span id="genre-loading" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
                             <svg class="animate-spin h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                             </svg>
                         </span>
                     </div>
+                    <div class="error-placeholder text-xs mt-1" id="genre-error-placeholder"></div>
                 </div>
-                {{-- Language Field --}}
-                <div class="field-container flex flex-col">
-                    <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                    <div class="error-placeholder flex-1 text-sm min-h-[1em] mb-1" id="language-error-placeholder"></div>
-                    <select id="language" name="language" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm p-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
-                        <option value="">Select Language...</option>
-                        <option value="English">English</option>
-                        <option value="Filipino">Filipino</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="Chinese">Chinese</option>
-                        <option value="Others">Others</option>
-                    </select>
-                </div>
-
             </div>
         </div>
 
-        <div class="mt-6">
-            <h2 class="flex items-center gap-2 font-semibold text-lg mb-3">
-                <span>Copies</span>
+        {{-- Author Information Card --}}
+        <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
+                <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                <span>Author Information</span>
             </h2>
 
-            <div id="copies-table-container" class="bg-white border rounded-lg shadow-sm p-4">
-                {{-- Copies Table Container --}}
+            <div class="author-group grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="field-container flex flex-col">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                    <input type="text" id="author_firstname" name="author_firstname" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" placeholder="First Name">
+                    <div class="error-placeholder text-xs mt-1" id="author_firstname-error-placeholder"></div>
+                </div>
+                <div class="field-container flex flex-col">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                    <input type="text" id="author_lastname" name="author_lastname" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" placeholder="Last Name">
+                    <div class="error-placeholder text-xs mt-1" id="author_lastname-error-placeholder"></div>
+                </div>
+                <div class="field-container flex flex-col">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Middle Initial</label>
+                    <input type="text" id="author_middle_initial" name="author_middle_initial" maxlength="1" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm uppercase" placeholder="M">
+                    <div class="error-placeholder text-xs mt-1" id="author_middle_initial-error-placeholder"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Buttons -->
-        <div class="flex justify-end gap-3 mt-8">
-            <button type="reset" class="border border-accent text-accent px-6 py-2.5 rounded-lg font-medium hover:bg-accent hover:text-white transition">
-                Clear Form
+        {{-- Publication Details Card - OPTIMIZED LAYOUT --}}
+        <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
+                <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Publication Details</span>
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- Publisher Field --}}
+                <div class="field-container flex flex-col">
+                    <label for="publisher" class="block text-sm font-semibold text-gray-700 mb-2">Publisher</label>
+                    <input type="text" id="publisher" name="publisher" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
+                    <div class="error-placeholder text-xs mt-1" id="publisher-error-placeholder"></div>
+                </div>
+                {{-- Publication Year Field --}}
+                <div class="field-container flex flex-col">
+                    <label for="publication_year" class="block text-sm font-semibold text-gray-700 mb-2">Publication Year</label>
+                    <input type="number" id="publication_year" name="publication_year" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
+                    <div class="error-placeholder text-xs mt-1" id="publication_year-error-placeholder"></div>
+                </div>
+            </div>
+        </div>
+
+
+
+        {{-- Copies Management Card --}}
+        <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 pb-3 border-b border-gray-200 gap-4">
+                <h2 class="flex items-center gap-2 font-bold text-lg text-gray-900">
+                    <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <span>Book Copies</span>
+                </h2>
+
+                <button type="button" id="add-copy-btn" class="px-4 py-2 text-xs bg-accent hover:bg-accent/80 cursor-pointer text-white rounded-lg transition shadow-sm font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Copy
+                </button>
+            </div>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200" style="min-height: 300px;">
+                <table class="w-full text-sm rounded-lg">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Copy No.</th>
+                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Current Status</th>
+                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Change Status</th>
+                            <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="copies-table-body" class="bg-white divide-y divide-gray-100">
+                        <tr class="copies-empty">
+                            <td colspan="4" class="py-20 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <p class="text-gray-500 text-sm">Loading copies…</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Pagination Container --}}
+            <div id="copies-pagination" class="hidden"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+            <button type="reset" class="px-6 py-3 border-2 border-accent text-accent rounded-lg font-semibold hover:bg-accent hover:text-white transition shadow-sm">
+                Reset Changes
             </button>
-            <button type="submit" class="bg-accent text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition">
+            <button type="submit" class="px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition shadow-md hover:shadow-lg flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
                 Save Changes
             </button>
         </div>

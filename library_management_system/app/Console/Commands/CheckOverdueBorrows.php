@@ -7,6 +7,7 @@ use App\Models\BorrowTransaction;
 use App\Models\ActivityLog;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class CheckOverdueBorrows extends Command
 {
@@ -32,6 +33,12 @@ class CheckOverdueBorrows extends Command
                 foreach ($overdueBorrows as $borrow) {
                     $borrow->status = 'overdue';
                     $borrow->save();
+
+                    $borrower = User::find($borrow->user_id);
+                    if ($borrower) {
+                        $borrower->library_status = 'suspended';
+                        $borrower->save();
+                    }
 
                     // Log the action
                     ActivityLog::create([

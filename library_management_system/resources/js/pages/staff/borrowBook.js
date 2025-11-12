@@ -1,7 +1,9 @@
 import { fetchAllBooks } from '../../api/bookHandler.js';
-import { closeBorrowerModal, initializeBorrowerProfileModal } from './borrowers.js';
+import { closeBorrowerModal } from './borrower/borrowerProfileModal.js';
+import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { openConfirmBorrowModal } from './confirmBorrow.js';
-import { debounce, highlightSearchMatches, formatLastNameFirst } from '../../utils.js';
+import { debounce, formatLastNameFirst } from '../../utils.js';
+import { highlightSearchMatches } from '../../tableControls.js';
 
 // Store current state for navigation
 let currentState = {
@@ -240,7 +242,7 @@ export function restoreProfileContent(modal, borrower) {
     
     if (modal.dataset.originalContent) {
         modalContent.innerHTML = modal.dataset.originalContent;
-        initializeBorrowerProfileModal(modal, borrower);
+        initializeBorrowerProfileUI(modal, borrower);
         
         const closeBtn = modal.querySelector('#close-borrower-modal');
         if (closeBtn) {

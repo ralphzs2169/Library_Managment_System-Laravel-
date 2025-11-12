@@ -1,6 +1,6 @@
-import { highlightSearchMatches } from "../../utils.js";
-import { debounce } from "../../utils.js";
+import {  debounce } from "../../utils.js";
 import { loadBorrowers } from "../../api/usersHandler.js";
+import { highlightSearchMatches } from "../../tableControls.js";
 
 document.addEventListener('click', async (e) => {
     if (e.target.matches('.pagination-btn') && !e.target.disabled) {

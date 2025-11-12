@@ -14,6 +14,73 @@ class SettingsService
         return $settings;
     }
 
+    public function detectChanges(Request $request)
+    {
+        $currentSettings = $this->getAllSettings();
+        
+        $fields = [
+            'max_books_per_student' => 'borrowing.max_books_per_student',
+            'max_books_per_teacher' => 'borrowing.max_books_per_teacher',
+            'borrow_duration' => 'borrowing.borrow_duration',
+            'rate_per_day' => 'penalty.rate_per_day',
+            'max_amount' => 'penalty.max_amount',
+            'lost_fee_multiplier' => 'penalty.lost_fee_multiplier',
+            'damaged_fee_multiplier' => 'penalty.damaged_fee_multiplier',
+            'reminder_days_before_due' => 'notifications.reminder_days_before_due',
+        ];
+
+        $changes = [];
+
+        foreach ($fields as $inputKey => $dbKey) {
+            $newValue = $request->input($inputKey);
+            $oldValue = $currentSettings[$dbKey] ?? null;
+
+            // Normalize values for comparison
+            $normalizedOld = $this->normalizeValue($oldValue);
+            $normalizedNew = $this->normalizeValue($newValue);
+
+            if ($normalizedOld !== $normalizedNew) {
+                $changes[$inputKey] = [
+                    'old' => $oldValue,
+                    'new' => $newValue
+                ];
+            }
+        }
+
+        // Check checkbox fields separately
+        $checkboxFields = [
+            'enable_borrower_notifications' => 'notifications.enable_borrower_notifications',
+            'show_overdue_notifications' => 'notifications.show_overdue_notifications',
+        ];
+
+        foreach ($checkboxFields as $inputKey => $dbKey) {
+            $newValue = $request->has($inputKey) ? 1 : 0;
+            $oldValue = (int) ($currentSettings[$dbKey] ?? 0);
+
+            if ($oldValue !== $newValue) {
+                $changes[$inputKey] = [
+                    'old' => $oldValue,
+                    'new' => $newValue
+                ];
+            }
+        }
+
+        return $changes;
+    }
+
+    protected function normalizeValue($value)
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        return trim($value);
+    }
+
     public function updateSettings(Request $request)
     {
         return DB::transaction(function () use ($request) {

@@ -1,8 +1,7 @@
 import { showError, showInfo, showWarning, showConfirmation, showSuccessWithRedirect } from "../utils.js";
 import { SEMESTER_ROUTES, VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
-import { highlightSearchMatches } from "../utils.js";
-
+import { highlightSearchMatches } from "../tableControls.js";
 export async function getCreateSemesterForm() {
     try {
         const response = await fetch(SEMESTER_ROUTES.CREATE, {
@@ -316,6 +315,8 @@ export async function loadSemesters(page = 1) {
         if (searchTerm) {
             highlightSearchMatches(searchTerm, '#semesters-table-container', [1]);
         }
+
+         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
         showError('Network Error', 'Unable to load semesters. Please try again later.');
     }

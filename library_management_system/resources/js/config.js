@@ -20,6 +20,13 @@ export const API_ROUTES ={
     // Add other API routes as needed
 };
 
+export const BOOK_CATALOG_SEARCH_COLUMN_INDEXES = [2, 3]; // Title, Author, ISBN
+export const BOOKS_ROUTES = {
+    INDEX: '/librarian/books/index',
+    CREATE: '/librarian/books/create'
+};
+
+
 export const SEMESTER_ROUTES = {
     INDEX: '/librarian/semester-management',
     CREATE: '/librarian/semester-management/create',

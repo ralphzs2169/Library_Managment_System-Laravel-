@@ -94,3 +94,67 @@ export async function getAvailableCopies(bookId) {
         return [];
     }
 }
+
+export async function returnBook(formData) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    formData.append('_token', csrfToken);
+
+    // Step 1: Validate only
+    formData.append('validate_only', 1);
+    let response = await fetch(BORROW_TRANSACTION_ROUTES.RETURN, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: formData
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        if (response.status === VALIDATION_ERROR) {
+            if (result.status === 'invalid') {
+                showWarning('Invalid Return', result.message);
+                closeConfirmReturnModal();
+            }
+            return;
+        }
+        showWarning('Something went wrong', 'Please try again.');
+        return;
+    }
+
+    // Step 2: Show confirmation
+    const isConfirmed = await showConfirmation(
+        'Confirm Return?',
+        'Are you sure you want to mark this book as returned?',
+        'Yes, return'
+    );
+
+    if (!isConfirmed) return;
+
+    formData.delete('validate_only');
+
+    // Step 3: Submit return
+    response = await fetch(BORROW_TRANSACTION_ROUTES.RETURN, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: formData
+    });
+
+    if (!response.ok) {
+        showWarning('Something went wrong', 'Please try again.');
+        return;
+    }
+
+    // Close modal
+    const modal = document.getElementById('confirm-return-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+
+    showSuccessWithRedirect('Success', 'Book returned successfully!', window.location.href);
+}

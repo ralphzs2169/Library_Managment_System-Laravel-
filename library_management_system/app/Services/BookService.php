@@ -140,6 +140,11 @@ class BookService {
                  return ['status' => 'unchanged', 'message' => 'No changes detected.'];
             }
             
+            // Check for validation errors from detectChanges
+            if (isset($changes['error'])) {
+                return $changes; // Return error response directly
+            }
+            
             $this->validateBookData($request, $book);
             return ['status' => 'success', 'message' => 'Validation passed'];
         }
@@ -284,12 +289,95 @@ class BookService {
             }
         }
 
-        // Check for changes in copies status
+        // Check for changes in copies status and new copies
         $copiesInput = $request->input('copies', []);
         foreach ($copiesInput as $copyId => $newStatus) {
-            $copy = $book->copies()->find($copyId);
-            if ($copy && $copy->status !== $newStatus) {
-                $changes["copies.$copyId"] = ['old' => $copy->status, 'new' => $newStatus];
+            // New copies (negative IDs)
+            if ($copyId < 0) {
+                $changes["copies.new_{$copyId}"] = [
+                    'old' => null, 
+                    'new' => "New copy with status: {$newStatus}"
+                ];
+            } else {
+                // Existing copies - check for status change
+                $copy = $book->copies()->find($copyId);
+                
+                if (!$copy) {
+                    continue; // Skip if copy not found
+                }
+
+                // Only validate if the status is actually changing
+                if ($copy->status !== $newStatus) {
+                    // Validate status transition   
+                    if ($newStatus === 'borrowed') {
+                        return [
+                            'error' => true,
+                            'status' => 'invalid',
+                            'message' => "Cannot manually change status of a copy to borrowed. The book must be checked out through a proper borrowing transaction.",
+                            'copy_id' => $copyId
+                        ];
+                    }
+
+                    if ($copy->status === 'withdrawn') {
+                        return [
+                            'error' => true,
+                            'status' => 'invalid',
+                            'message' => "Cannot change status of withdrawn copy. Withdrawn books are permanently removed from circulation and cannot be reactivated.",
+                            'copy_id' => $copyId
+                        ];
+                    }
+
+                    if ($copy->status === 'borrowed' && $newStatus === 'available') {
+                        return [
+                            'error' => true,
+                            'status' => 'invalid',
+                            'message' => "Cannot manually change status of borrowed copy to available. The book must be returned first through the return process.",
+                            'copy_id' => $copyId
+                        ];
+                    }
+
+                    if ($copy->status === 'borrowed' && $newStatus === 'withdrawn') {
+                        return [
+                            'error' => true,
+                            'status' => 'invalid',
+                            'message' => "Cannot withdraw a borrowed book. The book must be returned before it can be withdrawn.",
+                            'copy_id' => $copyId
+                        ];
+                    }
+
+                    if ($copy->status === 'borrowed' && $newStatus === 'lost') {
+                        return [
+                            'error' => true,
+                            'status' => 'invalid',
+                            'message' => "Cannot directly mark a borrowed book as lost. Lost reports must be submitted by staff and approved through the proper process.",
+                            'copy_id' => $copyId
+                        ];
+                    }
+
+                    if ($copy->status === 'borrowed' && $newStatus === 'damaged') {
+                        return [
+                            'error' => true,
+                            'status' => 'invalid',
+                            'message' => "Cannot directly mark a borrowed book as damaged. Damaged reports must be submitted by staff and approved through the proper process.",
+                            'copy_id' => $copyId
+                        ];
+                    }
+
+                    if ($copy->status === 'lost' && $newStatus !== 'available') {
+                        return [
+                            'error' => true,
+                            'status' => 'invalid',
+                            'message' => "A lost book can only be updated to 'Available' once it is recovered.",
+                            'copy_id' => $copyId
+                        ];
+                    }
+
+                    // Track changes
+                    $changes["copies.{$copyId}"] = [
+                        'old' => $copy->status, 
+                        'new' => $newStatus
+                    ];
+                }
             }
         }
 
@@ -333,15 +421,30 @@ class BookService {
     }
 
     /**
-     * Update the status of each book copy if changed.
+     * Update the status of each book copy if changed, or create new copies.
      */
     protected function updateCopies(Request $request, Book $book)
     {
         $copiesInput = $request->input('copies', []);
+        
         foreach ($copiesInput as $copyId => $newStatus) {
-            $copy = $book->copies()->find($copyId);
-            if ($copy && $copy->status !== $newStatus) {
-                $copy->update(['status' => $newStatus]);
+            // Handle new copies (negative IDs)
+            if ($copyId < 0) {
+                // Get the next available copy number
+                $nextCopyNumber = BookCopy::where('book_id', $book->id)->max('copy_number') + 1;
+                
+                // Create new copy with the provided status
+                BookCopy::create([
+                    'book_id' => $book->id,
+                    'copy_number' => $nextCopyNumber,
+                    'status' => $newStatus // This is the status from the form
+                ]);
+            } else {
+                // Update existing copy
+                $copy = $book->copies()->find($copyId);
+                if ($copy && $copy->status !== $newStatus) {
+                    $copy->update(['status' => $newStatus]);
+                }
             }
         }
     }

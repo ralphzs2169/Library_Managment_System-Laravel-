@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -58,6 +59,33 @@ class User extends Authenticatable
         return "{$this->firstname} " . $middle_name . "{$this->lastname}";
     }
 
+    public function getLibraryStatusLabelAttribute()
+    {
+        return $this->library_status === 'with_penalty' ? 'penalty' : $this->library_status;
+    }
+
+    public function getActiveBorrowingsCountAttribute()
+    {
+        return $this->borrowTransactions()
+            ->whereIn('status', ['borrowed', 'overdue'])
+            ->whereNull('returned_at')
+            ->count();
+    }
+    
+    public function getTotalUnpaidFinesAttribute()
+    {
+        return $this->borrowTransactions()
+            ->whereHas('penalties', function ($q) {
+                $q->where('status', 'unpaid');
+            })
+            ->get()
+            ->sum(function ($transaction) {
+                return $transaction->penalties()
+                    ->where('status', 'unpaid')
+                    ->sum('amount');
+            });
+    }
+    
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class, 'user_id');
@@ -77,4 +105,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(BorrowTransaction::class, 'user_id');
     }
+
+    
 }
