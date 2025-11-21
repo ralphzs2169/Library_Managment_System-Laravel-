@@ -8,12 +8,22 @@ use Illuminate\Support\Facades\DB;
 use App\Models\BookCopy;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use App\Enums\BookCopyStatus;
+use App\Enums\IssueReportStatus;
+use App\Enums\IssueReportType;
+use App\Models\Penalty;
+use App\Models\Settings;
+use App\Enums\PenaltyType;
+use App\Enums\PenaltyStatus;
+use Exception;
+
 
 class BookService {
 
     public function showAvailableBooks($filters){
         $query = Book::whereHas('copies', function ($q) {
-            $q->where('status', 'available');
+            $q->where('status', 'available')
+            ->whereDoesntHave('pendingIssueReport');
         });
 
         // Apply search filter if provided
@@ -110,7 +120,7 @@ class BookService {
                 BookCopy::create([
                     'book_id' => $book->id,
                     'copy_number' => $nextCopyNumber + $i,
-                    'status' => 'available'
+                    'status' => BookCopyStatus::AVAILABLE
                 ]);
             }
 
@@ -146,7 +156,7 @@ class BookService {
             }
             
             $this->validateBookData($request, $book);
-            return ['status' => 'success', 'message' => 'Validation passed'];
+            return ['status' => 'success', 'message' => 'Validation passed', 'changes' => $changes];
         }
 
         try {
@@ -291,93 +301,34 @@ class BookService {
 
         // Check for changes in copies status and new copies
         $copiesInput = $request->input('copies', []);
+
         foreach ($copiesInput as $copyId => $newStatus) {
+
             // New copies (negative IDs)
             if ($copyId < 0) {
                 $changes["copies.new_{$copyId}"] = [
                     'old' => null, 
                     'new' => "New copy with status: {$newStatus}"
                 ];
-            } else {
-                // Existing copies - check for status change
-                $copy = $book->copies()->find($copyId);
-                
-                if (!$copy) {
-                    continue; // Skip if copy not found
-                }
+                continue;
+            }
 
-                // Only validate if the status is actually changing
-                if ($copy->status !== $newStatus) {
-                    // Validate status transition   
-                    if ($newStatus === 'borrowed') {
-                        return [
-                            'error' => true,
-                            'status' => 'invalid',
-                            'message' => "Cannot manually change status of a copy to borrowed. The book must be checked out through a proper borrowing transaction.",
-                            'copy_id' => $copyId
-                        ];
-                    }
+            // Existing copies
+            $copy = $book->copies->firstWhere('id', $copyId) ?: $book->copies()->find($copyId);
+            if (!$copy) {
+                continue; // Skip if copy not found
+            }
 
-                    if ($copy->status === 'withdrawn') {
-                        return [
-                            'error' => true,
-                            'status' => 'invalid',
-                            'message' => "Cannot change status of withdrawn copy. Withdrawn books are permanently removed from circulation and cannot be reactivated.",
-                            'copy_id' => $copyId
-                        ];
-                    }
+            $currentStatus = $copy->status; // converts enum to string
+            $newStatus = $newStatus;
 
-                    if ($copy->status === 'borrowed' && $newStatus === 'available') {
-                        return [
-                            'error' => true,
-                            'status' => 'invalid',
-                            'message' => "Cannot manually change status of borrowed copy to available. The book must be returned first through the return process.",
-                            'copy_id' => $copyId
-                        ];
-                    }
-
-                    if ($copy->status === 'borrowed' && $newStatus === 'withdrawn') {
-                        return [
-                            'error' => true,
-                            'status' => 'invalid',
-                            'message' => "Cannot withdraw a borrowed book. The book must be returned before it can be withdrawn.",
-                            'copy_id' => $copyId
-                        ];
-                    }
-
-                    if ($copy->status === 'borrowed' && $newStatus === 'lost') {
-                        return [
-                            'error' => true,
-                            'status' => 'invalid',
-                            'message' => "Cannot directly mark a borrowed book as lost. Lost reports must be submitted by staff and approved through the proper process.",
-                            'copy_id' => $copyId
-                        ];
-                    }
-
-                    if ($copy->status === 'borrowed' && $newStatus === 'damaged') {
-                        return [
-                            'error' => true,
-                            'status' => 'invalid',
-                            'message' => "Cannot directly mark a borrowed book as damaged. Damaged reports must be submitted by staff and approved through the proper process.",
-                            'copy_id' => $copyId
-                        ];
-                    }
-
-                    if ($copy->status === 'lost' && $newStatus !== 'available') {
-                        return [
-                            'error' => true,
-                            'status' => 'invalid',
-                            'message' => "A lost book can only be updated to 'Available' once it is recovered.",
-                            'copy_id' => $copyId
-                        ];
-                    }
-
-                    // Track changes
-                    $changes["copies.{$copyId}"] = [
-                        'old' => $copy->status, 
-                        'new' => $newStatus
-                    ];
-                }
+            // Only validate if the status is actually changing
+            if ($currentStatus !== $newStatus) {
+                   // Track changes
+                $changes["copies.{$copyId}"] = [
+                    'old' => $currentStatus, 
+                    'new' => $newStatus
+                ];
             }
         }
 
@@ -425,33 +376,156 @@ class BookService {
      */
     protected function updateCopies(Request $request, Book $book)
     {
-        $copiesInput = $request->input('copies', []);
-        
-        foreach ($copiesInput as $copyId => $newStatus) {
-            // Handle new copies (negative IDs)
-            if ($copyId < 0) {
-                // Get the next available copy number
-                $nextCopyNumber = BookCopy::where('book_id', $book->id)->max('copy_number') + 1;
-                
-                // Create new copy with the provided status
-                BookCopy::create([
-                    'book_id' => $book->id,
-                    'copy_number' => $nextCopyNumber,
-                    'status' => $newStatus // This is the status from the form
-                ]);
-            } else {
-                // Update existing copy
+        DB::transaction(function () use ($request, $book) {
+            $copiesInput = $request->input('copies', []);
+            $pendingResolved = $request->input('pending_issue_resolved');
+
+            foreach ($copiesInput as $copyId => $newStatus) {
+                // Handle new copies (negative IDs)
+                if ($copyId < 0) {
+                    $nextCopyNumber = BookCopy::where('book_id', $book->id)->max('copy_number') + 1;
+                    BookCopy::create([
+                        'book_id' => $book->id,
+                        'copy_number' => $nextCopyNumber,
+                        'status' => $newStatus
+                    ]);
+                    continue;
+                }
+
+                // Existing copies
                 $copy = $book->copies()->find($copyId);
-                if ($copy && $copy->status !== $newStatus) {
+                if (!$copy) continue;
+
+                $currentStatus = $copy->status;
+
+                // Only update if status changed
+                if ($currentStatus !== $newStatus) {
+
+                    // Handle pending issue review resolution
+                    if ($pendingResolved === 'true' && $currentStatus === BookCopyStatus::PENDING_ISSUE_REVIEW) {
+                        $errors = $this->resolvePendingIssueReport($copy, $newStatus, $request->user()->id);
+
+                        if (!empty($errors)) {
+                            throw new Exception("Errors occurred: " . implode('; ', $errors));
+                        }
+
+                        continue; // Skip normal update since handled
+                    }
+
+                    if ($newStatus === BookCopyStatus::BORROWED) {
+                        throw new Exception("Cannot manually set a book copy to 'Borrowed' status. Borrowing must be done through the borrowing process.");
+                    }
+
+                    if ($currentStatus === BookCopyStatus::WITHDRAWN  && $newStatus !== BookCopyStatus::WITHDRAWN) {
+                        throw new Exception("Cannot change status of withdrawn copy. Withdrawn books are permanently removed from circulation and cannot be reactivated."); 
+                    }
+
+                    if ($currentStatus === BookCopyStatus::BORROWED && $newStatus === BookCopyStatus::AVAILABLE) {
+                        throw new Exception("Cannot directly mark a borrowed book as available. The book must be returned through the proper process before it can be marked as available.");
+                    }
+
+                    if ($currentStatus === BookCopyStatus::BORROWED && $newStatus === BookCopyStatus::WITHDRAWN) {
+                        throw new Exception("Cannot withdraw a borrowed book. The book must be returned before it can be withdrawn.");
+                    }
+
+                    if ($currentStatus === BookCopyStatus::BORROWED && $newStatus === BookCopyStatus::LOST) {
+                        throw new Exception("Cannot directly mark a borrowed book as lost. Lost reports must be submitted by staff and approved through the proper process.");
+                    }
+
+                    if ($currentStatus === BookCopyStatus::BORROWED && $newStatus === BookCopyStatus::DAMAGED) {
+                        throw new Exception("Cannot directly mark a borrowed book as damaged. Damage reports must be submitted by staff and approved through the proper process.");
+                    }
+
+                    if ($currentStatus === BookCopyStatus::LOST && $newStatus === BookCopyStatus::AVAILABLE) {
+                       throw new Exception("Cannot directly mark a lost book as available. Lost reports must be reviewed and approved through the proper process.");
+                    }
+
+                    // Otherwise, update status normally
                     $copy->update(['status' => $newStatus]);
                 }
             }
-        }
+        });
     }
 
     /**
-     * Helper: map author field names.
+     * Resolve a pending issue report for a book copy.
      */
+    protected function resolvePendingIssueReport(BookCopy $copy, $newStatus, $userId)
+    {
+        $errors = [];
+
+        try {
+            DB::transaction(function () use ($copy, $newStatus, $userId) {
+                $pendingReport = $copy->pendingIssueReport()->first();
+
+                if (!$pendingReport) {
+                    $errors[] = "No pending report found for copy ID: {$copy->id}";
+                    return;
+                }
+
+                // Approve: set status to damaged/lost, create penalty, suspend user
+                if ($newStatus === BookCopyStatus::DAMAGED || $newStatus === BookCopyStatus::LOST) {
+                    if (!$pendingReport->update([
+                        'status' => IssueReportStatus::APPROVED,
+                        'approved_by' => $userId,
+                        'resolved_at' => now(),
+                    ])) {
+                        $errors[] = "Failed to update pending report for copy ID: {$copy->id}";
+                    }
+
+                    if (!$copy->update(['status' => $newStatus])) {
+                        $errors[] = "Failed to update status for copy ID: {$copy->id}";
+                    }
+
+                    // Determine penalty type and amount
+                    $penaltyType = $newStatus === BookCopyStatus::DAMAGED ? PenaltyType::DAMAGED_BOOK : PenaltyType::LOST_BOOK;
+                    $penaltyAmount = $copy->getPenaltyAmountAttribute();
+
+                    $transaction = $copy->borrowTransaction()->latest()->first();
+                    if (!$transaction) {
+                        $errors[] = "No borrow transaction found for copy ID: {$copy->id}";
+                    }
+                    // Create penalty record
+                    $penalty =Penalty::create([
+                        'borrow_transaction_id' => $transaction ? $transaction->id : null,
+                        'amount' => $penaltyAmount,
+                        'type' => $penaltyType,
+                        'status' => PenaltyStatus::UNPAID,
+                        'issued_at' => now(),
+                    ]);
+
+                    if (!$penalty) {
+                        $errors[] = "Failed to create penalty for copy ID: {$copy->id}";
+                    }
+
+                    // Suspend user if transaction exists
+                    if ($transaction && $transaction->user) {
+                        if(!$transaction->user->update(['library_status' => 'suspended'])) {
+                            $errors[] = "Failed to suspend user ID: {$transaction->user->id}";
+                        }
+                    }
+                }
+                // Reject: set status to available
+                elseif ($newStatus === BookCopyStatus::AVAILABLE) {
+                    if (!$pendingReport->update([
+                        'status' => IssueReportStatus::REJECTED,
+                        'approved_by' => $userId,
+                        'resolved_at' => now(),
+                    ])) {
+                        $errors[] = "Failed to update pending report for copy ID: {$copy->id}";
+                    }
+
+                    if (!$copy->update(['status' => $newStatus])) {
+                        $errors[] = "Failed to update status for copy ID: {$copy->id}";
+                    }
+                }
+            });
+        } catch (\Exception $e) {
+            $errors[] = "Database error: " . $e->getMessage();
+        }
+        return $errors;
+    }
+
     protected function mapAuthorField($field)
     {
         return match ($field) {

@@ -1,7 +1,8 @@
 import { showBorrowBookContent, restoreProfileContent } from './borrowBook.js';
 import { borrowBook } from '../../api/borrowTransactionHandler.js';
 import { clearInputError } from '../../helpers.js';
-
+import { fetchSettings } from '../../api/settingsHandler.js';
+import { closeBorrowerModal } from './borrower/borrowerProfileModal.js';
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
 // Store borrower data for navigation
@@ -11,7 +12,7 @@ let currentBook = null;
 const copySelect = document.getElementById('book_copy_id');
 const dueDateInput = document.getElementById('due_date');
 
-export function initializeConfirmBorrowModal(modal, borrower, book) {
+export async function initializeConfirmBorrowModal(modal, borrower, book) {
     currentBorrower = borrower;
     currentBook = book;
     
@@ -29,7 +30,12 @@ export function initializeConfirmBorrowModal(modal, borrower, book) {
         }
     }
 
-    if (book) {
+    if (book) { 
+        const profileIcon = modal.querySelector('#confirm-borrower-initials');
+        if (profileIcon && borrower) {
+            const names = borrower.firstname.charAt(0).toUpperCase() + (borrower.lastname?.charAt(0).toUpperCase() || '');
+            profileIcon.textContent = names || '--';
+        }
         const bookCover = modal.querySelector('#confirm-book-cover');
         const bookTitle = modal.querySelector('#confirm-book-title');
         const bookAuthor = modal.querySelector('#confirm-book-author');
@@ -50,9 +56,28 @@ export function initializeConfirmBorrowModal(modal, borrower, book) {
         populateCopyNumbers(modal, book);
     }
 
+    const settings = await fetchSettings();
+    const borrowDuration = settings['borrowing.borrow_duration'];
     // Attach clear error logic to input fields
     const copySelect = modal.querySelector('#book_copy_id');
     const dueDateInput = modal.querySelector('#due_date');
+    const borrowDurationMsg = modal.querySelector('#borrow-duration');
+
+    if (borrowDurationMsg && borrowDuration) {
+        borrowDurationMsg.textContent = `Standard: ${borrowDuration} days from today`;
+    }
+
+    if (borrowDuration) {
+        const today = new Date();
+        today.setDate(today.getDate() + parseInt(borrowDuration));
+        
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        
+        dueDateInput.value = `${year}-${month}-${day}`;
+    }
+
 
     if (copySelect) {
         copySelect.addEventListener('change', () => clearInputError(copySelect));
@@ -145,7 +170,7 @@ document.addEventListener('click', function(event) {
     }
 });
 
-export function openConfirmBorrowModal(borrower, book) {
+export function openConfirmBorrowModal(borrower, book, ) {
     currentBorrower = borrower;
     currentBook = book;
     
@@ -164,7 +189,7 @@ export function openConfirmBorrowModal(borrower, book) {
     });
     
     // Initialize modal with data
-    initializeConfirmBorrowModal(modal, borrower, book);
+    initializeConfirmBorrowModal(modal, borrower, book  );
 }
 
 export function closeConfirmBorrowModal() {
@@ -179,11 +204,16 @@ export function closeConfirmBorrowModal() {
     modal.classList.add('bg-opacity-0');
     modalContent.classList.remove('scale-100', 'opacity-100');
     modalContent.classList.add('scale-95', 'opacity-0');
-
+    
     // Hide modal after animation completes
     setTimeout(() => {
         modal.classList.add('hidden');
-        restoreProfileContent(document.getElementById('borrower-profile-modal'), null);
+        // Pass the active borrower so profile buttons re-bind correctly
+        const profileModal = document.getElementById('borrower-profile-modal');
+
+        if (profileModal && currentBorrower) {
+            restoreProfileContent(profileModal, currentBorrower, null);
+        }
     }, 150);
 }
 

@@ -1,13 +1,12 @@
-import { API_ROUTES, VALIDATION_ERROR } from "../config.js";
-import { displayInputErrors, scrollToFirstError } from "../helpers.js";
+import {  SEARCH_COLUMN_INDEXES, VALIDATION_ERROR, BOOK_ROUTES } from "../config.js";
+import { displayInputErrors } from "../helpers.js";
 import { showSuccessWithRedirect, showWarning, showConfirmation, showError, showInfo } from "../utils.js";
-import { BOOKS_ROUTES, BOOK_CATALOG_SEARCH_COLUMN_INDEXES } from "../config.js";
 import { highlightSearchMatches } from "../tableControls.js";
 
 export async function addBookHandler(bookData, form) {
     // Step 1: Validate only
     bookData.append('validate_only', 1);
-    let response = await fetch(API_ROUTES.ADD_BOOK, {
+    let response = await fetch(BOOK_ROUTES.STORE, {
         method: 'POST',
         // Indicate we expect JSON so the server returns JSON errors instead of HTML redirects
         headers: {
@@ -20,7 +19,6 @@ export async function addBookHandler(bookData, form) {
     const result = await response.json();
 
     if (!response.ok) {
-
         if (response.status === VALIDATION_ERROR) { 
             displayInputErrors(result.errors, form); 
             return;
@@ -39,7 +37,7 @@ export async function addBookHandler(bookData, form) {
     if (!isConfirmed) return;
     bookData.delete('validate_only');
     // Step 3: Add Book
-    response = await fetch(API_ROUTES.ADD_BOOK, {
+    response = await fetch(BOOK_ROUTES.STORE, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -56,7 +54,8 @@ export async function addBookHandler(bookData, form) {
     showSuccessWithRedirect('Success', 'Book added successfully!', window.location.href);
 }
 
-export async function fetchAllBooks({ search = '' , sort = 'title_asc', page = 1 } = {}) {
+//
+export async function fetchAllAvailableBooks({ search = '' , sort = 'title_asc', page = 1 } = {}) {
     try {
 
          const params = new URLSearchParams({
@@ -65,7 +64,7 @@ export async function fetchAllBooks({ search = '' , sort = 'title_asc', page = 1
             page
         });
         
-        const response = await fetch(`/staff/books/available?${params.toString()}`, {
+        const response = await fetch(BOOK_ROUTES.AVAILABLE_BOOKS(params.toString()), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -87,9 +86,15 @@ export async function fetchAllBooks({ search = '' , sort = 'title_asc', page = 1
 export async function editBookHandler(bookDetails, form) {
     // Make sure validate_only is set after all other fields
     bookDetails.set('validate_only', 1);
+    const bookId = bookDetails.get('book_id');
+    
+    // Add CSRF token and method spoofing for PUT request
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    bookDetails.append('_token', csrfToken);
+    bookDetails.append('_method', 'PUT');
 
-    let response = await fetch(`${API_ROUTES.UPDATE_BOOK}/${bookDetails.get('book_id')}`, {
-        method: 'POST',
+    let response = await fetch(BOOK_ROUTES.UPDATE(bookId), {
+        method: 'POST', // Use POST but spoof to PUT with _method
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
@@ -97,7 +102,7 @@ export async function editBookHandler(bookDetails, form) {
         body: bookDetails
     });
 
-    const result = await response.json();
+    let result = await response.json();
 
     if (!response.ok) {
         if (response.status === VALIDATION_ERROR) {
@@ -127,21 +132,27 @@ export async function editBookHandler(bookDetails, form) {
     );
     
     if (!isConfirmed) return;
+    
     bookDetails.delete('validate_only');
 
     // Step 3: Submit update
-    response = await fetch(`${API_ROUTES.UPDATE_BOOK}/${bookDetails.get('book_id')}`, {
-        method: 'POST',
+    response = await fetch(BOOK_ROUTES.UPDATE(bookId), {
+        method: 'POST', // Use POST but spoof to PUT with _method
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
         },
         body: bookDetails
     });
-
+    result = await response.json();
 
     if (!response.ok) {
-        showWarning('Something went wrong', 'Please try again.');
+        showWarning('Something went wrong', 'Failed to update book. Please try again later.');
+        return;
+    }
+
+    if (result.status === 'invalid' || result.status === 'error') {
+        showWarning('Something went wrong', result.message || 'Failed to update book. Please try again later.');
         return;
     }
 
@@ -150,7 +161,7 @@ export async function editBookHandler(bookDetails, form) {
 
 export async function fetchBookDetails(book) {
     try {
-        const response = await fetch(`/librarian/books/${book.id}/edit`, {
+        const response = await fetch(BOOK_ROUTES.EDIT(book.id), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -184,7 +195,7 @@ export async function loadBooks(page = 1) {
             status: statusFilter?.value || 'all'
         });
 
-        const response = await fetch(`${BOOKS_ROUTES.INDEX}?${params.toString()}`, {
+        const response = await fetch(`${BOOK_ROUTES.INDEX}?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -206,7 +217,7 @@ export async function loadBooks(page = 1) {
         // Highlight search matches
         const searchTerm = searchInput?.value?.trim();
         if (searchTerm) {
-            highlightSearchMatches(searchTerm, '#books-table-container', BOOK_CATALOG_SEARCH_COLUMN_INDEXES);
+            highlightSearchMatches(searchTerm, '#books-table-container', SEARCH_COLUMN_INDEXES.BOOK_CATALOG);
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });

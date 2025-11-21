@@ -175,3 +175,17 @@ button[disabled]:hover+.tooltip{
 .tooltip {
   pointer-events: none;
 }
+
+
+.toaster-ui-lib::after {
+  background: #ffffff !important; /* your custom color */
+  height: 2px !important;
+  border-radius: 2px;
+}
+.toaster-ui-lib img.icon-size-md {
+  display: inline-block;  /* or flex items-center if needed */
+  height: 30px;           /* adjust as needed */
+  width: 30px;
+  object-fit: contain;
+  margin-right: 0.5rem;
+}

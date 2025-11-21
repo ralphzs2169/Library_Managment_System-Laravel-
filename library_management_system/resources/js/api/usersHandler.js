@@ -1,13 +1,14 @@
 import { showError } from "../utils.js";
 import { getCurrentFilters } from "../pages/staff/borrowersPagination.js";
 import { highlightSearchMatches } from "../tableControls.js";
-
+import { filters } from "../pages/staff/borrowersPagination.js";
 // Load borrowers with filters
-export async function loadBorrowers(page = 1) {
+
+export async function loadBorrowers(page = filters.page, scrollUp = true) {
     const container = document.querySelector('#members-table-container');
     if (!container) return;
     
-    const filters = getCurrentFilters();
+    Object.assign(filters, getCurrentFilters(), { page });
     const params = new URLSearchParams({
         page,
         ...filters
@@ -30,7 +31,9 @@ export async function loadBorrowers(page = 1) {
                 highlightSearchMatches(filters.search, '#members-table-container', [1, 2]);
             }
             
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (scrollUp) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         } else {
             showError('Something went wrong', 'Unable to load members. Please try again.');
         }

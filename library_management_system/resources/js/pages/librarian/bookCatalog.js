@@ -1,16 +1,13 @@
 import { fetchBookDetails, loadBooks } from '../../api/bookHandler.js';
 import { clearAllErrors } from '../../helpers.js';
 import { initPagination, initSearch } from '../../tableControls.js';
-import { initializeEditForm } from './editBook.js';
-import { BOOK_CATALOG_SEARCH_COLUMN_INDEXES } from '../../config.js';
-import { 
-	renderCopiesTable, 
-	populateSummaryHeader,
-	addNewCopy
-} from './editBookHelpers.js';
+import { SEARCH_COLUMN_INDEXES } from '../../config.js';
+import { initializeEditForm  } from './editBook/initializeEditForm.js';
+import { renderCopiesTable, resetAllCopiesToOriginal } from './editBook/editBookHelpers.js';
+import { populateSummaryHeader, addNewCopy } from './editBook/editBookHelpers.js';
+import { initializeEditableFields, enableAllFields } from '../../utils/fieldEditor.js';
+import { closeIssueDetailsModal } from './editBook/viewIssueHelpers.js';
 
-initPagination(loadBooks);
-initSearch('#books-search', loadBooks, '#books-table-body', BOOK_CATALOG_SEARCH_COLUMN_INDEXES);
 
 // Add filter event listeners
 const categoryFilter = document.querySelector('#books-category-filter');
@@ -18,6 +15,9 @@ const statusFilter = document.querySelector('#books-status-filter');
 const sortSelect = document.querySelector('#books-sort');
 const resetFiltersBtn = document.querySelector('#reset-books-filters');
 const searchInput = document.querySelector('#books-search');
+
+initPagination(loadBooks);
+initSearch('#books-search', loadBooks, '#books-table-body', SEARCH_COLUMN_INDEXES.BOOK_CATALOG);
 
 if (categoryFilter) {
     categoryFilter.addEventListener('change', () => loadBooks(1));
@@ -49,6 +49,9 @@ const tableContainer = document.getElementById('books-table-container');
 const editFormContainer = document.getElementById('edit-book-form-container');
 const filtersContainer = document.getElementById('books-filters');
 
+// Store original book data for reset
+let originalBookData = null;
+
 // Show edit form, hide table
 function showEditForm() {
 	tableContainer.classList.add('hidden');
@@ -69,6 +72,9 @@ function showTable() {
 // Populate the static form markup with book data
 function populateEditForm(book) {
 	if (!editFormContainer) return;
+
+	// Store original book data for reset functionality
+	originalBookData = JSON.parse(JSON.stringify(book)); // Deep copy
 
 	// Basic fields
 	const title = editFormContainer.querySelector('#title');
@@ -121,8 +127,38 @@ function populateEditForm(book) {
 
 	// Use helper functions
 	populateSummaryHeader(book, editFormContainer);
-	renderCopiesTable(book, editFormContainer);
+	renderCopiesTable(book, editFormContainer); 
 	
+	// Show pending issue banner if any copy has status 'pending_issue_review'
+	const pendingBanner = editFormContainer.querySelector('#pending-issue-banner');
+	if (pendingBanner) {
+		const hasPending = Array.isArray(book.copies) && book.copies.some(c => c.status === 'pending_issue_review');
+		if (hasPending) {
+			pendingBanner.classList.remove('hidden');
+			
+			// Attach scroll-to-copies button listener
+			const scrollBtn = pendingBanner.querySelector('#scroll-to-copies-btn');
+			if (scrollBtn) {
+				scrollBtn.onclick = (e) => {
+					e.preventDefault();
+					const copiesSection = editFormContainer.querySelector('#copies-table-body');
+					if (copiesSection) {
+						copiesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+						// Optional: highlight the section briefly
+						copiesSection.classList.add('ring-2', 'ring-amber-400');
+						setTimeout(() => {
+							copiesSection.classList.remove('ring-2', 'ring-amber-400');
+						}, 2000);
+					}
+				};
+			}
+		} else {
+			pendingBanner.classList.add('hidden');
+		}
+	}
+
+	// Initialize editable fields after populating
+	initializeEditableFields(editFormContainer);
 }
 
 // Event listener for add copy button
@@ -161,7 +197,44 @@ document.addEventListener('click', async (e) => {
 	if (e.target.closest('#cancel-edit-book')) {
 		e.preventDefault();
 		showTable();
+		resetAllCopiesToOriginal(editFormContainer);
+	}
+
+	// Close issue details modal
+	if (e.target.closest('#close-issue-details-modal') || e.target.closest('#close-issue-details-btn')) {
+		e.preventDefault();
+		closeIssueDetailsModal();
 	}
 });
+
+// Close modal on outside click
+document.addEventListener('click', function(e) {
+    const issueModal = document.getElementById('issue-details-modal');
+    if (e.target === issueModal) {
+        closeIssueDetailsModal();
+    }
+});
+
+// Handle form reset to restore original values
+const editForm = editFormContainer?.querySelector('.edit-book-form');
+if (editForm) {
+	// Reset button handler
+	editForm.addEventListener('reset', (e) => {
+		e.preventDefault(); // Prevent default reset behavior
+		
+		if (!originalBookData) return;
+		
+		// Restore original values
+		populateEditForm(originalBookData);
+		
+		// Clear any validation errors
+		clearAllErrors(editFormContainer);
+	});
+
+	editForm.addEventListener('submit', (e) => {
+		// Enable all fields so they are included in form submission
+		enableAllFields(editFormContainer);
+	});
+}
 
 

@@ -22,11 +22,11 @@
             <div class="border border-gray-200 rounded-lg p-3 mb-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-accent to-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        RG
+                        <span id="confirm-borrower-initials">--</span>
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 font-medium">Borrowing for</p>
-                        <p id="confirm-borrower-name" class="font-bold text-gray-900">Guiral, Ralph Miguel C.</p>
+                        <p id="confirm-borrower-name" class="font-bold text-gray-900"></p>
                     </div>
                 </div>
                 <p id="confirm-borrower-id" class="text-xs text-gray-500 font-mono">1352085</p>
@@ -68,8 +68,6 @@
             </div>
 
             <!-- Copy Number and Due Date Selection Row -->
-            <!-- Copy Number Selection -->
-            <!-- Copy Number Selection -->
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mt-4">
                 <label for="book_copy_id" class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,7 +94,7 @@
                 </label>
                 <div id="due_date-error-placeholder" class="error-placeholder"></div>
                 <input type="date" id="due_date" name="due_date" value="2025-08-10" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition">
-                <p class="text-xs text-gray-600 mt-2">Standard: 14 days from today</p>
+                <p class="text-xs text-gray-600 mt-2"><span id="borrow-duration"></span></p>
             </div>
         </div>
 

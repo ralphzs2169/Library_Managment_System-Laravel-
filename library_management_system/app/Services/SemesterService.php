@@ -104,10 +104,15 @@ class SemesterService
                     $query->orderBy('name', 'desc');
                     break;
                 default: // newest
-                    $query->orderBy('status', 'asc')->orderBy('start_date', 'asc');
-            }
+                    $query->orderByRaw("
+                        FIELD(status, 'active', 'inactive', 'ended')
+                    ")->orderBy('start_date', 'asc');
+                }
         } else {
-             $query->orderBy('status', 'asc')->orderBy('start_date', 'asc'); // default sort
+             $query->orderByRaw("
+                FIELD(status, 'active', 'inactive', 'ended')
+            ")->orderBy('start_date', 'asc');
+
         }
 
         return $query->paginate(10)->withQueryString();

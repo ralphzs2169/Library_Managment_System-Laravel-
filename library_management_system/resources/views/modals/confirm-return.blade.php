@@ -1,5 +1,5 @@
 {{-- filepath: c:\Users\Angela\library_management_system\resources\views\modals\confirm-return.blade.php --}}
-<div id="confirm-return-modal" class="fixed inset-0 flex items-center hidden justify-center bg-background-unfocused bg-opacity-0 z-50 transition-opacity duration-150" role="dialog" aria-modal="true" aria-labelledby="confirm-return-title">
+<div id="confirm-return-modal" class="fixed inset-0 flex items-center hidden justify-center bg-background-unfocused bg-opacity-0 z-70 transition-opacity duration-150" role="dialog" aria-modal="true" aria-labelledby="confirm-return-title">
     <div id="confirm-return-content" class="bg-white rounded-2xl shadow-2xl w-[95%] max-w-2xl my-8 max-h-[90vh] overflow-hidden transform scale-95 opacity-0 transition-all duration-150 flex flex-col">
         <!-- Header -->
         <div class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4 flex items-center justify-between">

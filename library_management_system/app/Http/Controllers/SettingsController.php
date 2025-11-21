@@ -23,6 +23,14 @@ class SettingsController extends Controller
         return view('pages.librarian.settings', compact('settings'));
     }
 
+    public function allSettings()
+    {
+        $settings = $this->settingsService->getAllSettings();
+        return response()->json([
+            'success' => true,
+            'data' => $settings
+        ]);
+    }
     /**
      * Update the specified resource in storage.
      */

@@ -33,7 +33,8 @@ class UserController extends Controller
         // Return both the user model (for server rendering) and explicit collections for API clients
         return response()->json([
             'user' => $data['user'], // model (will be serialized)
-            'due_reminder_threshold' => $data['due_reminder_threshold'] ?? null
+            'due_reminder_threshold' => $data['due_reminder_threshold'] ?? null,
+            'borrow_duration' => $data['borrow_duration'] ?? null,
         ]);
     }
 
@@ -107,7 +108,8 @@ class UserController extends Controller
         }
 
         try {
-            $transaction = $this->userService->borrowBook($request);
+            $bookCopy = BookCopy::findOrFail($request->input('book_copy_id'));
+            $transaction = $this->userService->borrowBook($request, $bookCopy);
             return $this->jsonResponse('success', 'Book borrowed successfully', 201, ['transaction' => $transaction]);
         } catch (\Exception $e) {
             return $this->jsonResponse('error', 'Failed to borrow book: ' . $e->getMessage(), 500);
@@ -131,6 +133,29 @@ class UserController extends Controller
             return $this->jsonResponse('success', 'Book returned successfully', 200, ['transaction' => $transaction]);
         } catch (\Exception $e) {
             return $this->jsonResponse('error', 'Failed to return book: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function updatePenalty(Request $request, $penaltyId)
+    {
+        if ($request->validate_only) {
+            $result = $this->userService->validatePenaltyUpdate($request);
+
+            if ($result['status'] === 'invalid') {
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => $result['errors']
+                ], 422);
+            }
+
+            return $this->jsonResponse('valid', 'Validation passed', 200);
+        }
+
+        try {
+            $penalty = $this->userService->updatePenalty($request, $penaltyId);
+            return $this->jsonResponse('success', 'Penalty updated successfully', 200, ['penalty' => $penalty]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse('error', 'Failed to update penalty: ' . $e->getMessage(), 500);
         }
     }
 }

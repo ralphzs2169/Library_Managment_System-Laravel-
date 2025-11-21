@@ -88,4 +88,4 @@
 </x-layout>
 
 @vite('resources/js/pages/librarian/semesterManagement.js')
-@vite('resources/js/pages/librarian/pagination/semesterPagination.js')
+@vite('resources/js/pages/tablControls.js')

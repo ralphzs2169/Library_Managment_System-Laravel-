@@ -9,7 +9,7 @@ export function attachTransactionActions(tbody, borrowedBooks, borrower) {
             const txId = this.dataset.transactionId;
             const transaction = borrowedBooks.find(t => String(t.id) === String(txId));
             if (!transaction) return;
-            closeBorrowerModal(false);
+            // closeBorrowerModal(false);
             openConfirmReturnModal(borrower, transaction);
         });
     });
@@ -20,7 +20,7 @@ export function attachTransactionActions(tbody, borrowedBooks, borrower) {
             e.preventDefault();
             const txId = this.dataset.transactionId;
             // TODO: Implement renew functionality
-            console.log('Renew transaction:', txId);
+            
         });
     });
 }

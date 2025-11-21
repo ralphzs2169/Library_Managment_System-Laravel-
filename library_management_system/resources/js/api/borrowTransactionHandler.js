@@ -1,7 +1,8 @@
-import { showError, showConfirmation, showSuccessWithRedirect, showWarning } from "../utils.js";
+import { showError, showConfirmation, showSuccessWithRedirect, showWarning, showToast } from "../utils.js";
 import {  VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors, scrollToFirstErrorInModal } from "../helpers.js";
 import { BORROW_TRANSACTION_ROUTES } from "../config.js";
+import { loadBorrowers } from "./usersHandler.js";
 import { closeConfirmBorrowModal } from "../pages/staff/confirmBorrow.js";
 
 export async function borrowBook(borrowData) {
@@ -60,18 +61,17 @@ export async function borrowBook(borrowData) {
         body: borrowData
     });
 
+    const data = await response.json(); 
+
     if (!response.ok) {
-        showError('Something went wrong', 'Please try again.');
+        showError('Something went wrong', data.message || 'Please try again.');
         return;
     }
 
     // Close modal first
-    const modal = document.getElementById('confirm-borrow-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-
-    showSuccessWithRedirect('Success', 'Book borrowed successfully!', window.location.href);
+    closeConfirmBorrowModal();
+    showToast('Book Borrowed Successfully!', 'success');
+    loadBorrowers(1, false);
 }
 
 export async function getAvailableCopies(bookId) {
@@ -100,8 +100,8 @@ export async function returnBook(formData) {
     formData.append('_token', csrfToken);
 
     // Step 1: Validate only
-    formData.append('validate_only', 1);
-    let response = await fetch(BORROW_TRANSACTION_ROUTES.RETURN, {
+    // formData.append('validate_only', 1);
+    const response = await fetch(BORROW_TRANSACTION_ROUTES.RETURN, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -110,51 +110,20 @@ export async function returnBook(formData) {
         body: formData
     });
 
-    const result = await response.json().catch(() => ({}));
+    const result = await response.json();
 
     if (!response.ok) {
         if (response.status === VALIDATION_ERROR) {
             if (result.status === 'invalid') {
                 showWarning('Invalid Return', result.message);
-                closeConfirmReturnModal();
+                // closeConfirmReturnModal();
             }
-            return;
+            return false;
         }
         showWarning('Something went wrong', 'Please try again.');
-        return;
+        return false;
     }
 
-    // Step 2: Show confirmation
-    const isConfirmed = await showConfirmation(
-        'Confirm Return?',
-        'Are you sure you want to mark this book as returned?',
-        'Yes, return'
-    );
-
-    if (!isConfirmed) return;
-
-    formData.delete('validate_only');
-
-    // Step 3: Submit return
-    response = await fetch(BORROW_TRANSACTION_ROUTES.RETURN, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        },
-        body: formData
-    });
-
-    if (!response.ok) {
-        showWarning('Something went wrong', 'Please try again.');
-        return;
-    }
-
-    // Close modal
-    const modal = document.getElementById('confirm-return-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-
-    showSuccessWithRedirect('Success', 'Book returned successfully!', window.location.href);
+    showToast('Book Returned Successfully!', 'success');
+    return true;
 }

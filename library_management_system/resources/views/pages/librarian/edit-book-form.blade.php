@@ -26,6 +26,36 @@
         </button>
     </div>
 
+    <div id="pending-issue-banner" class="hidden mb-4 rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3 flex items-start justify-between gap-3">
+        <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <div class="text-sm text-amber-800 leading-snug">
+                <p class="font-semibold">Pending Issue Review</p>
+                <p>At least one copy of this book requires review approval. Please check the copies section below to resolve pending reports.</p>
+            </div>
+        </div>
+        <div class="relative inline-block">
+            <button type="button" id="scroll-to-copies-btn" class="flex items-center justify-center w-10 h-10 bg-amber-500 hover:bg-amber-400 cursor-pointer text-white rounded-full shadow-sm transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Line shaft -->
+                    <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <!-- Arrowhead -->
+                    <polyline points="5,12 12,19 19,12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+
+            </button>
+            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                Review Copies
+                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
+            </div>
+        </div>
+
+    </div>
+
     <form class="edit-book-form" enctype="multipart/form-data" data-book-id="{{ $book->id }}" novalidate>
         @csrf
         @method('PUT')
@@ -67,20 +97,20 @@
                         {{-- Title Field --}}
                         <div class="field-container flex flex-col">
                             <label for="title" class="block text-sm font-semibold text-gray-700 mb-2">Book Title</label>
-                            <input type="text" id="title" name="title" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
+                            <input type="text" id="title" name="title" placeholder="Enter book title" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
                             <div class="error-placeholder text-xs mt-1" id="title-error-placeholder"></div>
                         </div>
                         {{-- ISBN Field --}}
                         <div class="field-container flex flex-col">
                             <label for="isbn" class="block text-sm font-semibold text-gray-700 mb-2">ISBN</label>
-                            <input type="text" id="isbn" name="isbn" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm font-mono">
+                            <input type="text" id="isbn" name="isbn" placeholder="Enter ISBN number" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm font-mono disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
                             <div class="error-placeholder text-xs mt-1" id="isbn-error-placeholder"></div>
                         </div>
                     </div>
                     {{-- Description --}}
                     <div class="field-container">
                         <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">Book Description</label>
-                        <textarea id="description" name="description" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm"></textarea>
+                        <textarea id="description" placeholder="Provide a short summary of the book" name=" description" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"></textarea>
                         <div class="error-placeholder text-xs mt-1" id="description-error-placeholder"></div>
                     </div>
                     {{-- Price and Language Row --}}
@@ -89,14 +119,14 @@
                             <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">Book Price</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₱</span>
-                                <input type="number" step="0.01" id="price" name="price" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
+                                <input type="number" step="0.01" id="price" placeholder="Enter book price" name="price" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
                             </div>
                             <div class="error-placeholder text-xs mt-1" id="price-error-placeholder"></div>
                         </div>
 
                         <div class="field-container flex flex-col">
                             <label for="language" class="block text-sm font-semibold text-gray-700 mb-2">Language</label>
-                            <select id="language" name="language" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
+                            <select id="language" name="language" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
                                 <option value="">Select Language...</option>
                                 <option value="English">English</option>
                                 <option value="Filipino">Filipino</option>
@@ -109,102 +139,105 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Classification Card - OPTIMIZED LAYOUT --}}
-        <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
-                <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                </div>
-                <span>Category & Genre</span>
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="field-container flex flex-col">
-                    <label for="category" class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-                    <select id="category" name="category" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" data-endpoint="{{ route('librarian.genres.by-category') }}">
-                        <option disabled value="">Select Category...</option>
-                        @foreach ($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                    <div class="error-placeholder text-xs mt-1" id="category-error-placeholder"></div>
-                </div>
-                <div class="field-container flex flex-col">
-                    <label for="genre" class="block text-sm font-semibold text-gray-700 mb-2">Genre</label>
-                    <div class="relative">
-                        <select id="genre" name="genre" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" {{ $book->genre_id ? '' : 'disabled' }}></select>
-                        <span id="genre-loading" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
-                            <svg class="animate-spin h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                            </svg>
-                        </span>
+            {{-- Category and Genre Card --}}
+            <div class="mt-6">
+                <h2 class="flex items-center gap-2 font-bold text-lg pt-3 text-gray-900 pb-3 border-t border-gray-200">
+                    <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
                     </div>
-                    <div class="error-placeholder text-xs mt-1" id="genre-error-placeholder"></div>
+                    <span>Category & Genre</span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="field-container flex flex-col">
+                        <label for="category" class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                        <select id="category" name="category" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" data-endpoint="{{ route('librarian.genres.by-category') }}">
+                            <option disabled value="">Select Category...</option>
+                            @foreach ($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="error-placeholder text-xs mt-1" id="category-error-placeholder"></div>
+                    </div>
+                    <div class="field-container flex flex-col">
+                        <label for="genre" class="block text-sm font-semibold text-gray-700 mb-2">Genre</label>
+                        <div class="relative">
+                            <select id="genre" name="genre" class="w-full bg-white border border-[#B1B1B1] disabled rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" {{ $book->genre_id ? '' : 'disabled' }}></select>
+                            <span id="genre-loading" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
+                                <svg class="animate-spin h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="error-placeholder text-xs mt-1" id="genre-error-placeholder"></div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Author Information Card --}}
+            <div class="mt-6">
+                <h2 class="flex items-center gap-2 font-bold text-lg pt-3 text-gray-900 pb-3 border-t border-gray-200">
+                    <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <span>Author Information</span>
+                </h2>
+
+                <div class="author-group grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="field-container flex flex-col">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                        <input type="text" id="author_firstname" placeholder="Enter author's first name" name="author_firstname" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
+                        <div class="error-placeholder text-xs mt-1" id="author_firstname-error-placeholder"></div>
+                    </div>
+                    <div class="field-container flex flex-col">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                        <input type="text" id="author_lastname" placeholder="Enter author's last name" name="author_lastname" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
+                        <div class="error-placeholder text-xs mt-1" id="author_lastname-error-placeholder"></div>
+                    </div>
+                    <div class="field-container flex flex-col">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Middle Initial</label>
+                        <input type="text" id="author_middle_initial" placeholder="Enter author's middle initial" name="author_middle_initial" maxlength="1" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
+                        <div class="error-placeholder text-xs mt-1" id="author_middle_initial-error-placeholder"></div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Publication Details Card --}}
+            <div class="mt-6">
+                <h2 class="flex items-center gap-2 font-bold text-lg py-3 text-gray-900 border-t border-gray-200">
+                    <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <span>Publication Details</span>
+                </h2>
+
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{-- Publisher Field --}}
+                    <div class="field-container flex flex-col">
+                        <label for="publisher" class="block text-sm font-semibold text-gray-700 mb-2">Publisher</label>
+                        <input type="text" id="publisher" placeholder="Enter publisher name" name="publisher" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
+                        <div class="error-placeholder text-xs mt-1" id="publisher-error-placeholder"></div>
+                    </div>
+                    {{-- Publication Year Field --}}
+                    <div class="field-container flex flex-col">
+                        <label for="publication_year" class="block text-sm font-semibold text-gray-700 mb-2">Publication Year</label>
+                        <input type="number" id="publication_year" placeholder="Enter publication year" name="publication_year" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
+                        <div class="error-placeholder text-xs mt-1" id="publication_year-error-placeholder"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Author Information Card --}}
-        <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
-                <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                </div>
-                <span>Author Information</span>
-            </h2>
-
-            <div class="author-group grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="field-container flex flex-col">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
-                    <input type="text" id="author_firstname" name="author_firstname" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" placeholder="First Name">
-                    <div class="error-placeholder text-xs mt-1" id="author_firstname-error-placeholder"></div>
-                </div>
-                <div class="field-container flex flex-col">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
-                    <input type="text" id="author_lastname" name="author_lastname" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" placeholder="Last Name">
-                    <div class="error-placeholder text-xs mt-1" id="author_lastname-error-placeholder"></div>
-                </div>
-                <div class="field-container flex flex-col">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Middle Initial</label>
-                    <input type="text" id="author_middle_initial" name="author_middle_initial" maxlength="1" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm uppercase" placeholder="M">
-                    <div class="error-placeholder text-xs mt-1" id="author_middle_initial-error-placeholder"></div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Publication Details Card - OPTIMIZED LAYOUT --}}
-        <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
-                <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <span>Publication Details</span>
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {{-- Publisher Field --}}
-                <div class="field-container flex flex-col">
-                    <label for="publisher" class="block text-sm font-semibold text-gray-700 mb-2">Publisher</label>
-                    <input type="text" id="publisher" name="publisher" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
-                    <div class="error-placeholder text-xs mt-1" id="publisher-error-placeholder"></div>
-                </div>
-                {{-- Publication Year Field --}}
-                <div class="field-container flex flex-col">
-                    <label for="publication_year" class="block text-sm font-semibold text-gray-700 mb-2">Publication Year</label>
-                    <input type="number" id="publication_year" name="publication_year" class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm">
-                    <div class="error-placeholder text-xs mt-1" id="publication_year-error-placeholder"></div>
-                </div>
-            </div>
-        </div>
+        {{-- Classification Card --}}
+        {{-- <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm"> --}}
 
 
 
@@ -229,7 +262,7 @@
             </div>
 
             <div class="overflow-x-auto rounded-lg border border-gray-200" style="min-height: 300px;">
-                <table class="w-full text-sm rounded-lg">
+                <table class="w-full text-sm rounded-lg ">
                     <thead>
                         <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                             <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Copy No.</th>
@@ -252,6 +285,8 @@
                     </tbody>
                 </table>
             </div>
+            {{-- Hidden input toggles to true when at least one issue has been resolved --}}
+            <input type="hidden" name="pending_issue_resolved" id="pending_issue_resolved" value="false">
 
             {{-- Pagination Container --}}
             <div id="copies-pagination" class="hidden"></div>
@@ -259,7 +294,7 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
-            <button type="reset" class="px-6 py-3 border-2 border-accent text-accent rounded-lg font-semibold hover:bg-accent hover:text-white transition shadow-sm">
+            <button id="edit-form-reset-button" type="reset" class="px-6 py-3 border-2 border-accent text-accent rounded-lg font-semibold hover:bg-accent hover:text-white transition shadow-sm">
                 Reset Changes
             </button>
             <button type="submit" class="px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition shadow-md hover:shadow-lg flex items-center gap-2">
@@ -270,4 +305,16 @@
             </button>
         </div>
     </form>
+
+    {{-- Scroll to Top helper --}}
+    {{-- <div class="mt-6 flex justify-center">
+        <button id="edit-form-scroll-top" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition text-sm shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            </svg>
+            <span>Back to top</span>
+        </button>
+    </div> --}}
 </div>
+
+@include('modals.issue-details')

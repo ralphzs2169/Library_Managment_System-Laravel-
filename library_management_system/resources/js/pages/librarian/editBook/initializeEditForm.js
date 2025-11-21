@@ -1,10 +1,12 @@
-import { editBookHandler } from "../../api/bookHandler.js";
-import { initImagePreview } from "../librarian/imagePreview.js";
-import { showError } from "../../utils.js";
-import { clearInputError } from "../../helpers.js";
-import { handleCategoryChange } from "./addNewBook.js";
+import { editBookHandler } from "../../../api/bookHandler.js";
+import { initImagePreview } from "../imagePreview.js";
+import { showError } from "../../../utils.js";
+import { clearInputError } from "../../../helpers.js";
+import { handleCategoryChange } from "../addNewBook.js";
+import { updatePendingIssueResolvedFlag, resetAllCopiesToOriginal } from "./editBookHelpers.js";
 
 export async function initializeEditForm(form, book) {
+
     // Ensure the hidden book id is updated to the current book
     const hiddenBookId = form.querySelector('#edit-book-id');
     if (hiddenBookId) hiddenBookId.value = book.id ?? '';
@@ -38,20 +40,20 @@ export async function initializeEditForm(form, book) {
     const editBookCopiesContainer = form.querySelector('#copies-table-container');
 
     // Fill form - determine category and selected genre
-    editTitleField.value = book.title || '';
+    book?.title && (editTitleField.value = book.title);
     const categoryId = book.genre?.category_id ?? '';
     const selectedGenreId = book.genre_id ?? '';
     editCategorySelect.value = categoryId;
 
-    editAuthorFirstNameField.value = book.author.firstname || '';
-    editAuthorLastNameField.value = book.author.lastname || '';
-    editAuthorMiddleInitialField.value = book.author.middle_initial || '';
+    book?.author?.firstname && (editAuthorFirstNameField.value = book.author.firstname);
+    book?.author?.lastname && (editAuthorLastNameField.value = book.author.lastname);
+    book?.author?.middle_initial && (editAuthorMiddleInitialField.value = book.author.middle_initial);
 
-    editIsbnField.value = book.isbn || '';
-    editPublicationYearField.value = book.publication_year || '';
+    book?.isbn && (editIsbnField.value = book.isbn);
+    book?.publication_year && (editPublicationYearField.value = book.publication_year);
     editLanguageSelect.value = book.language || '';
     editPublisherField.value = book.publisher || '';
-    editDescriptionField.value = book.description || '';
+    book?.description && (editDescriptionField.value = book.description);
     editPriceField.value = book.price || '';
 
     const editGenreLoading = form.querySelector('#genre-loading') || null;
@@ -84,7 +86,7 @@ export async function initializeEditForm(form, book) {
          };
     }
 
-    renderCopiesTable(editBookCopiesContainer, book.copies);
+    initializeCopiesTable(editBookCopiesContainer, book.copies);
 
     // Always remove before re-adding
     editCategorySelect.removeEventListener('change', form._categoryChangeHandler);
@@ -97,6 +99,7 @@ export async function initializeEditForm(form, book) {
     const editBookForm = form.querySelector('.edit-book-form');
     if (editBookForm && !editBookForm.dataset.submitBound) {
         editBookForm.dataset.submitBound = 'true';
+        
         editBookForm.addEventListener('submit', async function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -113,7 +116,7 @@ export async function initializeEditForm(form, book) {
                 if (!formData.has('genre')) {
                     formData.set('genre', null);
                 }
-                console.log('Submitting edit form for book ID:', bookIdEl?.value);
+                 
                 await editBookHandler(formData, form.id);
                 // Optionally hide form and show table after success
                 // document.getElementById('books-table-container').classList.remove('hidden');
@@ -123,10 +126,28 @@ export async function initializeEditForm(form, book) {
                 showError('Submission Error', err.message || 'An error occurred while submitting the form. Please try again.');
             }
         });
+
+        // Add reset handler
+        editBookForm.addEventListener('reset', function(e) {
+            e.preventDefault();
+            
+            // Reset all copy review actions and status
+            resetAllCopiesToOriginal(form);
+            
+            // The parent bookCatalog.js will handle resetting form fields
+            // by calling populateEditForm(originalBookData)
+        });
     }
+
+    const globalResetButton = form.querySelector('#edit-form-reset-button');
+    globalResetButton?.addEventListener('click', () => {
+        console.log('Resetting form...');
+        updatePendingIssueResolvedFlag(form);
+    });
+
 }
 
-export function renderCopiesTable(container, copies = []) {
+function initializeCopiesTable(container, copies = []) {
     if (!container) return;
     container.innerHTML = ''; // Clear container
 

@@ -13,12 +13,27 @@ use App\Models\BookCopy;
 use App\Models\Penalty;
 use App\Models\Semester;
 use Illuminate\Support\Facades\Validator;
+use App\Enums\BookCopyStatus;
+use App\Enums\PenaltyType;
+use App\Enums\PenaltyStatus;
+use App\Enums\BorrowTransactionStatus;
+use App\Models\IssueReport;
+use App\Enums\IssueReportType;
+use App\Enums\IssueReportStatus;
+use App\Models\Payment;
+use Illuminate\Support\Facades\Log;
 
 class UserService
 {
-    public function borrowBook(Request $request)
+    public function borrowBook(Request $request, $bookCopy)
     {
-        return DB::transaction(function () use ($request) {
+        return DB::transaction(function () use ($request, $bookCopy) {
+            $bookCopy->refresh(); // reload latest status
+
+            if ($bookCopy->status !== 'available' || $bookCopy->pendingIssueReport()->exists()) {
+                throw new \Exception('Book is no longer available.');
+            }
+
             $borrower = User::findOrFail($request->input('borrower_id'));
             $bookCopy = BookCopy::with('book')->findOrFail($request->input('book_copy_id'));
             $book = $bookCopy->book; // Get book from book copy
@@ -51,83 +66,95 @@ class UserService
         });
     }
 
-    public function getBorrowerDetails($userId)
-    {
-        $user = User::with([
-            'students.department',
-            'teachers.department',
-        ])->findOrFail($userId);
+public function getBorrowerDetails(int $userId)
+{
+    // Load user with student/teacher relationships
+    $user = User::with(['students.department', 'teachers.department'])
+        ->findOrFail($userId);
 
-        // Active borrows: not yet returned and status borrowed/overdue
-        $activeBorrows = BorrowTransaction::with(['bookCopy.book.author'])
-            ->where('user_id', $userId)
-            ->whereNull('returned_at')
-            ->whereIn('status', ['borrowed', 'overdue'])
-            ->get();
+    // Get active borrow transactions (not yet returned, status borrowed/overdue)
+    $activeBorrows = BorrowTransaction::with(['bookCopy.book.author'])
+        ->where('user_id', $userId)
+        ->whereNull('returned_at')
+        ->whereIn('status', ['borrowed', 'overdue'])
+        ->get();
 
-        // Transactions with unpaid penalties (DB-driven)
-        $unpaidPenaltyTransactions = BorrowTransaction::with(['bookCopy.book.author'])
-            ->where('user_id', $userId)
-            ->whereHas('penalties', fn($q) => $q->where('status', 'unpaid'))
-            ->get()
-            ->flatMap(function ($borrowRecord) {
-                return $borrowRecord->penalties
-                    ->where('status', 'unpaid')
-                    ->map(function ($singlePenalty) use ($borrowRecord) {
-                        $borrowRecordCopy = clone $borrowRecord;
-                        $borrowRecordCopy->penalty = $singlePenalty; // attach only the single unpaid penalty
-                        return $borrowRecordCopy;
-                    });
-            });
+    // Get all transactions that have unpaid or partially paid penalties
+    $transactionsWithActivePenalties = BorrowTransaction::with(['bookCopy.book.author', 'penalties.payments'])
+        ->where('user_id', $userId)
+        ->whereHas('penalties', fn($query) => $query->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]))
+        ->get()
+        ->flatMap(function ($borrowTransaction) {
+            return $borrowTransaction->penalties
+                ->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
+                ->map(function ($singlePenalty) use ($borrowTransaction) {
 
+                    // Clone the borrow transaction so we can attach a single penalty
+                    $transactionCopy = clone $borrowTransaction;
+                    $transactionCopy->penalty = $singlePenalty;
 
+                    // Calculate remaining amount safely as float
+                    if ($singlePenalty->status === PenaltyStatus::PARTIALLY_PAID) {
+                        $totalPaid = (float) $singlePenalty->payments->sum(fn($payment) => (float) $payment->amount);
+                        $transactionCopy->penalty->remaining_amount = (float) $singlePenalty->amount - $totalPaid;
+                    } else {
+                        $transactionCopy->penalty->remaining_amount = (float) $singlePenalty->amount;
+                    }
 
-        $today = now()->startOfDay();
-
-        $activeBorrows->transform(function ($tx) use ($today) {
-            $dueDate = Carbon::parse($tx->due_at)->startOfDay();
-
-            if ($tx->status === 'overdue') {
-                $tx->days_overdue = $dueDate->diffInDays($today);
-                $tx->days_until_due = null;
-            } else {
-                $tx->days_overdue = null;
-                $tx->days_until_due = $dueDate->gt($today) ? $today->diffInDays($dueDate) : 0;
-            }
-            return $tx;
+                    return $transactionCopy;
+                });
         });
 
-        $totalFines = 0;
+    $today = now()->startOfDay();
 
-        $unpaidPenaltyTransactions->transform(function ($transaction) use (&$totalFines) {
-            $unpaid = $transaction->penalties->where('status', 'unpaid');
-            $amount = (float) $unpaid->sum('amount');
-            $totalFines += $amount;
+    // Compute overdue and days until due for active borrows
+    $activeBorrows->transform(function ($borrow) use ($today) {
+        $dueDate = Carbon::parse($borrow->due_at)->startOfDay();
 
-            if ($transaction->returned_at) {
-                $dueDate = Carbon::parse($transaction->due_at)->startOfDay();
-                $returnedDate = Carbon::parse($transaction->returned_at)->startOfDay();
-                $transaction->days_overdue = $returnedDate->gt($dueDate) ? $dueDate->diffInDays($returnedDate) : 0;
-            } else {
-                $transaction->days_overdue = null;
-            }
-            $transaction->days_until_due = null;
+        if ($borrow->status === 'overdue') {
+            $borrow->days_overdue = $dueDate->diffInDays($today);
+            $borrow->days_until_due = null;
+        } else {
+            $borrow->days_overdue = null;
+            $borrow->days_until_due = $dueDate->gt($today) ? $today->diffInDays($dueDate) : 0;
+        }
 
-            return $transaction;
-        });
+        return $borrow;
+    });
 
-        $dueReminderThreshold = config('settings.notifications.reminder_days_before_due', 3);
-        $user->total_unpaid_fines = $totalFines;
-        $user->full_name = $user->getFullnameAttribute();
-        $user->active_borrows = $activeBorrows->values();
-        $user->transactions_with_unpaid_penalties = $unpaidPenaltyTransactions->values();
+    // Compute days overdue for transactions with penalties
+    $transactionsWithActivePenalties->transform(function ($transaction) {
+        if ($transaction->returned_at) {
+            $dueDate = Carbon::parse($transaction->due_at)->startOfDay();
+            $returnedDate = Carbon::parse($transaction->returned_at)->startOfDay();
+            $transaction->days_overdue = $returnedDate->gt($dueDate) ? $dueDate->diffInDays($returnedDate) : 0;
+        } else {
+            $transaction->days_overdue = null;
+        }
 
-        // Return explicit arrays for the API consumer (avoid relying on dynamic model properties)
-        return [
-            'user' => $user,
-            'due_reminder_threshold' => $dueReminderThreshold
-        ];
-    }
+        $transaction->days_until_due = null;
+
+        return $transaction;
+    });
+
+    // Config values
+    $dueReminderThreshold = (int) config('settings.notifications.reminder_days_before_due', 3);
+    $borrowDurationDays = (int) config('settings.borrowing.borrow_duration', 14);
+
+    // Assign to user
+    $user->total_unpaid_fines = $user->getTotalUnpaidFinesAttribute();
+    $user->full_name = $user->getFullnameAttribute();
+    $user->active_borrows = $activeBorrows->values();
+    $user->transactions_with_penalties = $transactionsWithActivePenalties->values();
+
+    return [
+        'user' => $user,
+        'due_reminder_threshold' => $dueReminderThreshold,
+        'borrow_duration' => $borrowDurationDays,
+    ];
+}
+
+
 
     
     public function validateBorrowRequest(Request $request)
@@ -194,36 +221,61 @@ class UserService
             $returnedDate = now()->startOfDay();
             $isLate = $returnedDate->gt($dueDate);
 
-            // Determine final status and copy status
+            // Determine final transaction status and copy status
             if($isLate){
-                $finalStatus = 'returned';
-                $copyStatus = 'available';
+                $transactionStatus = BorrowTransactionStatus::RETURNED;
+                $copyStatus = BookCopyStatus::AVAILABLE;
 
                 $penalty = Penalty::create([
                     'borrow_transaction_id' => $transaction->id,
                     'amount' => min(round($dueDate->diffInDays($returnedDate) * (float)config('settings.penalty.rate_per_day', 0), 2), (float)config('settings.penalty.max_amount', 0)),
-                    'type' => 'late_return',
-                    'status' => 'unpaid',
+                    'type' => PenaltyType::LATE_RETURN,
+                    'status' => PenaltyStatus::UNPAID,
                     'issued_at' => now(),
                 ]);
 
                 if (!$penalty) {
                     throw new \Exception('Failed to create penalty record.');
                 }
+
+                if ($reportDamaged) {
+                    // If also damaged, override statuses
+                    $transactionStatus = BorrowTransactionStatus::RETURNED;
+                    $copyStatus = BookCopyStatus::PENDING_ISSUE_REVIEW;
+
+                    IssueReport::create([
+                        'book_copy_id' => $bookCopy->id,
+                        'borrower_id' => $borrower->id,
+                        'reported_by' => $request->user()->id,
+                        'report_type' => IssueReportType::DAMAGE,
+                        'description' => $request->input('damage_description', 'Reported damaged upon return.'),
+                        'status' => IssueReportStatus::PENDING,
+                    ]);
+                }
+                
             } else if ($reportDamaged) {
                 // If damaged, status is 'damaged' regardless of being late
-                $finalStatus = 'damaged';
-                $copyStatus = 'damaged';
+                $transactionStatus = BorrowTransactionStatus::RETURNED;
+                $copyStatus = BookCopyStatus::PENDING_ISSUE_REVIEW;
+
+                    IssueReport::create([
+                        'book_copy_id' => $bookCopy->id,
+                        'borrower_id' => $borrower->id,
+                        'reported_by' => $request->user()->id,
+                        'report_type' => IssueReportType::DAMAGE,
+                        'description' => $request->input('damage_description', 'Reported damaged upon return.'),
+                        'status' => IssueReportStatus::PENDING,
+                    ]);
             } else {
                 // Not damaged - mark as 'returned'
-                $finalStatus = 'returned';
-                $copyStatus = 'available';
+                $transactionStatus = BorrowTransactionStatus::RETURNED;
+                $copyStatus = BookCopyStatus::AVAILABLE;
             }
 
             // Update transaction
              $transaction->update([
                 'returned_at' => now(),
-                'status' => $finalStatus,
+                'status' => $transactionStatus,
             ]);
 
             // Update book copy status
@@ -235,7 +287,7 @@ class UserService
             ActivityLog::create([
                 'action' => 'returned',
                 'details' => $borrower->full_name . ' returned "' . $book->title . '" (Copy #' . $bookCopy->copy_number . ')' . $damagedText . $lateText,
-                'entity_type' => 'BorrowTransaction',
+                'entity_type' => 'Borrow Transaction',
                 'entity_id' => $transaction->id,
                 'user_id' => $request->user()->id,
             ]);
@@ -269,4 +321,100 @@ class UserService
 
         return ['status' => 'valid'];
     }
+
+    public function validatePenaltyUpdate(Request $request)
+    {
+        // Check if penalty is already paid
+        $penalty = Penalty::find($request->input('penalty_id'));
+
+        if (!$penalty) {
+            return ['status' => 'invalid', 'message' => 'Penalty not found.'];
+        }
+
+        if ($penalty->status === PenaltyStatus::PAID) {
+            return ['status' => 'invalid', 'message' => 'Penalty has already been paid.'];
+        }
+
+        $paidAmount = $penalty->payments->sum('amount');
+    $remainingAmount = $penalty->amount - $paidAmount;
+
+        // Validate input
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'amount' => 'required|numeric|min:0.01|max:' . $remainingAmount,
+            ],
+            [
+                'amount.max' => "The payment cannot exceed the penalty amount",
+                'amount.min' => "The payment must be at least ₱0.01",
+            ]
+        );
+
+
+        if ($validator->fails()) {
+            return ['status' => 'invalid', 'errors' => $validator->errors()];
+        }
+
+        return ['status' => 'valid'];
+    }
+
+    public function updatePenalty(Request $request, $penaltyId)
+    {
+        return DB::transaction(function () use ($request, $penaltyId) {
+            $penalty = Penalty::with('payments', 'borrowTransaction')
+                ->findOrFail($penaltyId);
+
+            // Add new payment
+            Payment::create([
+                'penalty_id' => $penalty->id,
+                'amount' => $request->input('amount'),
+                'paid_by_id' => $penalty->borrowTransaction->user_id,
+                'processed_by_id' => $request->user()->id,
+                'paid_at' => now(),
+            ]);
+
+            // Calculate updated paid amount
+            $currentAmountPaid = $penalty->payments->sum('amount');
+            $amountPaid = $request->input('amount');
+            $newAmountTotal = $currentAmountPaid + $amountPaid;
+
+            // Determine new status
+            $penalty->status = $newAmountTotal < $penalty->amount
+                ? PenaltyStatus::PARTIALLY_PAID
+                : PenaltyStatus::PAID;
+
+            $penalty->save();
+
+            // If penalty is fully paid, check if borrower can be reactivated
+            if ($penalty->status === PenaltyStatus::PAID) {
+
+                $userId = $penalty->borrowTransaction->user_id;
+
+                $hasRemainingPenalties = Penalty::whereHas('borrowTransaction', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                })
+                ->where('status', '!=', PenaltyStatus::PAID)
+                ->exists();
+
+                // If NO remaining penalties → activate user
+                if (!$hasRemainingPenalties) {
+                    User::where('id', $userId)->update([
+                        'library_status' => 'active'
+                    ]);
+                }
+            }
+
+            // Log activity
+            ActivityLog::create([
+                'action' => 'paid',
+                'details' => "Updated penalty ID: {$penalty->id} to {$penalty->status} with paid amount {$request->amount}",
+                'entity_type' => 'Penalty',
+                'entity_id' => $penalty->id,
+                'user_id' => $request->user()->id,
+            ]);
+
+            return $penalty;
+        });
+    }
+
 }

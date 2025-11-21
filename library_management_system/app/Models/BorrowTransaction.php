@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\BorrowTransactionStatus;
 
 class BorrowTransaction extends Model
 {
@@ -13,6 +14,7 @@ class BorrowTransaction extends Model
         'borrowed_at',
         'returned_at',
         'due_at',
+        'status',
     ];
 
     protected $casts = [
@@ -25,13 +27,13 @@ class BorrowTransaction extends Model
 
     public function markAsBorrowed()
     {
-        $this->status = 'borrowed';
+        $this->status = BorrowTransactionStatus::BORROWED;
         $this->save();
     }
 
     public function markAsReturned()
     {
-        $this->status = 'returned';
+        $this->status = BorrowTransactionStatus::RETURNED;
         $this->returned_at = now();
         $this->save();
     }

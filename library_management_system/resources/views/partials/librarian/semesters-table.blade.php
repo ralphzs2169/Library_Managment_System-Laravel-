@@ -45,29 +45,29 @@
                             <button class="p-2 bg-gray-400 rounded-lg transition-colors group opacity-50 cursor-not-allowed" disabled>
                                 <img src="{{ asset('build/assets/icons/edit.svg') }}" alt="Edit" class="w-5 h-5">
                             </button>
-                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                                 Cannot edit ended semester
-                                <div class="absolute top-full right-6 border-4 border-transparent border-t-white"></div>
+                                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                             </div>
                         </div>
                         <div class="relative inline-block">
                             <button class="p-2 bg-gray-400 rounded-lg transition-colors group opacity-50 cursor-not-allowed" disabled>
                                 <img src="{{ asset('build/assets/icons/activate.svg') }}" alt="Activate" class="w-5 h-5">
                             </button>
-                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                                 Cannot activate ended semester
-                                <div class="absolute top-full right-6 border-4 border-transparent border-t-white"></div>
+                                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                             </div>
                         </div>
                         @elseif($semester->status === 'inactive')
                         {{-- Inactive semester - can edit and activate --}}
                         <div class="relative inline-block">
-                            <button class="p-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors group edit-semester" data-semester-id="{{ $semester->id }}">
+                            <button class="p-2 bg-blue-500 hover:bg-blue-600 rounded-lg cursor-pointer transition-colors group edit-semester" data-semester-id="{{ $semester->id }}">
                                 <img src="{{ asset('build/assets/icons/edit.svg') }}" alt="Edit" class="w-5 h-5">
                             </button>
-                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                                 Edit
-                                <div class="absolute top-full right-6 border-4 border-transparent border-t-white"></div>
+                                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                             </div>
                         </div>
 
@@ -77,9 +77,9 @@
                             <button class="p-2 bg-gray-400 rounded-lg transition-colors group opacity-50 cursor-not-allowed" disabled>
                                 <img src="{{ asset('build/assets/icons/activate.svg') }}" alt="Activate" class="w-5 h-5">
                             </button>
-                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                                 Deactivate current semester first
-                                <div class="absolute top-full right-6 border-4 border-transparent border-t-white"></div>
+                                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                             </div>
                         </div>
                         @else
@@ -88,9 +88,9 @@
                             <button class="p-2 bg-green-500 hover:bg-green-600 rounded-lg transition-colors group activate-semester cursor-pointer" data-semester-id="{{ $semester->id }}">
                                 <img src="{{ asset('build/assets/icons/activate.svg') }}" alt="Activate" class="w-5 h-5">
                             </button>
-                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                                 Activate
-                                <div class="absolute top-full right-6 border-4 border-transparent border-t-white"></div>
+                                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                             </div>
                         </div>
                         @endif
@@ -100,18 +100,18 @@
                             <button class="p-2 bg-gray-400 rounded-lg transition-colors group opacity-50 cursor-not-allowed" disabled>
                                 <img src="{{ asset('build/assets/icons/edit.svg') }}" alt="Edit" class="w-5 h-5">
                             </button>
-                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                                 Cannot edit active semester
-                                <div class="absolute top-full right-6 border-4 border-transparent border-t-white"></div>
+                                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                             </div>
                         </div>
                         <div class="relative inline-block">
                             <button class="p-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors group deactivate-semester cursor-pointer" data-semester-id="{{ $semester->id }}">
                                 <img src="{{ asset('build/assets/icons/ban.svg') }}" alt="Deactivate" class="w-5 h-5">
                             </button>
-                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                            <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                                 Deactivate
-                                <div class="absolute top-full right-6 border-4 border-transparent border-t-white"></div>
+                                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                             </div>
                         </div>
                         @endif

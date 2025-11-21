@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\PenaltyType;
+use App\Enums\PenaltyStatus;
 
 class Penalty extends Model
 {
@@ -17,5 +19,10 @@ class Penalty extends Model
     public function borrowTransaction()
     {
         return $this->belongsTo(BorrowTransaction::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

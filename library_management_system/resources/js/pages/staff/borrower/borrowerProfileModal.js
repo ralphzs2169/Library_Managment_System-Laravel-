@@ -1,6 +1,8 @@
 import { fetchBorrowerDetails } from '../../../api/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrowerProfilePopulators.js';
 import { restoreProfileContent } from '../borrowBook.js';
+import { initializeBorrowerTabs } from './tabbedContainer.js';
+import { showSkeleton } from '../../../utils.js';
 
 const closeBorrowerModalBtn = document.getElementById('close-borrower-modal');
 const borrowerModal = document.getElementById('borrower-profile-modal');
@@ -48,9 +50,16 @@ export async function openBorrowerProfileModal(userId) {
         modalContent.classList.add('scale-100', 'opacity-100');
     });
 
-const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(userId)
+    const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(userId)
     await initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold);
+
+    // Ensure modal and its scrollable content are scrolled to top after showing
+    const scrollableContainer = document.getElementById('borrower-profile-scrollable-content');
+    if (scrollableContainer) {
+        scrollableContainer.scrollTo({ top: 0, behavior: 'auto' });
+    }
 }
+
 
 export function closeBorrowerModal(withAnimation = true) {
     const modalContent = document.getElementById('borrower-profile-content');
@@ -60,13 +69,18 @@ export function closeBorrowerModal(withAnimation = true) {
         borrowerModal.classList.add('bg-opacity-0');
     } else {
         borrowerModal.classList.add('hidden');
-        restoreProfileContent(borrowerModal, null);
+        // restoreProfileContent(borrowerModal, null);
     }
     modalContent.classList.remove('scale-100', 'opacity-100');
     modalContent.classList.add('scale-95', 'opacity-0');
     
+    const { resetTabsToDefault } = initializeBorrowerTabs();
+    showSkeleton(borrowerModal, '#borrower-profile-skeleton', '#borrower-profile-real');
     setTimeout(() => {
         borrowerModal.classList.add('hidden');
+        // showSkeleton(borrowerModal, '#borrower-profile-skeleton', '#borrower-profile-real');
         restoreProfileContent(borrowerModal, null);
+        resetTabsToDefault();
     }, 150);
+
 }

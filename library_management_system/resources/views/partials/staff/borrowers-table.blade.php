@@ -32,6 +32,10 @@
                 </td>
                 <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
+                        <!-- Borrower initials icon -->
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-teal-600 flex items-center justify-center text-white font-bold text-xs">
+                            {{ strtoupper(substr($user->firstname,0,1)) }}{{ strtoupper(substr($user->lastname,0,1)) }}
+                        </div>
                         <span class="font-medium text-gray-800 whitespace-nowrap">{{ $user->getFullnameAttribute() }}</span>
                     </div>
                 </td>
@@ -43,8 +47,21 @@
                     @endif
                 </td>
                 <td class="py-3 px-4">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $user->role === 'student' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700' }}">
-                        {{ $user->role }}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold
+                        @if($user->role === 'student') bg-blue-100 text-blue-700 border border-blue-100 w-full
+                        @elseif($user->role === 'teacher') bg-green-200 text-green-700 border border-green-100 w-full
+                        @else bg-gray-100 text-gray-600 border border-gray-200 @endif">
+                        @if($user->role === 'student')
+
+                        <img src="{{ asset('build/assets/icons/student-role-badge.svg') }}" alt="Student Badge" class="w-3.5 h-3.5">
+                        @elseif($user->role === 'teacher')
+                        <img src="{{ asset('build/assets/icons/teacher-role-badge.svg') }}" alt="Teacher Badge" class="w-3.5 h-3.5">
+                        @else
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                        </svg>
+                        @endif
+                        {{ ucfirst($user->role) }}
                     </span>
                 </td>
                 <td class="py-3 px-4 text-gray-600 whitespace-nowrap text-xs">
@@ -56,12 +73,32 @@
                 </td>
                 <td class="py-3 px-4">
                     @if ($user->library_status === 'active')
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700">
-                        {{$user->library_status}}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700 border w-full border-green-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Active
                     </span>
                     @elseif ($user->library_status === 'suspended')
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">
-                        {{$user->library_status}}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border w-full border-red-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Suspended
+                    </span>
+                    @elseif ($user->library_status === 'cleared')
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Cleared
+                    </span>
+                    @else
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                        </svg>
+                        {{ ucfirst($user->library_status) }}
                     </span>
                     @endif
                 </td>

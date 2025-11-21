@@ -38,7 +38,7 @@ Route::prefix('librarian')
         Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
         Route::post('/books/store', [BookController::class, 'store'])->name('books.store');
         Route::get('/books/{book}/edit', [BookController::class, 'edit'])->name('books.edit');
-        Route::put('/books/update/{book}', [BookController::class, 'update'])->name('books.update');
+        Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update');
 
         Route::get('/category-management', [CategoryController::class, 'index'])->name('category-management');
         Route::post('/category-management', [CategoryController::class, 'store'])->name('category-management.store');
@@ -80,6 +80,10 @@ Route::prefix('staff')
 
         Route::post('/borrow-transaction/borrow', [UserController::class, 'borrowBook'])->name('borrow-transaction.borrow');
         Route::post('/borrow-transaction/return', [UserController::class, 'returnBook'])->name('borrow-transaction.return');
+
+        Route::put('/penalties/{penalty}', [UserController::class, 'updatePenalty'])->name('penalties.update');
     });
+
+Route::middleware('auth')->get('/settings', [SettingsController::class, 'allSettings'])->name('settings');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

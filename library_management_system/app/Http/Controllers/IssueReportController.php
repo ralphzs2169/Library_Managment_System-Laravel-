@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BookCopy;
+use App\Models\IssueReport;
 use Illuminate\Http\Request;
 
-class BookCopyController extends Controller
+class IssueReportController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class BookCopyController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BookCopy $bookCopy)
+    public function show(IssueReport $issueReport)
     {
         //
     }
@@ -42,7 +42,7 @@ class BookCopyController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(BookCopy $bookCopy)
+    public function edit(IssueReport $issueReport)
     {
         //
     }
@@ -50,7 +50,7 @@ class BookCopyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BookCopy $bookCopy)
+    public function update(Request $request, IssueReport $issueReport)
     {
         //
     }
@@ -58,9 +58,8 @@ class BookCopyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BookCopy $bookCopy)
+    public function destroy(IssueReport $issueReport)
     {
         //
     }
-    
 }

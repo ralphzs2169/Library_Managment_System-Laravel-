@@ -1,9 +1,10 @@
-import { fetchAllBooks } from '../../api/bookHandler.js';
+import { fetchAllAvailableBooks } from '../../api/bookHandler.js';
 import { closeBorrowerModal } from './borrower/borrowerProfileModal.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { openConfirmBorrowModal } from './confirmBorrow.js';
 import { debounce, formatLastNameFirst } from '../../utils.js';
 import { highlightSearchMatches } from '../../tableControls.js';
+import { showError } from '../../utils.js';
 
 // Store current state for navigation
 let currentState = {
@@ -29,6 +30,9 @@ export function showBorrowBookContent(modal, borrower, restoreState = false) {
         };
     }
     
+    // Mark modal view state as "borrow"
+    modal.dataset.view = 'borrow';
+
     // Replace content with borrow book interface
     modalContent.innerHTML = `
         <!-- Header -->
@@ -151,7 +155,7 @@ async function loadAvailableBooks(borrower, { search = '', sort = 'title_asc', p
     paginationContainer.innerHTML = '';
 
     try {
-        const { data: books, meta } = await fetchAllBooks({ search, sort, page });
+        const { data: books, meta } = await fetchAllAvailableBooks({ search, sort, page });
 
         if (!books || books.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-gray-500">No books found</td></tr>`;
@@ -178,7 +182,8 @@ async function loadAvailableBooks(borrower, { search = '', sort = 'title_asc', p
                     </span>
                 </td>
                 <td class="px-4 py-3 text-center">
-                    <button class="borrow-book-btn cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg text-xs font-medium transition-all shadow-sm hover:shadow" data-book="${encodeURIComponent(JSON.stringify(book))}">
+                    <button class="borrow-book-btn cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg text-xs font-medium transition-all shadow-sm hover:shadow" 
+                                   data-book="${encodeURIComponent(JSON.stringify(book))}">
                         <img src="${window.location.origin}/build/assets/icons/add-white.svg" alt="Borrow" class="w-4 h-4">
                         Borrow
                     </button>
@@ -191,13 +196,15 @@ async function loadAvailableBooks(borrower, { search = '', sort = 'title_asc', p
                 try {
                     const book = JSON.parse(decodeURIComponent(this.dataset.book));
                     const borrowerModal = document.getElementById('borrower-profile-modal');
+                
                     if (borrowerModal) {
                         borrowerModal.classList.add('hidden');
                     }
                     // Pass borrower and book to confirm modal
                     openConfirmBorrowModal(borrower, book);
+                    closeBorrowerModal();
                 } catch (error) {
-                    showError('Something went wrong', 'Failed to load book information.');
+                    showError('Something went wrong', error + 'Failed to load book information.');
                 }
             });
         });
@@ -237,20 +244,51 @@ function renderPagination(meta, borrower, params) {
     });
 }
 
-export function restoreProfileContent(modal, borrower) {
-    const modalContent = modal.querySelector('#borrower-profile-content');
+// Guard to prevent multiple concurrent restores (debounce)
+let isRestoringProfile = false;
+let restoreTimer = null;
+
+export function restoreProfileContent(modal, borrower, options = {}) {
+    // const { force = false } = options;
+
+    // If already on profile view and not forced, skip restore
+    if (modal?.dataset?.view === 'profile' && !force) {
+        return;
+    }
+
+    // Global single-flight guard across modules
+    if (window.__restoreProfileInProgress) return;
+    window.__restoreProfileInProgress = true;
+
+    // Local guard to coalesce burst calls within this module
+    if (isRestoringProfile) return;
+    isRestoringProfile = true;
+    clearTimeout(restoreTimer);
     
+    const modalContent = modal.querySelector('#borrower-profile-content');
+
     if (modal.dataset.originalContent) {
         modalContent.innerHTML = modal.dataset.originalContent;
+        // Re-bind borrower profile UI only once per restore
         initializeBorrowerProfileUI(modal, borrower);
-        
+
         const closeBtn = modal.querySelector('#close-borrower-modal');
         if (closeBtn) {
+            // Use assignment to avoid stacking listeners
             closeBtn.onclick = (e) => {
                 e.preventDefault();
                 closeBorrowerModal();
             };
         }
     }
+
+    // Mark modal view state as "profile"
+    modal.dataset.view = 'profile';
+
+    // Release guards after a short tick
+    restoreTimer = setTimeout(() => {
+        isRestoringProfile = false;
+        window.__restoreProfileInProgress = false;
+    }, 200);
 }
 

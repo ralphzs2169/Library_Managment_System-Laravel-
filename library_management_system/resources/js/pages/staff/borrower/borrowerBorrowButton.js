@@ -44,6 +44,6 @@ export async function setupBorrowBookButton(modal, borrower) {
 function enableBorrowButton(button, modal, borrower) {
     button.onclick = (e) => {
         e.preventDefault();
-        showBorrowBookContent(modal, borrower);
+        showBorrowBookContent(modal, borrower, false);
     };
 }

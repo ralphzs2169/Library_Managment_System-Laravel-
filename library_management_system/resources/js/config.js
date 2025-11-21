@@ -15,15 +15,20 @@ export const API_ROUTES ={
     UPDATE_GENRE: BASE_URL + 'librarian/category-management/genres',
     DELETE_GENRE: BASE_URL + 'librarian/category-management/genres',
 
-    ADD_BOOK: BASE_URL + 'librarian/books/store',
-    UPDATE_BOOK: BASE_URL + 'librarian/books/update',
     // Add other API routes as needed
 };
+export const SEARCH_COLUMN_INDEXES = {
+    BOOK_CATALOG: [2, 3], // Title, Author, ISBN
+    SEMESTER_CATALOG: [1], // Semester Name
+}
 
-export const BOOK_CATALOG_SEARCH_COLUMN_INDEXES = [2, 3]; // Title, Author, ISBN
-export const BOOKS_ROUTES = {
+export const BOOK_ROUTES = {
     INDEX: '/librarian/books/index',
-    CREATE: '/librarian/books/create'
+    CREATE: '/librarian/books/create',
+    STORE: '/librarian/books/store',
+    EDIT: (id) => `/librarian/books/${id}/edit`,
+    UPDATE: (id) => `/librarian/books/${id}`,
+    AVAILABLE_BOOKS: (params) => `/staff/books/available?${params}`,
 };
 
 
@@ -45,9 +50,14 @@ export const BORROW_TRANSACTION_ROUTES = {
     RETURN: '/staff/borrow-transaction/return',
 }
 
+export const PENALTY_ROUTES = {
+    UPDATE: (id) => `/staff/penalties/${id}`,
+};
+
 export const VALIDATION_ERROR = 422;
 export const AUTHORIZATION_ERROR = 403;
 
 export const SETTINGS_ROUTES = {
+    FETCH: '/settings',
     UPDATE: '/librarian/settings',
 };

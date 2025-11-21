@@ -93,10 +93,12 @@
     @include('modals.confirm-borrow')
     @include('modals.confirm-return')
     @include('modals.borrower-profile')
+    @include('modals.confirm-payment')
 </x-layout>
 
 @vite('resources/js/pages/staff/borrower/borrowerProfileModal.js')
 @vite('resources/js/pages/staff/borrowBook.js')
 @vite('resources/js/pages/staff/confirmBorrow.js')
 @vite('resources/js/pages/staff/confirmReturn.js')
+@vite('resources/js/pages/staff/borrower/borrowerPaymentHandler.js')
 @vite('resources/js/pages/staff/borrowersPagination.js')

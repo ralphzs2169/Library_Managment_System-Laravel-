@@ -2,11 +2,16 @@
 <x-layout>
     <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
-        <div class="bg-white shadow-sm rounded-xl p-5 mb-5">
+        <div class="bg-white shadow-sm rounded-xl p-5 mb-3">
             <div class="flex justify-between items-center">
-                <div class="flex items-center">
-                    <img src="{{ asset('build/assets/icons/books-black.svg') }}" alt="Books Icon" class="inline-block w-10 h-10 mr-2">
-                    <h1 class="text-2xl font-bold rounded-xl">Books Catalog</h1>
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-accent to-teal-600 rounded-xl flex items-center justify-center shadow-md">
+                        <img src="{{ asset('build/assets/icons/book-catalog-white.svg ')}}" alt="Book Catalog Icon" class="w-8 h-8">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Book Catalog</h1>
+                        <p class="text-sm text-gray-500 mt-0.5">Manage your library's book collection</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-gray-500 text-sm">Total Books</span>
@@ -17,6 +22,7 @@
 
         <!-- Main Content -->
         <div id="books-filters" class="bg-white shadow-sm rounded-xl p-6">
+
             <!-- Search and Filters -->
             <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
                 <div class="flex-1 max-w-md">
@@ -48,6 +54,7 @@
                         <option value="borrowed" {{ request('status') === 'borrowed' ? 'selected' : '' }}>Status: Borrowed Copies</option>
                         <option value="damaged" {{ request('status') === 'damaged' ? 'selected' : '' }}>Status: Damaged Copies</option>
                         <option value="lost" {{ request('status') === 'lost' ? 'selected' : '' }}>Status: Lost Copies</option>
+                        <option value="pending_issue_review" {{ request('status') === 'pending_issue_review' ? 'selected' : '' }}>Status: Pending Review Copies</option>
                     </select>
                     <button type="button" id="reset-books-filters" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition whitespace-nowrap">
                         Reset Filters

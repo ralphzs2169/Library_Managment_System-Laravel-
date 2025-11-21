@@ -1,7 +1,27 @@
 import { VALIDATION_ERROR } from "./config.js";
 import { logoutHandler } from "./api/authHandler.js";
 import Swal from 'sweetalert2';
+import Toaster from "toaster-ui";
 import { displayInputErrors } from "./helpers.js";
+
+
+export function showSkeleton(container, skeletonSelector = '.skeleton', realContentSelector = '.real-content') {
+    const skeleton = container.querySelector(skeletonSelector);
+    const realContent = container.querySelector(realContentSelector);
+    if (skeleton && realContent) {
+        skeleton.classList.remove('hidden');
+        realContent.classList.add('hidden');
+    }
+}
+
+export function hideSkeleton(container, skeletonSelector = '.skeleton', realContentSelector = '.real-content') {
+    const skeleton = container.querySelector(skeletonSelector);
+    const realContent = container.querySelector(realContentSelector);
+    if (skeleton && realContent) {
+        skeleton.classList.add('hidden');
+        realContent.classList.remove('hidden');
+    }
+}
 
 
 export function getJsonHeaders() {
@@ -49,6 +69,35 @@ export async function apiRequest(url, options = {}) {
     }
 }
 
+const toaster = new Toaster();
+
+export function showToast(message, type = 'info') {
+  // Define background color per type
+  const bgColor = type === 'success' ? '#4BB543' :
+                  type === 'error'   ? '#c82f2f' :
+                  type === 'warning' ? '#FFCC00' :
+                  '#333333';
+
+  // Define icon with shake animation for warning
+  const icon = type === 'success' ? '<img src="/build/assets/icons/success-toast.svg" class="mr-2 icon-size-md"/>' :
+               type === 'error'   ? '<i class="fa-solid fa-xmark mr-2"></i>' :
+               type === 'warning' ? '<i class="fa-solid fa-triangle-exclamation mr-2 shake-icon"></i>' :
+               '<i class="fa-solid fa-info mr-2"></i>';
+
+  const options = {
+    allowHtml: true,
+    duration: 3000,
+    styles: {
+      backgroundColor: bgColor,
+      color: '#ffffff',
+      borderRadius: '8px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+  };
+
+  toaster.addToast(`${icon}${message}`, type, options);
+}
 
 
 export function showError(title, message) {

@@ -1,16 +1,21 @@
 import { returnBook } from '../../api/borrowTransactionHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { restoreProfileContent } from './borrowBook.js';
-
+import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
+import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
+import { fetchSettings } from '../../api/settingsHandler.js';
 const confirmReturnModal = document.getElementById('confirm-return-modal');
 
 // Store current data for navigation
 let currentBorrower = null;
 let currentTransaction = null;
 
-export function initializeConfirmReturnModal(modal, borrower, transaction) {
+export async function initializeConfirmReturnModal(modal, borrower, transaction) {
     currentBorrower = borrower;
     currentTransaction = transaction;
+    
+    const settings = await fetchSettings();
+    const dueReminderThreshold = parseInt(settings['notifications.reminder_days_before_due']);
     
     // Populate borrower info
     if (borrower) {
@@ -60,21 +65,31 @@ export function initializeConfirmReturnModal(modal, borrower, transaction) {
             const date = transaction.due_at ? new Date(transaction.due_at) : null;
             dueDate.textContent = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
         }
-        
+        console.log(transaction);
+        const daysUntilDue = transaction.days_until_due;
         // Populate status badge (overdue or on-time)
         if (statusBadge) {
             if (transaction.status === 'overdue') {
                 statusBadge.innerHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-200 text-red-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Overdue
                     </span>
                 `;
+            } else if(transaction.status === 'borrowed' && daysUntilDue <= dueReminderThreshold) {
+                 statusBadge.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}
+                    </span>
+                `;
             } else {
                 statusBadge.innerHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -102,7 +117,8 @@ const backToProfileButton = document.getElementById('back-to-profile-button');
 if (backToProfileButton) {
     backToProfileButton.addEventListener('click', function(e) {
         e.preventDefault();
-        returnToBorrowerProfile();
+        console.log(currentBorrower);
+       returnToBorrowerProfile();
     });
 }
 
@@ -118,7 +134,7 @@ const cancelReturnBtn = document.getElementById('cancel-return-button');
 if (cancelReturnBtn) {
     cancelReturnBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        returnToBorrowerProfile();
+        closeConfirmReturnModal();
     });
 }
 
@@ -161,7 +177,7 @@ export function closeConfirmReturnModal() {
 
     setTimeout(() => {
         modal.classList.add('hidden');
-        restoreProfileContent(document.getElementById('borrower-profile-modal'), null);
+        // restoreProfileContent(document.getElementById('borrower-profile-modal'), null);
     }, 150);
 }
 
@@ -198,5 +214,12 @@ async function handleConfirmReturn() {
         formData.append('report_damaged', '1');
     }
     
-    await returnBook(formData);
+    const result = await returnBook(formData);
+    if (result) {
+        // returnToBorrowerProfile();
+        const modal = document.getElementById('borrower-profile-modal');
+        const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(currentBorrower.id)
+        await initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold);
+        closeConfirmReturnModal();
+    }
 }

@@ -63,3 +63,24 @@ export async function updateSettingsHandler(settingsData, form) {
 
     showSuccessWithRedirect('Success', 'Settings updated successfully!', window.location.href);
 }
+
+export async function fetchSettings() {
+    try {
+        const response = await fetch(SETTINGS_ROUTES.FETCH, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+            showWarning('Something went wrong', 'Please try again later.');
+            return;
+        }
+        
+        return result.data;
+    } catch (error) {
+         showWarning('Something went wrong', 'Please try again later.');
+    }
+}

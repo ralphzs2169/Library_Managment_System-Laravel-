@@ -2,6 +2,13 @@ import {  debounce } from "../../utils.js";
 import { loadBorrowers } from "../../api/usersHandler.js";
 import { highlightSearchMatches } from "../../tableControls.js";
 
+export const filters = {
+    search: '',
+    status: 'all',
+    role: 'all',
+    page: 1
+};
+
 document.addEventListener('click', async (e) => {
     if (e.target.matches('.pagination-btn') && !e.target.disabled) {
         const page = e.target.getAttribute('data-page');
@@ -51,6 +58,7 @@ export function getCurrentFilters() {
     return {
         search: searchInput?.value || '',
         status: statusFilter?.value || '',
-        role: roleFilter?.value || ''
+        role: roleFilter?.value || '',
+        page: 1
     };
 }

@@ -15,6 +15,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "sweetalert2": "^11.26.2"
+        "sweetalert2": "^11.26.2",
+        "toaster-ui": "^1.1.5"
     }
 }

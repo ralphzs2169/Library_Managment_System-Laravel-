@@ -30,6 +30,8 @@ class User extends Authenticatable
         'library_status'
     ];
 
+     protected $appends = ['fullname', 'total_unpaid_fines'];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -76,15 +78,22 @@ class User extends Authenticatable
     {
         return $this->borrowTransactions()
             ->whereHas('penalties', function ($q) {
-                $q->where('status', 'unpaid');
+                $q->whereIn('status', ['unpaid', 'partially_paid']);
             })
             ->get()
             ->sum(function ($transaction) {
                 return $transaction->penalties()
-                    ->where('status', 'unpaid')
-                    ->sum('amount');
+                    ->whereIn('status', ['unpaid', 'partially_paid'])
+                    ->get() // get actual penalties
+                    ->sum(function ($penalty) {
+                        if ($penalty->status === 'partially_paid') {
+                            return $penalty->amount - $penalty->payments()->sum('amount');
+                        }
+                        return $penalty->amount;
+                    });
             });
     }
+
     
     public function activityLogs()
     {
@@ -106,5 +115,24 @@ class User extends Authenticatable
         return $this->hasMany(BorrowTransaction::class, 'user_id');
     }
 
-    
+    public function penalties()
+    {
+        return $this->hasManyThrough(Penalty::class, BorrowTransaction::class, 'user_id', 'borrow_transaction_id');
+    }
+
+    public function issueReports()
+    {
+        return $this->hasMany(IssueReport::class, 'borrower_id');
+    }
+
+    public function reportsFiled()
+    {
+        return $this->hasMany(IssueReport::class, 'reported_by');
+    }
+
+    // Reports approved by the librarian/admin
+    public function reportsApproved()
+    {
+        return $this->hasMany(IssueReport::class, 'approved_by');
+    }
 }

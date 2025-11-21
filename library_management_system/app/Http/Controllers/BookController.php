@@ -202,7 +202,13 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        $book->load('author', 'genre', 'copies');
+        $book->load([
+            'author',
+            'genre',
+            'copies.pendingIssueReport.borrower',
+            'copies.pendingIssueReport.reportedBy',
+            'copies.pendingIssueReport.approvedBy',
+        ]);
         $categories = Category::all();
         $genres = Genre::all();
 

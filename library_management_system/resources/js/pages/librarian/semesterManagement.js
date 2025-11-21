@@ -1,5 +1,7 @@
-import { getCreateSemesterForm, storeNewSemester, activateSemester, fetchSemesterDetails, updateSemester, deactivateSemester } from '../../api/semesterHandler.js';
+import { getCreateSemesterForm, storeNewSemester, activateSemester, fetchSemesterDetails, updateSemester, deactivateSemester, loadSemesters } from '../../api/semesterHandler.js';
 import { clearInputError } from '../../helpers.js';
+import { initPagination, initSearch, initFilter } from '../../tableControls.js';
+import { SEARCH_COLUMN_INDEXES } from '../../config.js';
 
 const addSemesterModal = document.getElementById('add-semester-modal');
 const closeAddSemesterModal = document.getElementById('close-add-semester-modal');
@@ -11,6 +13,43 @@ const editSemesterModal = document.getElementById('edit-semester-modal');
 const closeEditSemesterModal = document.getElementById('close-edit-semester-modal');
 const cancelEditSemester = document.getElementById('cancel-edit-semester');
 const editSemesterForm = document.getElementById('edit-semester-form');
+
+
+initPagination(loadSemesters);
+initSearch('#semester-search', loadSemesters, '#semesters-table-body', SEARCH_COLUMN_INDEXES.SEMESTER_CATALOG);
+initFilter('#semester-status-filter', loadSemesters);
+// Add filter event listeners
+const categoryFilter = document.querySelector('#semesters-category-filter');
+const statusFilter = document.querySelector('#semesters-status-filter');
+const sortSelect = document.querySelector('#semesters-sort');
+const resetFiltersBtn = document.querySelector('#reset-semesters-filters');
+const searchInput = document.querySelector('#semesters-search');
+
+if (categoryFilter) {
+    categoryFilter.addEventListener('change', () => loadSemesters(1));
+}
+
+if (statusFilter) {
+    statusFilter.addEventListener('change', () => loadSemesters(1));
+}
+
+if (sortSelect) {
+    sortSelect.addEventListener('change', () => loadSemesters(1));
+}
+
+// Reset filters functionality
+if (resetFiltersBtn) {
+    resetFiltersBtn.addEventListener('click', () => {
+        // Reset all filter inputs to default values
+        if (searchInput) searchInput.value = '';
+        if (categoryFilter) categoryFilter.value = '';
+        if (statusFilter) statusFilter.value = 'all';
+        if (sortSelect) sortSelect.value = 'newest';
+        
+        // Reload books with default filters
+        loadSemesters(1);
+    });
+}
 
 // Open modal and fetch create form
 openAddSemesterBtn.addEventListener('click', async () => {
