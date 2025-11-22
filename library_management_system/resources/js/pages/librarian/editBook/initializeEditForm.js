@@ -112,15 +112,14 @@ export async function initializeEditForm(form, book) {
                 const bookIdEl = editBookForm.querySelector('#book-id');
                 if (bookIdEl) formData.set('book_id', bookIdEl.value);
 
-               
                 if (!formData.has('genre')) {
                     formData.set('genre', null);
                 }
-                 
+
                 await editBookHandler(formData, form.id);
-                // Optionally hide form and show table after success
-                // document.getElementById('books-table-container').classList.remove('hidden');
-                // document.getElementById('edit-book-form-container').classList.add('hidden');
+
+                // Immediately scroll to top after editBookHandler resolves
+                
             } catch (err) {
                 console.error('Error submitting edit form:', err);
                 showError('Submission Error', err.message || 'An error occurred while submitting the form. Please try again.');

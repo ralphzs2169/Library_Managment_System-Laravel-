@@ -21,7 +21,7 @@ use App\Models\IssueReport;
 use App\Enums\IssueReportType;
 use App\Enums\IssueReportStatus;
 use App\Models\Payment;
-use Illuminate\Support\Facades\Log;
+use App\Enums\LibraryStatus;
 
 class UserService
 {
@@ -80,30 +80,33 @@ public function getBorrowerDetails(int $userId)
         ->get();
 
     // Get all transactions that have unpaid or partially paid penalties
-    $transactionsWithActivePenalties = BorrowTransaction::with(['bookCopy.book.author', 'penalties.payments'])
-        ->where('user_id', $userId)
-        ->whereHas('penalties', fn($query) => $query->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]))
-        ->get()
-        ->flatMap(function ($borrowTransaction) {
-            return $borrowTransaction->penalties
-                ->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
-                ->map(function ($singlePenalty) use ($borrowTransaction) {
+  $transactionsWithActivePenalties = BorrowTransaction::with(['bookCopy.book.author', 'penalties.payments'])
+    ->where('user_id', $userId)
+    ->whereHas('penalties', fn($query) => $query->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]))
+    ->get()
+    ->flatMap(function ($borrowTransaction) {
+        return $borrowTransaction->penalties
+            ->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
+            ->map(function ($singlePenalty) use ($borrowTransaction) {
 
-                    // Clone the borrow transaction so we can attach a single penalty
-                    $transactionCopy = clone $borrowTransaction;
-                    $transactionCopy->penalty = $singlePenalty;
+                // Clone the borrow transaction so we can attach a single penalty
+                $transactionCopy = clone $borrowTransaction;
 
-                    // Calculate remaining amount safely as float
-                    if ($singlePenalty->status === PenaltyStatus::PARTIALLY_PAID) {
-                        $totalPaid = (float) $singlePenalty->payments->sum(fn($payment) => (float) $payment->amount);
-                        $transactionCopy->penalty->remaining_amount = (float) $singlePenalty->amount - $totalPaid;
-                    } else {
-                        $transactionCopy->penalty->remaining_amount = (float) $singlePenalty->amount;
-                    }
+                // Remove the full penalties collection to avoid duplication
+                unset($transactionCopy->penalties);
 
-                    return $transactionCopy;
-                });
-        });
+                // Attach the full penalty info, plus remaining_amount calculation
+                $singlePenalty->remaining_amount = $singlePenalty->status === PenaltyStatus::PARTIALLY_PAID
+                    ? (float) $singlePenalty->amount - (float) $singlePenalty->payments->sum(fn($payment) => (float) $payment->amount)
+                    : (float) $singlePenalty->amount;
+
+                $transactionCopy->penalty = $singlePenalty;
+
+                return $transactionCopy;
+            });
+    });
+
+
 
     $today = now()->startOfDay();
 
@@ -222,6 +225,7 @@ public function getBorrowerDetails(int $userId)
             $isLate = $returnedDate->gt($dueDate);
 
             // Determine final transaction status and copy status
+            $hasPenalty = false;
             if($isLate){
                 $transactionStatus = BorrowTransactionStatus::RETURNED;
                 $copyStatus = BookCopyStatus::AVAILABLE;
@@ -236,6 +240,8 @@ public function getBorrowerDetails(int $userId)
 
                 if (!$penalty) {
                     throw new \Exception('Failed to create penalty record.');
+                } else {
+                    $hasPenalty = true;
                 }
 
                 if ($reportDamaged) {
@@ -280,6 +286,11 @@ public function getBorrowerDetails(int $userId)
 
             // Update book copy status
             $bookCopy->update(['status' => $copyStatus]);
+
+            if ($hasPenalty) {
+                // Suspend borrower
+                $borrower->update(['library_status' => LibraryStatus::SUSPENDED]);
+            }
 
             // Create activity log
             $damagedText = $reportDamaged ? ' (reported as damaged)' : '';

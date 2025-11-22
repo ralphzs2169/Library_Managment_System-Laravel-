@@ -1,6 +1,6 @@
 import {  SEARCH_COLUMN_INDEXES, VALIDATION_ERROR, BOOK_ROUTES } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
-import { showSuccessWithRedirect, showWarning, showConfirmation, showError, showInfo } from "../utils.js";
+import { showSuccessWithRedirect, showWarning, showConfirmation, showError, showInfo, showToast } from "../utils.js";
 import { highlightSearchMatches } from "../tableControls.js";
 
 export async function addBookHandler(bookData, form) {
@@ -156,7 +156,7 @@ export async function editBookHandler(bookDetails, form) {
         return;
     }
 
-    showSuccessWithRedirect('Success', 'Book updated successfully!', window.location.href);
+    showToast('Book updated successfully!', 'success');
 }
 
 export async function fetchBookDetails(book) {

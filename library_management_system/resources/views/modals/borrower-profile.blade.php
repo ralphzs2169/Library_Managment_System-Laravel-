@@ -204,6 +204,8 @@
                                             <img src="{{ asset('build/assets/icons/currently-borrowed-white.svg')}}" alt="Currently Borrowed Icon" class="w-6 h-6">
                                         </div>
                                         <h2 class="text-lg font-semibold text-gray-900">Currently Borrowed Books</h2>
+                                        <span class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">3 / 3</span>
+
                                     </div>
                                     <div class="overflow-x-auto rounded-xl border border-gray-200">
                                         <table class="w-full text-sm">
@@ -213,7 +215,7 @@
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Book</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Date Borrowed</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Due Date</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Status</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-38 min-w-42 max-w-42 whitespace-nowrap">Status</th>
                                                     <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
                                                 </tr>
                                             </thead>
@@ -229,11 +231,12 @@
                                 </div>
                                 <!-- Penalties Table (hidden by default) -->
                                 <div id="tab-penalties-content" class="hidden">
-                                    <div class="mb-2 flex items-center gap-3">
+                                    <div class="mb-4 flex items-center gap-3">
                                         <div class="w-10 h-10 bg-gradient-to-br from-accent to-teal-600 rounded-lg flex items-center justify-center shadow-md">
                                             <img src="{{ asset('build/assets/icons/unpaid-white.svg')}}" alt="Unpaid Fines/Penalties Icon" class="w-6 h-6">
                                         </div>
                                         <h2 class="text-lg font-semibold text-gray-900">Unpaid Fines/Penalties</h2>
+                                        <span id="penalties-header-count" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">2</span>
                                     </div>
                                     <div class="overflow-x-auto rounded-xl border border-gray-200">
                                         <table class="w-full text-sm">
@@ -242,15 +245,15 @@
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">No.</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Book</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Returned On</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Reason</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  w-38 min-w-38 max-w-38 whitespace-nowrap">Reason</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Amount</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Status</th>
-                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  whitespace-nowrap">Status</th>
+                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase truncate tracking-wider text-xs  w-42 min-w-42 max-w-42 whitespace-nowrap">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="active-penalties-tbody" class="bg-white divide-y divide-gray-100">
                                                 <tr>
-                                                    <td colspan="6" class="py-10 text-center text-gray-500 text-sm">
+                                                    <td colspan="7" class="py-10 text-center text-gray-500 text-sm">
                                                         Loading unpaid fines/penalties...
                                                     </td>
                                                 </tr>

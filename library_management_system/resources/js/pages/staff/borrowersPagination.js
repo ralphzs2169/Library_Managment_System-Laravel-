@@ -1,5 +1,5 @@
 import {  debounce } from "../../utils.js";
-import { loadBorrowers } from "../../api/usersHandler.js";
+import { loadBorrowers } from "../../api/borrowerHandler.js";
 import { highlightSearchMatches } from "../../tableControls.js";
 
 export const filters = {

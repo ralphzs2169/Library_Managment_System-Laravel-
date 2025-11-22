@@ -3,7 +3,8 @@
         <thead>
             <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">No.</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Borrower Name</th>
+                <th class="py-3 text-center font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap"></th>
+                <th class="py-3 px-2 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Borrower Name</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">ID Number</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Role</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Dept/Year</th>
@@ -30,12 +31,15 @@
                 <td class="px-4 py-3 text-gray-600">
                     {{ $users->firstItem() + $index }}
                 </td>
-                <td class="py-3 px-4">
+                <td class="py-2 text-center">
+                    <!-- Borrower initials icon -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-teal-600 flex items-center justify-center text-white font-bold text-xs">
+                        {{ strtoupper(substr($user->firstname,0,1)) }}{{ strtoupper(substr($user->lastname,0,1)) }}
+                    </div>
+                </td>
+                <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
-                        <!-- Borrower initials icon -->
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-teal-600 flex items-center justify-center text-white font-bold text-xs">
-                            {{ strtoupper(substr($user->firstname,0,1)) }}{{ strtoupper(substr($user->lastname,0,1)) }}
-                        </div>
+
                         <span class="font-medium text-gray-800 whitespace-nowrap">{{ $user->getFullnameAttribute() }}</span>
                     </div>
                 </td>

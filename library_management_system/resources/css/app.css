@@ -162,18 +162,23 @@
     color: white !important;
 }
 
-button[disabled]:hover+.tooltip{
-  opacity: 1;
-}
-
-/* Show tooltip on button hover */
+/* Show tooltip ONLY when hovering the button’s wrapper */
 .relative:hover .tooltip {
+  opacity: 0; /* default: don't show even when parent is hovered */
+}
+
+/* Show tooltip ONLY when hovering EXACTLY the disabled button */
+.relative button[disabled]:hover + .tooltip {
+  opacity: 1;
+}
+.relative select[disabled]:hover + .tooltip {
   opacity: 1;
 }
 
-/* Prevent tooltip from blocking hover */
+/* Ensure tooltip doesn't capture hover */
 .tooltip {
   pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
 

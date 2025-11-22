@@ -2,10 +2,9 @@ import { setupBorrowBookButton } from './borrowerBorrowButton.js';
 import { attachTransactionActions } from './borrowerTransactionActions.js';
 import { attachPaymentActions } from './borrowerPaymentHandler.js';
 import { initializeBorrowerTabs } from './tabbedContainer.js';
-import { showSkeleton, hideSkeleton } from '../../../utils.js';
+import { showSkeleton, hideSkeleton, disableButton } from '../../../utils.js';
 
-export async function initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold, initialActiveTab = 'currently-borrowed-tab') {
-    console.log(borrower);
+export async function initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold, reloadProfileTabs = true, initialActiveTab = 'currently-borrowed-tab') {
     if (!borrower) return;
 
     // Show skeleton
@@ -23,8 +22,12 @@ export async function initializeBorrowerProfileUI(modal, borrower, dueReminderTh
         populatePlaceholderData(modal);
         populateCurrentlyBorrowedBooks(modal, borrower, dueReminderThreshold);
         populateActivePenalties(modal, borrower);
-        initializeBorrowerTabs(initialActiveTab);
 
+        if (reloadProfileTabs) {
+            initializeBorrowerTabs(initialActiveTab);
+            console.log('Reloading profile tabs with initial active tab:', initialActiveTab);
+        }
+        
         await setupBorrowBookButton(modal, borrower);
     } finally {
         clearTimeout(skeletonTimer);
@@ -168,14 +171,26 @@ function populatePlaceholderData(modal) {
 
 function populateCurrentlyBorrowedBooks(modal, borrower, dueReminderThreshold) {
     const tbody = modal.querySelector('#currently-borrowed-tbody');
-    const borrowedCount = modal.querySelector('#borrowed-count');
+    const borrowedCountElem = modal.querySelector('#borrowed-count');
+    const borrowedHeaderCountElem = modal.querySelector('.bg-accent\\/10.text-accent.font-bold'); // header count badge
     
     if (!tbody) return;
     
     const borrowedBooks = borrower.active_borrows || [];
-    
-    if (borrowedCount) {
-        borrowedCount.textContent = `${borrowedBooks.length}`;
+    const borrowedCount = borrowedBooks.length;
+
+    // Set borrowed count in tab badge
+    if (borrowedCountElem) {
+        borrowedCountElem.textContent = `${borrowedCount}`;
+    }
+
+    // Set borrowed count in header badge (dynamic)
+    if (borrowedHeaderCountElem) {
+        if (borrower.role === 'student') {
+            borrowedHeaderCountElem.textContent = `${borrowedCount} / 3`;
+        } else {
+            borrowedHeaderCountElem.textContent = `${borrowedCount}`;
+        }
     }
     
     tbody.innerHTML = '';
@@ -184,12 +199,7 @@ function populateCurrentlyBorrowedBooks(modal, borrower, dueReminderThreshold) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="8" class="py-10 text-center">
-                    <div class="flex flex-col items-center justify-center">
-                        <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-2">
-                            <img src="/build/assets/icons/no-books.svg" alt="No Books" class="w-8 h-8">
-                        </div>
                         <p class="text-gray-500 text-md font-medium mb-2">No currently borrowed books</p>
-                    </div>
                 </td>
             </tr>
         `;
@@ -311,18 +321,20 @@ function generateTransactionButtons(transaction, isReturned, status, daysOverdue
     } else {
         const tooltip = isReturned ? 'Book already returned' : 'Cannot renew overdue books';
         renewButton = `
-            <div class="relative group">
-                <button disabled class="cursor-not-allowed inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-xs font-medium opacity-50" title="${tooltip}">
+            <div class="relative inline-block group">
+                <button disabled class="cursor-not-allowed inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-xs font-medium opacity-50">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Renew
                 </button>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                     ${tooltip}
+                    <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                 </div>
             </div>
         `;
+       
     }
 
     // Return button logic
@@ -357,14 +369,22 @@ function generateTransactionButtons(transaction, isReturned, status, daysOverdue
 
 function populateActivePenalties(modal, borrower) {
     const tbody = modal.querySelector('#active-penalties-tbody');
-    const penaltiesCount = modal.querySelector('#penalties-count');
+    const penaltiesCountElem = modal.querySelector('#penalties-count');
+    const penaltiesHeaderCountElem = modal.querySelector('#penalties-header-count');
     
     if (!tbody) return;
 
     const penaltyTransactions = (borrower.transactions_with_penalties || []);
+    const penaltiesCount = penaltyTransactions.length;
 
-    if (penaltiesCount) {
-        penaltiesCount.textContent = `${penaltyTransactions.length}`;
+    // Set penalties count in tab badge
+    if (penaltiesCountElem) {
+        penaltiesCountElem.textContent = `${penaltiesCount}`;
+    }
+
+    // Set penalties count in header badge (dynamic)
+    if (penaltiesHeaderCountElem) {
+        penaltiesHeaderCountElem.textContent = `${penaltiesCount}`;
     }
     
     tbody.innerHTML = '';
@@ -372,30 +392,29 @@ function populateActivePenalties(modal, borrower) {
     if (penaltyTransactions.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="py-10 text-center text-gray-500 text-sm">
+                <td colspan="7" class="py-10 text-center text-gray-500 text-sm">
                     No active penalties
                 </td>
             </tr>
         `;
         return;
     }
-    
+
     penaltyTransactions.forEach((transaction, index) => {
+        console.log('Rendering penalty transaction:', transaction);
         const book = transaction.book_copy?.book;
         const copyNumber = transaction.book_copy?.copy_number;
         const author = book?.author;
         const returnedDate = new Date(transaction.returned_at);
-
-        let reasonBadge = '';
-        let borderClass = '';
         
-        console.log(transaction.penalty);
+        // Reason badge (unchanged)
+        let reasonBadge = '';
         const penaltyType = transaction.penalty.type;
+        const status = transaction.penalty.status;
 
         if (penaltyType === 'late_return') {
-            borderClass = 'border-l-4 border-l-red-500';
             reasonBadge = `
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">
+                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
@@ -403,9 +422,8 @@ function populateActivePenalties(modal, borrower) {
                 </span>
             `;
         } else if (penaltyType === 'lost_book') {
-            borderClass = 'border-l-4 border-l-rose-500';
             reasonBadge = `
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700">
+                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -413,29 +431,45 @@ function populateActivePenalties(modal, borrower) {
                 </span>
             `;
         } else if (penaltyType === 'damaged_book') {
-            borderClass = 'border-l-4 border-l-rose-500';
             reasonBadge = `
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
+                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
                     <img src="/build/assets/icons/damaged-badge.svg" alt="Damaged Icon" class="w-3.5 h-3.5">
                     Damaged
                 </span>
             `;
         }
-        
+
+        // Border color based on penalty status
+        let borderClass = '';
+        switch (status) {
+            case 'unpaid':
+                borderClass = 'border-l-4 border-l-red-500';
+                break;
+            case 'partially_paid':
+                borderClass = 'border-l-4 border-l-orange-400';
+                break;
+            case 'paid':
+                borderClass = 'border-l-4 border-l-green-500';
+                break;
+            case 'cancelled':
+                borderClass = 'border-l-4 border-l-gray-400';
+                break;
+            default:
+                borderClass = '';
+        }
+
         const coverImage = book?.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
         const authorName = author ? `${author.firstname} ${author.lastname}` : 'Unknown Author';
         const returnedDateText = returnedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const status = transaction.penalty.status;
         const statusBadge = renderPenaltyStatusBadge(status);
 
         let amount = 0;
-        console.log(status)
         if (status === 'unpaid') {
             amount = transaction.penalty.amount;
         } else if (status === 'partially_paid') {
-            console.log(transaction.penalty)
             amount = transaction.penalty.remaining_amount;
         }
+        
         const row = `
             <tr class="hover:bg-gray-50 transition-colors ${borderClass}">
                 <td class="py-3 px-4 text-gray-600 font-medium">${index + 1}</td>
@@ -451,20 +485,19 @@ function populateActivePenalties(modal, borrower) {
                 <td class="py-3 px-4 text-gray-700 text-sm">${returnedDateText}</td>
                 <td class="py-3 px-4">${reasonBadge}</td>
                 <td class="py-3 px-4">
-                    <span class="text-red-600 font-bold text-sm">₱${Number(amount).toFixed(2)}</span>
+                    <span class="text-red-700 font-bold text-sm">₱${Number(amount).toFixed(2)}</span>
                 </td>
                 <td class="py-3 px-4">
                     ${statusBadge}
                 </td>
                 <td class="py-3 px-4">
                     <div class="flex items-center justify-center gap-2">
-                        <button class="pay-penalty-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-all shadow-sm" data-transaction-id="${transaction.id}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            Pay Penalty
+                        <button class="pay-penalty-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-xs tracking-wide font-medium transition-all shadow-sm" data-transaction="${JSON.stringify(transaction).replace(/"/g, '&quot;')}">
+                            <img src="/build/assets/icons/pay.svg" alt="Pay Fine Icon" class="w-4 h-4">
+                            Settle
                         </button>
                     </div>
+                    
                 </td>
             </tr>
         `;
@@ -475,7 +508,7 @@ function populateActivePenalties(modal, borrower) {
     attachPaymentActions(tbody, borrower);
 }
 
-function renderPenaltyStatusBadge(status) {
+export function renderPenaltyStatusBadge(status) {
     let badgeHTML = '';
     switch (status) {
         case 'unpaid':
@@ -501,9 +534,7 @@ function renderPenaltyStatusBadge(status) {
         case 'partially_paid':
             badgeHTML = `
                 <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700 whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7M12 2v20" />
-                    </svg>
+                    <img src="/build/assets/icons/partially-paid.svg" alt="Partially Paid Icon" class="w-3.5 h-3.5">
                     Partially Paid
                 </span>
             `;

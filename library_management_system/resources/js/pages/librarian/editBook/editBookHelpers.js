@@ -6,6 +6,8 @@ export function populateSummaryHeader(book, editFormContainer) {
     const sAuthor = editFormContainer.querySelector('#edit-summary-author');
     const sCover = editFormContainer.querySelector('#edit-summary-cover');
     const sCoverPlaceholder = editFormContainer.querySelector('#edit-summary-cover-placeholder');
+    const sPrice = editFormContainer.querySelector('#edit-summary-price');
+    const priceInput = editFormContainer.querySelector('#price');
 
     if (sTitle) sTitle.textContent = book.title || '—';
     if (sIsbn) sIsbn.textContent = book.isbn || 'N/A';
@@ -24,6 +26,17 @@ export function populateSummaryHeader(book, editFormContainer) {
             sCover.classList.add('hidden');
             sCoverPlaceholder.classList.remove('hidden');
         }
+    }
+
+    if (sPrice) {
+        sPrice.textContent = book.price !== undefined && book.price !== null
+            ? Number(book.price).toFixed(2)
+            : '—';
+    }
+    if (priceInput) {
+        priceInput.value = book.price !== undefined && book.price !== null
+            ? Number(book.price).toFixed(2)
+            : '';
     }
 }
 
@@ -97,9 +110,12 @@ export function renderCopiesTable(book, editFormContainer) {
     const copies = Array.isArray(book.copies) ? book.copies : [];
     allCopiesData = copies;
     
+    const badge = editFormContainer.querySelector('#copies-count-badge');
+    if (badge) badge.textContent = copies.length;
+
     if (!copies.length) {
         tbody.innerHTML = `
-            <tr>
+            <tr class="bg-white">
                 <td colspan="4" class="py-20 text-center">
                     <div class="flex flex-col items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -274,9 +290,9 @@ function renderStatusSelectColumn(isPendingReview, isDisabled, options, tooltipM
                 </select>
                 <!-- Hidden input to include disabled copies in form submission -->
                 <input type="hidden" name="copies[${copyId}]" value="${current}">
-                <div class="tooltip absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+               <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                     ${tooltipMessage}
-                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                    <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                 </div>
             </div>
         `;
@@ -608,6 +624,10 @@ export function updateStatsAfterChange(tbody, editFormContainer) {
     setText('stat-damaged', counts.damaged);
     setText('stat-lost', counts.lost);
     setText('stat-total', total);
+
+    // Update the copies count badge beside the title
+    const badge = editFormContainer.querySelector('#copies-count-badge');
+    if (badge) badge.textContent = total;
 }
 
 /**

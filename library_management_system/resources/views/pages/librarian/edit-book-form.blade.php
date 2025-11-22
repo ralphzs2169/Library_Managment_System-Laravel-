@@ -1,7 +1,7 @@
 <!-- Main Content Area -->
 <div class="bg-white shadow-sm rounded-xl p-6 mt-5">
     {{-- Book Summary Header with Back Button --}}
-    <div class="mb-6 border border-gray-200 rounded-lg p-3 flex items-center justify-between bg-gray-50">
+    <div id="edit-summary-header" class="mb-6 border border-gray-200 rounded-lg p-3 flex items-center justify-between bg-gray-50">
         <div class="flex items-center gap-3">
             <div class="w-12 h-16 rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white flex-shrink-0">
                 <img id="edit-summary-cover" src="" alt="Cover" class="w-full h-full object-cover hidden">
@@ -11,9 +11,14 @@
                 <p class="text-xs text-gray-500 font-medium">Editing</p>
                 <p id="edit-summary-title" class="font-bold text-gray-900">—</p>
                 <p class="text-xs text-gray-600 mt-0.5">
-                    <span class="font-medium">ISBN:</span> <span id="edit-summary-isbn" class="font-mono">—</span>
+                    <span class="font-medium">ISBN:</span> <span id="edit-summary-isbn">—</span>
                     <span class="mx-2 text-gray-400">•</span>
                     <span class="font-medium">Author:</span> <span id="edit-summary-author">—</span>
+                    <span class="mx-2 text-gray-400">•</span>
+                    <span class="font-medium">Price:</span>
+                    <span id="edit-summary-price">
+                        {{ isset($book->price) ? number_format($book->price, 2) : '—' }}
+                    </span>
                 </p>
             </div>
         </div>
@@ -119,7 +124,7 @@
                             <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">Book Price</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₱</span>
-                                <input type="number" step="0.01" id="price" placeholder="Enter book price" name="price" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed">
+                                <input type="number" step="0.01" id="price" placeholder="Enter book price" name="price" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" value="{{ isset($book->price) ? number_format($book->price, 2, '.', '') : '' }}">
                             </div>
                             <div class="error-placeholder text-xs mt-1" id="price-error-placeholder"></div>
                         </div>
@@ -250,7 +255,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <span>Book Copies</span>
+                    <span>Book Copies Management</span>
+                    <span id="copies-count-badge" class="ml-2 bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">
+
+                    </span>
                 </h2>
 
                 <button type="button" id="add-copy-btn" class="px-4 py-2 text-xs bg-accent hover:bg-accent/80 cursor-pointer text-white rounded-lg transition shadow-sm font-semibold flex items-center gap-1.5 whitespace-nowrap">
@@ -261,7 +269,7 @@
                 </button>
             </div>
 
-            <div class="overflow-x-auto rounded-lg border border-gray-200" style="min-height: 300px;">
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
                 <table class="w-full text-sm rounded-lg ">
                     <thead>
                         <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">

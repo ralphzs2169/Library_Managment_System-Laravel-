@@ -2,7 +2,7 @@ import { showError, showConfirmation, showSuccessWithRedirect, showWarning, show
 import {  VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors, scrollToFirstErrorInModal } from "../helpers.js";
 import { BORROW_TRANSACTION_ROUTES } from "../config.js";
-import { loadBorrowers } from "./usersHandler.js";
+import { loadBorrowers } from "./borrowerHandler.js";
 import { closeConfirmBorrowModal } from "../pages/staff/confirmBorrow.js";
 
 export async function borrowBook(borrowData) {
@@ -69,9 +69,9 @@ export async function borrowBook(borrowData) {
     }
 
     // Close modal first
+    loadBorrowers(undefined, false);
     closeConfirmBorrowModal();
     showToast('Book Borrowed Successfully!', 'success');
-    loadBorrowers(1, false);
 }
 
 export async function getAvailableCopies(bookId) {
@@ -125,5 +125,6 @@ export async function returnBook(formData) {
     }
 
     showToast('Book Returned Successfully!', 'success');
+    loadBorrowers(undefined, false);
     return true;
 }

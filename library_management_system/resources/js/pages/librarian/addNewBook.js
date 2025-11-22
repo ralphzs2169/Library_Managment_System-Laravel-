@@ -52,6 +52,21 @@ if (addBookform) {
         // Send FormData (multipart) to handler
         addBookHandler(formData, form.id);
     });
+    addBookform.addEventListener('reset', () => {
+        // Clear all input errors
+        addBookform.querySelectorAll(
+            '#add-book-form input, #add-book-form select, #add-book-form textarea'
+        ).forEach(el => clearInputError(el));
+
+        // Clear image preview on form reset
+        if (coverPreview) {
+            coverPreview.src = '';
+            coverPreview.classList.add('hidden');
+        }
+        if (coverPlaceholder) {
+            coverPlaceholder.classList.remove('hidden');
+        }
+    });
 }
 
 const categorySelect = document.getElementById('category');

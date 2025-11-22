@@ -192,7 +192,7 @@ class BookService {
             'publisher' => 'sometimes|nullable|string|max:255',
             'publication_year' => 'sometimes|nullable|digits:4|integer|min:1901|max:' . date('Y'),
             'language' => 'sometimes|required|in:English,Filipino,Spanish,Chinese,Others',
-            'price' => 'sometimes|nullable|numeric|min:0',
+            'price' => 'sometimes|required|numeric|min:0',
             'genre' => 'sometimes|required|exists:genres,id',
             'category' => 'sometimes|required|exists:categories,id',
             'author_firstname' => 'sometimes|required|string|max:45|regex:/^[A-Za-z\s]+$/',
@@ -436,9 +436,9 @@ class BookService {
                         throw new Exception("Cannot directly mark a borrowed book as damaged. Damage reports must be submitted by staff and approved through the proper process.");
                     }
 
-                    if ($currentStatus === BookCopyStatus::LOST && $newStatus === BookCopyStatus::AVAILABLE) {
-                       throw new Exception("Cannot directly mark a lost book as available. Lost reports must be reviewed and approved through the proper process.");
-                    }
+                    // if ($currentStatus === BookCopyStatus::LOST && $newStatus === BookCopyStatus::AVAILABLE) {
+                    //    throw new Exception("Cannot directly mark a lost book as available. Lost reports must be reviewed and approved through the proper process.");
+                    // }
 
                     // Otherwise, update status normally
                     $copy->update(['status' => $newStatus]);

@@ -51,7 +51,7 @@ export async function openBorrowerProfileModal(userId) {
     });
 
     const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(userId)
-    await initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold);
+    await initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold, true);
 
     // Ensure modal and its scrollable content are scrolled to top after showing
     const scrollableContainer = document.getElementById('borrower-profile-scrollable-content');
@@ -61,7 +61,7 @@ export async function openBorrowerProfileModal(userId) {
 }
 
 
-export function closeBorrowerModal(withAnimation = true) {
+export function closeBorrowerModal(withAnimation = true, reloadProfileTabs = false) {
     const modalContent = document.getElementById('borrower-profile-content');
 
     if (withAnimation) {
@@ -74,13 +74,15 @@ export function closeBorrowerModal(withAnimation = true) {
     modalContent.classList.remove('scale-100', 'opacity-100');
     modalContent.classList.add('scale-95', 'opacity-0');
     
-    const { resetTabsToDefault } = initializeBorrowerTabs();
-    showSkeleton(borrowerModal, '#borrower-profile-skeleton', '#borrower-profile-real');
     setTimeout(() => {
         borrowerModal.classList.add('hidden');
         // showSkeleton(borrowerModal, '#borrower-profile-skeleton', '#borrower-profile-real');
-        restoreProfileContent(borrowerModal, null);
-        resetTabsToDefault();
+        restoreProfileContent(borrowerModal, null, false);
+          showSkeleton(borrowerModal, '#borrower-profile-skeleton', '#borrower-profile-real');
+        if (reloadProfileTabs) {
+            const { resetTabsToDefault } = initializeBorrowerTabs();
+            resetTabsToDefault();
+        }
     }, 150);
 
 }

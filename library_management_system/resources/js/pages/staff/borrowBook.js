@@ -202,7 +202,7 @@ async function loadAvailableBooks(borrower, { search = '', sort = 'title_asc', p
                     }
                     // Pass borrower and book to confirm modal
                     openConfirmBorrowModal(borrower, book);
-                    closeBorrowerModal();
+                    closeBorrowerModal(false, false);
                 } catch (error) {
                     showError('Something went wrong', error + 'Failed to load book information.');
                 }
@@ -248,11 +248,11 @@ function renderPagination(meta, borrower, params) {
 let isRestoringProfile = false;
 let restoreTimer = null;
 
-export function restoreProfileContent(modal, borrower, options = {}) {
+export function restoreProfileContent(modal, borrower, reloadProfileTabs = true) {
     // const { force = false } = options;
 
     // If already on profile view and not forced, skip restore
-    if (modal?.dataset?.view === 'profile' && !force) {
+    if (modal?.dataset?.view === 'profile') {
         return;
     }
 
@@ -270,7 +270,7 @@ export function restoreProfileContent(modal, borrower, options = {}) {
     if (modal.dataset.originalContent) {
         modalContent.innerHTML = modal.dataset.originalContent;
         // Re-bind borrower profile UI only once per restore
-        initializeBorrowerProfileUI(modal, borrower);
+        initializeBorrowerProfileUI(modal, borrower, null, reloadProfileTabs);
 
         const closeBtn = modal.querySelector('#close-borrower-modal');
         if (closeBtn) {

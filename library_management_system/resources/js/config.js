@@ -20,6 +20,7 @@ export const API_ROUTES ={
 export const SEARCH_COLUMN_INDEXES = {
     BOOK_CATALOG: [2, 3], // Title, Author, ISBN
     SEMESTER_CATALOG: [1], // Semester Name
+    BORROWERS_LIST: [2, 3], // Borrower Name, ID Number
 }
 
 export const BOOK_ROUTES = {

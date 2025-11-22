@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('publisher')->nullable();
             $table->year('publication_year')->nullable();
             $table->enum('language', ['English', 'Filipino', 'Spanish', 'Chinese', 'Others'])->default('English');
-            $table->float('price')->nullable();
+            $table->float('price');
             $table->foreignId('author_id')->constrained('authors')->onDelete('cascade');
             $table->foreignId('genre_id')->constrained('genres')->onDelete('cascade');
             $table->timestamps();

@@ -1,5 +1,5 @@
-import { closeBorrowerModal } from './borrowerProfileModal.js';
 import { openConfirmReturnModal } from '../confirmReturn.js';
+import { openConfirmRenewModal } from '../confirmRenew.js';
 
 export function attachTransactionActions(tbody, borrowedBooks, borrower) {
     // Attach Return button listeners
@@ -19,7 +19,10 @@ export function attachTransactionActions(tbody, borrowedBooks, borrower) {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             const txId = this.dataset.transactionId;
-            // TODO: Implement renew functionality
+            const transaction = borrowedBooks.find(t => String(t.id) === String(txId));
+            if (!transaction) return;
+            // closeBorrowerModal(false);
+            openConfirmRenewModal(borrower, transaction);
             
         });
     });

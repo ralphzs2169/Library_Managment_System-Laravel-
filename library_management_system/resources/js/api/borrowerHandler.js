@@ -2,7 +2,46 @@ import { showError, showWarning, showConfirmation, showToast } from "../utils.js
 import { PENALTY_ROUTES } from "../config.js";
 import { VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
-import { closePaymentModal } from "../pages/staff/borrower/borrowerPaymentHandler.js";
+import { getCurrentFilters } from "../pages/staff/borrowersPagination.js";
+import { filters } from "../pages/staff/borrowersPagination.js";
+
+export async function loadBorrowers(page = filters.page, scrollUp = true) {
+    const container = document.querySelector('#members-table-container');
+    if (!container) return;
+    
+    Object.assign(filters, getCurrentFilters(), { page });
+    const params = new URLSearchParams({
+        page,
+        ...filters
+    });
+
+    try {
+        const response = await fetch(`?${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        });
+
+        if (response.ok) {
+            const html = await response.text();
+            container.innerHTML = html;
+            
+            // Highlight search matches after content is loaded
+            if (filters.search) {
+                highlightSearchMatches(filters.search, '#members-table-container', [1, 2]);
+            }
+            
+            if (scrollUp) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        } else {
+            showError('Something went wrong', 'Unable to load members. Please try again.');
+        }
+    } catch (error) {
+        showError('Something went wrong', 'Unable to load members. Please try again.');
+    }
+}
 
 export async function fetchBorrowerDetails(userId) {
      try {
@@ -49,7 +88,7 @@ export async function updatePenalty(paymentDetails, form) {
         if (!response.ok) {
             if (response.status === VALIDATION_ERROR) {
                 // Check for invalid status (business rule violation)
-                displayInputErrors(result.errors, form);
+                displayInputErrors(result.errors, form, false);
                 return false;
             }
             showWarning('Something went wrong', 'Please try again.');
@@ -89,6 +128,7 @@ export async function updatePenalty(paymentDetails, form) {
         }
         
         showToast('Payment processed successfully!', 'success');
+        loadBorrowers(undefined, false);
         return true;
         // showSuccessWithRedirect('Success', 'Book updated successfully!', window.location.href);
     }

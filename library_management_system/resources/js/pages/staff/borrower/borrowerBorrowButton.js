@@ -27,8 +27,9 @@ export async function setupBorrowBookButton(modal, borrower) {
             return;
         }
 
+        console.log(borrower)
         // 3. Check borrow limit
-        if (borrower.borrow_transactions && borrower.borrow_transactions.length >= 3) {
+        if (borrower.active_borrows && borrower.active_borrows.length >= 3) {
             disableButton(borrowBookBtn, 'Borrower has reached the maximum limit of 3 borrowed books.');
             return;
         }

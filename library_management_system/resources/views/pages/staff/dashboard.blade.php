@@ -90,6 +90,7 @@
         </div>
     </div>
 
+    @include('modals.confirm-renew')
     @include('modals.confirm-borrow')
     @include('modals.confirm-return')
     @include('modals.borrower-profile')
@@ -100,5 +101,6 @@
 @vite('resources/js/pages/staff/borrowBook.js')
 @vite('resources/js/pages/staff/confirmBorrow.js')
 @vite('resources/js/pages/staff/confirmReturn.js')
+@vite('resources/js/pages/staff/confirmRenew.js')
 @vite('resources/js/pages/staff/borrower/borrowerPaymentHandler.js')
 @vite('resources/js/pages/staff/borrowersPagination.js')

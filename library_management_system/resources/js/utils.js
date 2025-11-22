@@ -310,10 +310,10 @@ export function disableButton(button, msg = '') {
     
     // Add tooltip
     const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 bg-white text-black text-xs rounded-lg shadow-lg border border-gray-300 pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap z-50';
+    tooltip.className = 'tooltip absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg border border-gray-300 pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap z-50';
     tooltip.innerHTML = `
         ${msg}
-        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-white"></div>
+        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
     `;
     
     wrapper.appendChild(tooltip);

@@ -2,12 +2,10 @@ import { showBorrowBookContent, restoreProfileContent } from './borrowBook.js';
 import { borrowBook } from '../../api/borrowTransactionHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { fetchSettings } from '../../api/settingsHandler.js';
-import { closeBorrowerModal } from './borrower/borrowerProfileModal.js';
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
 // Store borrower data for navigation
 let currentBorrower = null;
-let currentBook = null;
 
 const copySelect = document.getElementById('book_copy_id');
 const dueDateInput = document.getElementById('due_date');
@@ -212,7 +210,7 @@ export function closeConfirmBorrowModal() {
         const profileModal = document.getElementById('borrower-profile-modal');
 
         if (profileModal && currentBorrower) {
-            restoreProfileContent(profileModal, currentBorrower, null);
+            restoreProfileContent(profileModal, currentBorrower, false);
         }
     }, 150);
 }

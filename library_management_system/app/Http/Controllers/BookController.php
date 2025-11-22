@@ -164,7 +164,7 @@ class BookController extends Controller
                 'publication_year' => 'nullable|digits:4|integer|min:1901|max:' . date('Y'),
                 'copies_available' => 'required|integer|min:1',
                 'language' => 'required|in:English,Filipino,Spanish,Chinese,Others',
-                'price' => 'nullable|numeric|min:0',
+                'price' => 'required|numeric|min:0',
                 'genre' => 'required|exists:genres,id',
                 'category' => 'required|exists:categories,id',
             ]);
