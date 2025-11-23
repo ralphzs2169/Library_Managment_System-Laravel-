@@ -270,7 +270,7 @@ export function restoreProfileContent(modal, borrower, reloadProfileTabs = true)
     if (modal.dataset.originalContent) {
         modalContent.innerHTML = modal.dataset.originalContent;
         // Re-bind borrower profile UI only once per restore
-        initializeBorrowerProfileUI(modal, borrower, null, reloadProfileTabs);
+        initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs);
 
         const closeBtn = modal.querySelector('#close-borrower-modal');
         if (closeBtn) {

@@ -55,25 +55,37 @@ export async function initializeConfirmBorrowModal(modal, borrower, book) {
         populateCopyNumbers(modal, book);
     }
 
-    const settings = await fetchSettings();
-    const borrowDuration = settings['borrowing.borrow_duration'];
-    // Attach clear error logic to input fields
+   const settings = await fetchSettings();
+
+   const borrowDuration = borrower.role === 'student'
+    ? settings['borrowing.student_duration']
+    : settings['borrowing.teacher_duration'];
+
+    // Elements
     const copySelect = modal.querySelector('#book_copy_id');
     const dueDateInput = modal.querySelector('#due_date');
     const borrowDurationMsg = modal.querySelector('#borrow-duration');
 
+    // Display standard duration
     if (borrowDurationMsg && borrowDuration) {
         borrowDurationMsg.textContent = `Standard: ${borrowDuration} days from today`;
     }
 
-    if (borrowDuration) {
+    // Set default due date
+    if (dueDateInput && borrowDuration) {
         const today = new Date();
-        today.setDate(today.getDate() + parseInt(borrowDuration));
-        
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        
+        today.setHours(0, 0, 0, 0); // force 00:00
+
+        // Add borrow duration
+        const dueDate = new Date(today);
+        // The backend expects "up to N days from today", so due date should be today + (borrowDuration - 1)
+        dueDate.setDate(dueDate.getDate() + parseInt(borrowDuration, 10) - 1);
+
+        // Format YYYY-MM-DD
+        const year = dueDate.getFullYear();
+        const month = String(dueDate.getMonth() + 1).padStart(2, '0');
+        const day = String(dueDate.getDate()).padStart(2, '0');
+
         dueDateInput.value = `${year}-${month}-${day}`;
     }
 

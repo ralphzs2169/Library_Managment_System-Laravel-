@@ -67,7 +67,7 @@ export async function fetchBorrowerDetails(userId) {
                 return;
            }
            
-            return { borrower: data.user, dueReminderThreshold: data.due_reminder_threshold, borrowDuration: data.borrow_duration };
+            return data.borrower;
         } catch (error) {
             showError('Network Error', 'Unable to load borrower details. Please try again later.');
         }

@@ -218,8 +218,8 @@ async function handleConfirmReturn() {
     if (result) {
         // returnToBorrowerProfile();
         const modal = document.getElementById('borrower-profile-modal');
-        const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(currentBorrower.id)
-        await initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold);
+        const freshBorrowerDetails = await fetchBorrowerDetails(currentBorrower.id)
+        await initializeBorrowerProfileUI(modal, freshBorrowerDetails);
         closeConfirmReturnModal();
     }
 }

@@ -171,8 +171,8 @@ async function processPenaltyPayment(penaltyId, currentBorrower) {
     const result = await updatePenalty(formData, form.id);
     if (result) {
             const modal = document.getElementById('borrower-profile-modal');
-            const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(currentBorrower.id);
-            await initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold, true, 'penalties-tab');
-            closePaymentModal(borrower);
+            const freshBorrower = await fetchBorrowerDetails(currentBorrower.id);
+            await initializeBorrowerProfileUI(modal, freshBorrower, true, 'penalties-tab');
+            closePaymentModal(freshBorrower);
         }
 }

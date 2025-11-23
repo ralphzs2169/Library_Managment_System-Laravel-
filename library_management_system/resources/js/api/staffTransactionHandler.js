@@ -12,8 +12,7 @@ export async function borrowBook(borrowData) {
     borrowData.append('_token', csrfToken);
 
     // Step 1: Validate only
-    borrowData.append('validate_only', 1);
-    let response = await fetch(TRANSACTION_ROUTES.BORROW, {
+    let response = await fetch(TRANSACTION_ROUTES.BORROW_VALIDATE, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -26,34 +25,33 @@ export async function borrowBook(borrowData) {
 
     if (!response.ok) {
         if (response.status === VALIDATION_ERROR) {
-            if (result.status === 'invalid'){
-                showWarning('Invalid Borrowing', result.message);
-                closeConfirmBorrowModal();
-            }
-            displayInputErrors(result.errors, 'confirm-borrow-modal', false);
-            
-            // Scroll to first error within the modal
+            displayInputErrors(result.data.errors, 'confirm-borrow-modal', false);
             scrollToFirstErrorInModal();
-            return;
+            return false;
+        } else if (response.status === BUSINESS_RULE_VIOLATION) {
+            showWarning('Borrowing Not Allowed', result.message);
+            closeConfirmBorrowModal();
+            return false;
+        } else if (response.status === NOT_FOUND) {
+            showWarning('Not Found', result.message);
+            closeConfirmBorrowModal();
+            return false;
         }
-        
-        showError('Something went wrong', 'Please try again.');
-        return;
+        showError('Something went wrong', result.message || 'Please try again Later.');
+        return false;
     }
 
     // Step 2: Show confirmation
     const isConfirmed = await showConfirmation(
         'Confirm Borrowing?',
-        'Are you sure you want to lend this book?',
+         `You are about to borrow this book for ${result.data.borrower_fullname}. Proceed?`,
         'Yes, confirm'
     );
     
     if (!isConfirmed) return;
 
-    borrowData.delete('validate_only');
-
     // Step 3: Submit borrow
-    response = await fetch(TRANSACTION_ROUTES.BORROW, {
+    response = await fetch(TRANSACTION_ROUTES.BORROW_PERFORM, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -193,6 +191,6 @@ export async function renewBook(renewData) {
 
     // Close modal first
     loadBorrowers(undefined, false);
-    showToast('Rewewal Transaction Successful!', 'success');
+    showToast('Rewewal Renewed Successful!', 'success');
     return true;
 }

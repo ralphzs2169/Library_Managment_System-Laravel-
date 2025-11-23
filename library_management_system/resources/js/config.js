@@ -42,8 +42,12 @@ export const SEMESTER_ROUTES = {
 
 export const TRANSACTION_ROUTES = {
     INDEX: '/staff/transaction',
-    BORROW: '/staff/transaction/borrow',
+
+    BORROW_VALIDATE: '/staff/transaction/borrow/validate',
+    BORROW_PERFORM: '/staff/transaction/borrow/perform',
+
     RETURN: '/staff/transaction/return',
+
     VALIDATE_RENEWAL: '/staff/transaction/renewal/validate',
     PERFORM_RENEWAL: '/staff/transaction/renewal/perform',
 }

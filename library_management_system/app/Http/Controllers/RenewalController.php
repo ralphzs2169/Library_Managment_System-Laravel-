@@ -30,11 +30,11 @@ class RenewalController extends Controller
         $result = RenewalPolicy::canRenew($renewer, $transaction, true, $request->all());
         
         switch ($result['result']) {
-                case 'success': return $this->jsonResponse('valid', 'Validation passed', 200, ['renewer_fullname' => $result['renewer_fullname']]);
-                case 'not_found': return $this->jsonResponse('not_found', $result['message'], 404);
-                case 'invalid_input': return $this->jsonResponse('invalid_input', $result['message'], 422, ['errors' => $result['errors']]);
-                case 'business_rule_violation': return $this->jsonResponse('business_rule_violation', $result['message'], 400);
-                default: return $this->jsonResponse('error', 'Unknown validation error', 500);
+            case 'success': return $this->jsonResponse('valid', 'Validation passed', 200, ['renewer_fullname' => $result['renewer_fullname']]);
+            case 'not_found': return $this->jsonResponse('not_found', $result['message'], 404);
+            case 'invalid_input': return $this->jsonResponse('invalid_input', $result['message'], 422, ['errors' => $result['errors']]);
+            case 'business_rule_violation': return $this->jsonResponse('business_rule_violation', $result['message'], 400);
+            default: return $this->jsonResponse('error', 'Unknown validation error', 500);
         }
     }
 

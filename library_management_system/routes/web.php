@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\RenewalController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SemesterController;
@@ -79,7 +80,9 @@ Route::prefix('staff')
             return response()->json(['has_active_semester' => $hasActive]);
         });
 
-        Route::post('/transaction/borrow', [UserController::class, 'borrowBook'])->name('staff-transaction.borrow');
+        Route::post('/transaction/borrow/validate', [BorrowController::class, 'validateBorrow'])->name('staff-transaction.borrow.validate');
+        Route::post('/transaction/borrow/perform', [BorrowController::class, 'performBorrow'])->name('staff-transaction.borrow.perform');
+
         Route::post('/transaction/return', [UserController::class, 'returnBook'])->name('staff-transaction.return');
 
         Route::post('/transaction/renewal/validate', [RenewalController::class, 'validateRenewal'])->name('staff-transaction.renewal.validate');

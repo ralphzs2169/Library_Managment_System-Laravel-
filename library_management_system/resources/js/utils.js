@@ -273,6 +273,7 @@ export function debounce(fn, delay) {
 
 export function resetButton(button) {
     // Remove disabled state
+    console.log('Resetting button:', button);
     button.disabled = false;
     button.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
     button.classList.add('hover:bg-accent/80', 'bg-accent', 'cursor-pointer');

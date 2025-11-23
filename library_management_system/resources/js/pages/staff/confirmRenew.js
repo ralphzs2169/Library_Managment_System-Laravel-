@@ -11,7 +11,7 @@ let currentTransaction = null;
 export async function initializeConfirmRenewModal(modal, renewer, transaction) {
     currentRenewer = renewer;
     currentTransaction = transaction;
-
+    console.table(renewer);
     // renewer info
     const renewerName = modal.querySelector('#renewer-name');
     const renewerId = modal.querySelector('#renewer-id');
@@ -30,17 +30,17 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
 
     // Book info
     const book = transaction.book_copy.book;
-    modal.querySelector('#confirm-renew-book-cover').src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
-    modal.querySelector('#confirm-renew-book-title').textContent = book.title || 'Untitled';
-    modal.querySelector('#confirm-renew-book-author').textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
-    modal.querySelector('#confirm-renew-book-isbn').textContent = book.isbn || 'N/A';
-    modal.querySelector('#confirm-renew-copy-number').textContent = transaction.book_copy.copy_number || 'N/A';
-    modal.querySelector('#confirm-renew-initial-borrow-date').textContent = transaction.borrowed_at ? new Date(transaction.borrowed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
-    modal.querySelector('#confirm-renew-current-due-date').textContent = transaction.due_at ? new Date(transaction.due_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+    modal.querySelector('#renew-book-cover').src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
+    modal.querySelector('#renew-book-title').textContent = book.title || 'Untitled';
+    modal.querySelector('#renew-book-author').textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
+    modal.querySelector('#renew-book-isbn').textContent = book.isbn || 'N/A';
+    modal.querySelector('#renew-copy-number').textContent = transaction.book_copy.copy_number || 'N/A';
+    modal.querySelector('#renew-initial-borrow-date').textContent = transaction.borrowed_at ? new Date(transaction.borrowed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+    modal.querySelector('#renew-current-due-date').textContent = transaction.due_at ? new Date(transaction.due_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
 
     // Due date input
     const dueDateInput = modal.querySelector('#new-due-date');
-    const renewDurationMsg = modal.querySelector('#confirm-renew-borrow-duration');
+    const renewDurationMsg = modal.querySelector('#renew-borrow-duration');
 
    
     const settings = await fetchSettings();
@@ -88,19 +88,19 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
     }
 
     // Cancel button
-    const cancelBtn = modal.querySelector('#confirm-renew-cancel-borrow-button');
+    const cancelBtn = modal.querySelector('#renew-cancel-button');
     if (cancelBtn) {
         cancelBtn.onclick = closeConfirmRenewModal;
     }
 
     // Back button
-    const backBtn = modal.querySelector('#confirm-renew-back-to-borrow-book-button');
+    const backBtn = modal.querySelector('#renew-back-to-borrower-profile');
     if (backBtn) {
         backBtn.onclick = returnToBorrowerProfileModal;
     }
 
     // Close button
-    const closeBtn = modal.querySelector('#confirm-renew-close-confirm-modal');
+    const closeBtn = modal.querySelector('#renew-close-confirm-modal');
     if (closeBtn) {
         closeBtn.onclick = closeConfirmRenewModal;
     }
@@ -218,9 +218,8 @@ async function handleConfirmRenew(currentRenewer, currentTransaction) {
     if (result) {
         const modal = document.getElementById('borrower-profile-modal');
         console.log('currentRenewer:', currentRenewer);
-        const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(currentRenewer.id);
-        const freshBorrowerDetails = borrower;
-        await initializeBorrowerProfileUI(modal, freshBorrowerDetails, dueReminderThreshold, true);
+        const freshBorrowerDetails = await fetchBorrowerDetails(currentRenewer.id);
+        await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true);
         closeConfirmRenewModal();
     }
 }

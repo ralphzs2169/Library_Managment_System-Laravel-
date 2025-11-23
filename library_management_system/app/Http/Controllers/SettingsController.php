@@ -40,13 +40,19 @@ class SettingsController extends Controller
             $request->validate([
                 'max_books_per_student' => 'required|integer|min:1|max:10',
                 'max_books_per_teacher' => 'required|integer|min:1|max:20',
-                'borrow_duration' => 'required|integer|min:1|max:90',
-                'student_renewal_limit' => 'required|integer|min:1|max:90',
-                'teacher_renewal_limit' => 'required|integer|min:1|max:90',
+
                 'student_duration' => 'required|integer|min:1|max:90',
                 'teacher_duration' => 'required|integer|min:1|max:90',
+
+                'student_renewal_limit' => 'required|integer|min:1|max:90',
+                'teacher_renewal_limit' => 'required|integer|min:1|max:90',
+
+                'renewing_student_duration' => 'required|integer|min:1|max:90',
+                'renewing_teacher_duration' => 'required|integer|min:1|max:90',
+
                 'student_min_days_before_renewal' => 'required|integer|min:1|max:90',
                 'teacher_min_days_before_renewal' => 'required|integer|min:1|max:90',
+
                 'rate_per_day' => 'required|numeric|min:0|max:100',
                 'max_amount' => 'required|numeric|min:0',
                 'lost_fee_multiplier' => 'required|numeric|min:0|max:5',
@@ -55,12 +61,19 @@ class SettingsController extends Controller
             ], [
                 'max_books_per_student.required' => 'The max books per student field is required.',
                 'max_books_per_teacher.required' => 'The max books per teacher field is required.',
+                
+                'student_duration.required' => 'The student borrow duration field is required.',
+                'teacher_duration.required' => 'The teacher borrow duration field is required.',
+                
                 'student_renewal_limit.required' => 'The student renewal limit field is required.',
                 'teacher_renewal_limit.required' => 'The teacher renewal limit field is required.',
-                'student_duration.required' => 'The student renewal duration field is required.',
-                'teacher_duration.required' => 'The teacher renewal duration field is required.',
+                
+                'renewing_student_duration.required' => 'The student renewal duration field is required.',
+                'renewing_teacher_duration.required' => 'The teacher renewal duration field is required.',
+                
                 'student_min_days_before_renewal.required' => 'The student min days before renewal field is required.',
                 'teacher_min_days_before_renewal.required' => 'The teacher min days before renewal field is required.',
+                
                 'rate_per_day.required' => 'The penalty rate per day field is required.',
                 'max_amount.required' => 'The penalty max amount field is required.',
                 'lost_fee_multiplier.required' => 'The lost book multiplier field is required.',

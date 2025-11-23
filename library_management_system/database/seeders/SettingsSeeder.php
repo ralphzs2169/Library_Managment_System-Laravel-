@@ -16,7 +16,8 @@ class SettingsSeeder extends Seeder
             // Borrowing rules
             ['key' => 'borrowing.max_books_per_student', 'value' => 3, 'group' => 'borrowing'],
             ['key' => 'borrowing.max_books_per_teacher', 'value' => 5, 'group' => 'borrowing'],
-            ['key' => 'borrowing.borrow_duration', 'value' => 7, 'group' => 'borrowing'],
+            ['key' => 'borrowing.student_duration', 'value' => 7, 'group' => 'borrowing'],
+            ['key' => 'borrowing.teacher_duration', 'value' => 14, 'group' => 'borrowing'],
 
 
             // Renewal Rules

@@ -1,17 +1,17 @@
-import { setupBorrowBookButton } from './borrowerBorrowButton.js';
 import { attachTransactionActions } from './borrowerTransactionActions.js';
 import { attachPaymentActions } from './borrowerPaymentHandler.js';
 import { initializeBorrowerTabs } from './tabbedContainer.js';
-import { showSkeleton, hideSkeleton, disableButton } from '../../../utils.js';
+import { showSkeleton, hideSkeleton, disableButton, showWarning, resetButton } from '../../../utils.js';
+import { fetchSettings } from '../../../api/settingsHandler.js';
+import { showBorrowBookContent } from '../borrowBook.js';
 
-export async function initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold, reloadProfileTabs = true, initialActiveTab = 'currently-borrowed-tab') {
+export async function initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs = true, initialActiveTab = 'currently-borrowed-tab') {
     if (!borrower) return;
-
+    
     // Show skeleton
     let skeletonTimer = setTimeout(() => {
         showSkeleton(modal, '#borrower-profile-skeleton', '#borrower-profile-real');
     }, 100); // Show skeleton if loading takes more than 100ms
-
     try {
         populateProfilePicture(modal, borrower);
         populateBasicInfo(modal, borrower);
@@ -20,7 +20,8 @@ export async function initializeBorrowerProfileUI(modal, borrower, dueReminderTh
         populateContactDetails(modal, borrower);
         populateTotalFines(modal, borrower);
         populatePlaceholderData(modal);
-        populateCurrentlyBorrowedBooks(modal, borrower, dueReminderThreshold);
+        setupBorrowBookButton(modal, borrower);
+        populateCurrentlyBorrowedBooks(modal, borrower);
         populateActivePenalties(modal, borrower);
 
         if (reloadProfileTabs) {
@@ -28,12 +29,31 @@ export async function initializeBorrowerProfileUI(modal, borrower, dueReminderTh
             console.log('Reloading profile tabs with initial active tab:', initialActiveTab);
         }
         
-        await setupBorrowBookButton(modal, borrower);
     } finally {
         clearTimeout(skeletonTimer);
         hideSkeleton(modal, '#borrower-profile-skeleton', '#borrower-profile-real');
     }
 }
+
+function setupBorrowBookButton(modal, borrower) {
+    const borrowBookBtn = modal.querySelector('#borrow-book-btn');
+
+    resetButton(borrowBookBtn);
+    // Remove any existing click listener first
+    borrowBookBtn.replaceWith(borrowBookBtn.cloneNode(true)); 
+    const newBtn = modal.querySelector('#borrow-book-btn');
+
+    if (borrower.can_borrow.result === 'success') {
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showBorrowBookContent(modal, borrower, false);
+        });
+        return;
+    }
+
+    disableButton(newBtn, borrower.can_borrow.message || 'Borrowing not allowed.');
+}
+
 
 function populateProfilePicture(modal, borrower) {  
     const profilePicture = modal.querySelector('#borrower-profile-picture');
@@ -169,10 +189,19 @@ function populatePlaceholderData(modal) {
     if (reservation) reservation.textContent = 'None';
 }
 
-function populateCurrentlyBorrowedBooks(modal, borrower, dueReminderThreshold) {
+async function populateCurrentlyBorrowedBooks(modal, borrower) {
     const tbody = modal.querySelector('#currently-borrowed-tbody');
     const borrowedCountElem = modal.querySelector('#borrowed-count');
     const borrowedHeaderCountElem = modal.querySelector('.bg-accent\\/10.text-accent.font-bold'); // header count badge
+
+    const settings = await fetchSettings(); 
+
+    if (!settings) {
+        showWarning('Something went wrong', 'Unable to load application settings. Some features may not work as expected.');
+        return;
+    }
+    
+    const dueReminderThreshold = parseInt(settings['notifications.reminder_days_before_due']);
     
     if (!tbody) return;
     
@@ -218,7 +247,7 @@ function populateCurrentlyBorrowedBooks(modal, borrower, dueReminderThreshold) {
         const isReturned = transaction.returned_at !== null;
 
         const dueDateText = dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
+        
         // Badge configuration matching Blade table style
         const badgeConfig = {
             overdue: {
@@ -308,7 +337,6 @@ function generateTransactionButtons(transaction, isReturned, status, daysOverdue
     let renewButton = '';
     let returnButton = '';
 
-    console.log('Generating buttons for transaction:', transaction);
     // Can renew if not returned, status is 'borrowed', and not overdue
     if (transaction.can_renew.result === 'success') {
         renewButton = `

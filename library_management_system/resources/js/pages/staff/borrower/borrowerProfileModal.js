@@ -2,7 +2,7 @@ import { fetchBorrowerDetails } from '../../../api/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrowerProfilePopulators.js';
 import { restoreProfileContent } from '../borrowBook.js';
 import { initializeBorrowerTabs } from './tabbedContainer.js';
-import { showSkeleton } from '../../../utils.js';
+import { resetButton, showSkeleton } from '../../../utils.js';
 
 const closeBorrowerModalBtn = document.getElementById('close-borrower-modal');
 const borrowerModal = document.getElementById('borrower-profile-modal');
@@ -50,8 +50,8 @@ export async function openBorrowerProfileModal(userId) {
         modalContent.classList.add('scale-100', 'opacity-100');
     });
 
-    const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(userId)
-    await initializeBorrowerProfileUI(modal, borrower, dueReminderThreshold, true);
+    const borrower = await fetchBorrowerDetails(userId)
+    await initializeBorrowerProfileUI(modal, borrower, true);
 
     // Ensure modal and its scrollable content are scrolled to top after showing
     const scrollableContainer = document.getElementById('borrower-profile-scrollable-content');
@@ -78,7 +78,7 @@ export function closeBorrowerModal(withAnimation = true, reloadProfileTabs = fal
         borrowerModal.classList.add('hidden');
         // showSkeleton(borrowerModal, '#borrower-profile-skeleton', '#borrower-profile-real');
         restoreProfileContent(borrowerModal, null, false);
-          showSkeleton(borrowerModal, '#borrower-profile-skeleton', '#borrower-profile-real');
+        showSkeleton(borrowerModal, '#borrower-profile-skeleton', '#borrower-profile-real');
         if (reloadProfileTabs) {
             const { resetTabsToDefault } = initializeBorrowerTabs();
             resetTabsToDefault();

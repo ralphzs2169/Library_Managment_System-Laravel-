@@ -22,58 +22,16 @@ use App\Enums\IssueReportType;
 use App\Enums\IssueReportStatus;
 use App\Models\Payment;
 use App\Enums\LibraryStatus;
-use App\Enums\ActivityLogActions;
-use App\Models\RenewalTransaction;
-use Illuminate\Support\Facades\Log;
+use App\Policies\BorrowPolicy;
 use App\Policies\RenewalPolicy;
 
 class UserService
 {
-    public function borrowBook(Request $request, $bookCopy)
-    {
-        return DB::transaction(function () use ($request, $bookCopy) {
-            $bookCopy->refresh(); // reload latest status
-
-            if ($bookCopy->status !== 'available' || $bookCopy->pendingIssueReport()->exists()) {
-                throw new \Exception('Book is no longer available.');
-            }
-
-            $borrower = User::findOrFail($request->input('borrower_id'));
-            $bookCopy = BookCopy::with('book')->findOrFail($request->input('book_copy_id'));
-            $book = $bookCopy->book; // Get book from book copy
-
-            $activeSemester = Semester::where('status', 'active')->first();
-            
-            // Create the borrow transaction
-            $transaction = BorrowTransaction::create([
-                'user_id' => $borrower->id,
-                'book_copy_id' => $bookCopy->id,
-                'semester_id' => $activeSemester ? $activeSemester->id : null,
-                'borrowed_at' => now(),
-                'due_at' => $request->input('due_date'),
-                'status' => 'borrowed'
-            ]);
-
-            // Update book copy status
-            $bookCopy->update(['status' => 'borrowed']);
-
-            // Create activity log
-            ActivityLog::create([
-                'action' => 'borrowed',
-                'details' => $borrower->full_name . ' borrowed "' . $book->title . '" (Copy #' . $bookCopy->copy_number . ')',
-                'entity_type' => 'BorrowTransaction',
-                'entity_id' => $transaction->id,
-                'user_id' => $request->user()->id,
-            ]);
-
-            return $transaction;
-        });
-    }
 
 public function getBorrowerDetails(int $userId)
 {
     // Load user with student/teacher relationships
-    $user = User::with(['students.department', 'teachers.department'])
+    $borrower = User::with(['students.department', 'teachers.department'])
         ->findOrFail($userId);
 
     // Get active borrow transactions (not yet returned, status borrowed/overdue)
@@ -84,132 +42,77 @@ public function getBorrowerDetails(int $userId)
         ->get();
 
     foreach ($activeBorrows as $transaction) {
-        $transaction->can_renew = RenewalPolicy::canRenew($user, $transaction, false);
+        $transaction->can_renew = RenewalPolicy::canRenew($borrower, $transaction, false);
     }
 
-    // Get all transactions that have unpaid or partially paid penalties
-  $transactionsWithActivePenalties = BorrowTransaction::with(['bookCopy.book.author', 'penalties.payments'])
-    ->where('user_id', $userId)
-    ->whereHas('penalties', fn($query) => $query->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]))
-    ->get()
-    ->flatMap(function ($borrowTransaction) {
-        return $borrowTransaction->penalties
-            ->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
-            ->map(function ($singlePenalty) use ($borrowTransaction) {
+        // Get all transactions that have unpaid or partially paid penalties
+    $transactionsWithActivePenalties = BorrowTransaction::with(['bookCopy.book.author', 'penalties.payments'])
+        ->where('user_id', $userId)
+        ->whereHas('penalties', fn($query) => $query->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]))
+        ->get()
+        ->flatMap(function ($borrowTransaction) {
+            return $borrowTransaction->penalties
+                ->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
+                ->map(function ($singlePenalty) use ($borrowTransaction) {
 
-                // Clone the borrow transaction so we can attach a single penalty
-                $transactionCopy = clone $borrowTransaction;
+                    // Clone the borrow transaction so we can attach a single penalty
+                    $transactionCopy = clone $borrowTransaction;
 
-                // Remove the full penalties collection to avoid duplication
-                unset($transactionCopy->penalties);
+                    // Remove the full penalties collection to avoid duplication
+                    unset($transactionCopy->penalties);
 
-                // Attach the full penalty info, plus remaining_amount calculation
-                $singlePenalty->remaining_amount = $singlePenalty->status === PenaltyStatus::PARTIALLY_PAID
-                    ? (float) $singlePenalty->amount - (float) $singlePenalty->payments->sum(fn($payment) => (float) $payment->amount)
-                    : (float) $singlePenalty->amount;
+                    // Attach the full penalty info, plus remaining_amount calculation
+                    $singlePenalty->remaining_amount = $singlePenalty->status === PenaltyStatus::PARTIALLY_PAID
+                        ? (float) $singlePenalty->amount - (float) $singlePenalty->payments->sum(fn($payment) => (float) $payment->amount)
+                        : (float) $singlePenalty->amount;
 
-                $transactionCopy->penalty = $singlePenalty;
+                    $transactionCopy->penalty = $singlePenalty;
 
-                return $transactionCopy;
-            });
-    });
-
-
-
-    $today = now()->startOfDay();
-
-    // Compute overdue and days until due for active borrows
-    $activeBorrows->transform(function ($borrow) use ($today) {
-        $dueDate = Carbon::parse($borrow->due_at)->startOfDay();
-
-        if ($borrow->status === 'overdue') {
-            $borrow->days_overdue = $dueDate->diffInDays($today);
-            $borrow->days_until_due = null;
-        } else {
-            $borrow->days_overdue = null;
-            $borrow->days_until_due = $dueDate->gt($today) ? $today->diffInDays($dueDate) : 0;
-        }
-
-        return $borrow;
-    });
-
-    // Compute days overdue for transactions with penalties
-    $transactionsWithActivePenalties->transform(function ($transaction) {
-        if ($transaction->returned_at) {
-            $dueDate = Carbon::parse($transaction->due_at)->startOfDay();
-            $returnedDate = Carbon::parse($transaction->returned_at)->startOfDay();
-            $transaction->days_overdue = $returnedDate->gt($dueDate) ? $dueDate->diffInDays($returnedDate) : 0;
-        } else {
-            $transaction->days_overdue = null;
-        }
-
-        $transaction->days_until_due = null;
-
-        return $transaction;
-    });
-
-    // Config values
-    $dueReminderThreshold = (int) config('settings.notifications.reminder_days_before_due', 3);
-    $borrowDurationDays = (int) config('settings.borrowing.borrow_duration', 14);
-
-    // Assign to user
-    $user->total_unpaid_fines = $user->getTotalUnpaidFinesAttribute();
-    $user->full_name = $user->getFullnameAttribute();
-    $user->active_borrows = $activeBorrows->values();
-    $user->transactions_with_penalties = $transactionsWithActivePenalties->values();
-
-    return [
-        'user' => $user,
-        'due_reminder_threshold' => $dueReminderThreshold,
-        'borrow_duration' => $borrowDurationDays,
-    ];
-}
+                    return $transactionCopy;
+                });
+        });
 
 
 
-    
-    public function validateBorrowRequest(Request $request)
-    {
-        // Ensure borrower exists
-        $borrower = User::find($request->input('borrower_id'));
-        if (!$borrower) {
-            return ['status' => 'invalid', 'message' => 'Borrower not found.'];
-        }
+        $today = now()->startOfDay();
 
-        // 1. Check for outstanding penalties
-        if ($borrower->library_status === 'suspended') {
-            return ['status' => 'invalid', 'message' => 'Borrowing suspended due to an outstanding penalty.'];
-        }
+        // Compute overdue and days until due for active borrows
+        $activeBorrows->transform(function ($borrow) use ($today) {
+            $dueDate = Carbon::parse($borrow->due_at)->startOfDay();
 
-        // 2. For students, check active semester and borrow limit
-        if ($borrower->role === 'student') {
-            $hasActive = Semester::where('status', 'active')->exists();
-            if (!$hasActive) {
-                return ['status' => 'invalid', 'message' => 'No active semester found. Students can only borrow during an active semester.'];
+            if ($borrow->status === 'overdue') {
+                $borrow->days_overdue = $dueDate->diffInDays($today);
+                $borrow->days_until_due = null;
+            } else {
+                $borrow->days_overdue = null;
+                $borrow->days_until_due = $dueDate->gt($today) ? $today->diffInDays($dueDate) : 0;
             }
 
-            $borrowCount = BorrowTransaction::where('user_id', $borrower->id)
-                ->where('status', 'borrowed')
-                ->count();
+            return $borrow;
+        });
 
-            if ($borrowCount >= 3) {
-                return ['status' => 'invalid', 'message' => 'Borrower has reached the maximum limit of 3 borrowed books.'];
+        // Compute days overdue for transactions with penalties
+        $transactionsWithActivePenalties->transform(function ($transaction) {
+            if ($transaction->returned_at) {
+                $dueDate = Carbon::parse($transaction->due_at)->startOfDay();
+                $returnedDate = Carbon::parse($transaction->returned_at)->startOfDay();
+                $transaction->days_overdue = $returnedDate->gt($dueDate) ? $dueDate->diffInDays($returnedDate) : 0;
+            } else {
+                $transaction->days_overdue = null;
             }
-        }
 
-        // 3. Field validation
-        $validator = Validator::make($request->all(), [
-            'book_copy_id' => 'required|exists:book_copies,id',
-            'borrower_id' => 'required|exists:users,id',
-            'due_date' => 'required|date|after:today',
-            'semester_id' => 'nullable|exists:semesters,id',
-        ]);
+            $transaction->days_until_due = null;
 
-        if ($validator->fails()) {
-            return ['status' => 'invalid', 'errors' => $validator->errors()];
-        }
+            return $transaction;
+        });
 
-        return ['status' => 'valid'];
+        // Assign to user
+        $borrower->total_unpaid_fines = $borrower->getTotalUnpaidFinesAttribute();
+        $borrower->full_name = $borrower->getFullnameAttribute();
+        $borrower->active_borrows = $activeBorrows->values();
+        $borrower->can_borrow = BorrowPolicy::canBorrow(false, ['borrower_id' => $userId]);
+        $borrower->transactions_with_penalties = $transactionsWithActivePenalties->values();
+        return ['borrower' => $borrower ];
     }
 
     public function returnBook(Request $request)

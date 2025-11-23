@@ -29,31 +29,53 @@
                     </h2>
                 </div>
                 <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Max Books (Student) -->
-                        <div class="field-container flex flex-col">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Max Books per Student</label>
-                            <div class="error-placeholder flex-1 text-sm" id="max_books_per_student-error-placeholder"></div>
-                            <input id="max_books_per_student" type="number" name="max_books_per_student" value="{{ $settings['borrowing.max_books_per_student'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="10">
-                            <p class="mt-1 text-xs text-gray-500">Maximum number of books a student can borrow</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Student Borrowing Config -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col gap-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <img src="{{ asset('build/assets/icons/student.svg') }}" alt="Student Icon" class="w-5 h-5">
+                                <h3 class="text-base font-semibold text-purple-700">Student Borrowing Settings</h3>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Max Books (Student) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Books per Student</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="max_books_per_student-error-placeholder"></div>
+                                    <input id="max_books_per_student" type="number" name="max_books_per_student" value="{{ $settings['borrowing.max_books_per_student'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="10">
+                                    <p class="mt-1 text-xs text-gray-500">Maximum number of books a student can borrow</p>
+                                </div>
+                                <!-- Borrow Duration (Student) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Borrow Duration (Days)</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="student_duration-error-placeholder"></div>
+                                    <input id="student_duration" type="number" name="student_duration" value="{{ $settings['borrowing.student_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
+                                    <p class="mt-1 text-xs text-gray-500">Default number of days for student borrowing</p>
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- Max Books (Teacher) -->
-                        <div class="field-container flex flex-col">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Max Books per Teacher</label>
-                            <div class="error-placeholder flex-1 text-sm" id="max_books_per_teacher-error-placeholder"></div>
-                            <input id="max_books_per_teacher" type="number" name="max_books_per_teacher" value="{{ $settings['borrowing.max_books_per_teacher'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="20">
-                            <p class="mt-1 text-xs text-gray-500">Maximum number of books a teacher can borrow</p>
+                        <!-- Teacher Borrowing Config -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col gap-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <img src="{{ asset('build/assets/icons/teacher.svg') }}" alt="Teacher Icon" class="w-5 h-5">
+                                <h3 class="text-base font-semibold text-blue-700">Teacher Borrowing Settings</h3>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Max Books (Teacher) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Books per Teacher</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="max_books_per_teacher-error-placeholder"></div>
+                                    <input id="max_books_per_teacher" type="number" name="max_books_per_teacher" value="{{ $settings['borrowing.max_books_per_teacher'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="20">
+                                    <p class="mt-1 text-xs text-gray-500">Maximum number of books a teacher can borrow</p>
+                                </div>
+                                <!-- Borrow Duration (Teacher) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Borrow Duration (Days)</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="teacher_duration-error-placeholder"></div>
+                                    <input id="teacher_duration" type="number" name="teacher_duration" value="{{ $settings['borrowing.teacher_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
+                                    <p class="mt-1 text-xs text-gray-500">Default number of days for teacher borrowing</p>
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- Borrow Duration -->
-                        <div class="field-container flex flex-col">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Borrow Duration (Days)</label>
-                            <div class="error-placeholder flex-1 text-sm" id="borrow_duration-error-placeholder"></div>
-                            <input id="borrow_duration" type="number" name="borrow_duration" value="{{ $settings['borrowing.borrow_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
-                            <p class="mt-1 text-xs text-gray-500">Default number of days for book borrowing</p>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -85,8 +107,8 @@
                                 <!-- Renewal Duration (Student) -->
                                 <div class="field-container flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Renewal Duration (Days)</label>
-                                    <div class="error-placeholder flex-1 text-sm" id="student_duration-error-placeholder"></div>
-                                    <input id="student_duration" type="number" name="student_duration" value="{{ $settings['renewing.student_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
+                                    <div class="error-placeholder flex-1 text-sm" id="renewing_student_duration-error-placeholder"></div>
+                                    <input id="renewing_student_duration" type="number" name="renewing_student_duration" value="{{ $settings['renewing.student_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
                                     <p class="mt-1 text-xs text-gray-500">Days added to due date per renewal.</p>
                                 </div>
                                 <!-- Min Days Before Renewal (Student) -->
@@ -115,8 +137,8 @@
                                 <!-- Renewal Duration (Teacher) -->
                                 <div class="field-container flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Renewal Duration (Days)</label>
-                                    <div class="error-placeholder flex-1 text-sm" id="teacher_duration-error-placeholder"></div>
-                                    <input id="teacher_duration" type="number" name="teacher_duration" value="{{ $settings['renewing.teacher_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
+                                    <div class="error-placeholder flex-1 text-sm" id="renewing_teacher_duration-error-placeholder"></div>
+                                    <input id="renewing_teacher_duration" type="number" name="renewing_teacher_duration" value="{{ $settings['renewing.teacher_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
                                     <p class="mt-1 text-xs text-gray-500">Days added to due date per renewal.</p>
                                 </div>
                                 <!-- Min Days Before Renewal (Teacher) -->
