@@ -1,12 +1,13 @@
 import { fetchBookDetails, loadBooks } from '../../api/bookHandler.js';
 import { clearAllErrors } from '../../helpers.js';
 import { initPagination, initSearch } from '../../tableControls.js';
-import { SEARCH_COLUMN_INDEXES } from '../../config.js';
+import { SEARCH_COLUMN_INDEXES } from '../../utils/tableFilters.js';
 import { initializeEditForm  } from './editBook/initializeEditForm.js';
 import { renderCopiesTable, resetAllCopiesToOriginal } from './editBook/editBookHelpers.js';
 import { populateSummaryHeader, addNewCopy } from './editBook/editBookHelpers.js';
 import { initializeEditableFields, enableAllFields } from '../../utils/fieldEditor.js';
 import { closeIssueDetailsModal } from './editBook/viewIssueHelpers.js';
+import { BOOK_FILTERS } from '../../utils/tableFilters.js';
 
 
 // Add filter event listeners
@@ -39,7 +40,11 @@ if (resetFiltersBtn) {
         if (categoryFilter) categoryFilter.value = '';
         if (statusFilter) statusFilter.value = 'all';
         if (sortSelect) sortSelect.value = 'newest';
-        
+		
+		BOOK_FILTERS.search = '';
+		BOOK_FILTERS.category = '';
+		BOOK_FILTERS.status = 'all';
+		BOOK_FILTERS.sort = 'newest';
         // Reload books with default filters
         loadBooks(1);
     });

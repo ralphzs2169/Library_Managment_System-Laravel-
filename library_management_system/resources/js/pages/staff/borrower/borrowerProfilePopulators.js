@@ -308,8 +308,9 @@ function generateTransactionButtons(transaction, isReturned, status, daysOverdue
     let renewButton = '';
     let returnButton = '';
 
-    // Renew button logic
-    if (!isReturned && status === 'borrowed' && daysOverdue === null) {
+    console.log('Generating buttons for transaction:', transaction);
+    // Can renew if not returned, status is 'borrowed', and not overdue
+    if (transaction.can_renew.result === 'success') {
         renewButton = `
             <button class="renew-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent/90 text-white rounded-lg text-xs font-medium transition-all shadow-sm" data-transaction-id="${transaction.id}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -319,7 +320,7 @@ function generateTransactionButtons(transaction, isReturned, status, daysOverdue
             </button>
         `;
     } else {
-        const tooltip = isReturned ? 'Book already returned' : 'Cannot renew overdue books';
+        const tooltip = transaction.can_renew.message;
         renewButton = `
             <div class="relative inline-block group">
                 <button disabled class="cursor-not-allowed inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-xs font-medium opacity-50">

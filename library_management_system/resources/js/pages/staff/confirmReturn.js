@@ -1,4 +1,4 @@
-import { returnBook } from '../../api/borrowTransactionHandler.js';
+import { returnBook } from '../../api/staffTransactionHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { restoreProfileContent } from './borrowBook.js';
 import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';

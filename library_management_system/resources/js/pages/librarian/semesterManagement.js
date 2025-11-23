@@ -1,7 +1,7 @@
 import { getCreateSemesterForm, storeNewSemester, activateSemester, fetchSemesterDetails, updateSemester, deactivateSemester, loadSemesters } from '../../api/semesterHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { initPagination, initSearch, initFilter } from '../../tableControls.js';
-import { SEARCH_COLUMN_INDEXES } from '../../config.js';
+import { SEARCH_COLUMN_INDEXES } from '../../utils/tableFilters.js';
 
 const addSemesterModal = document.getElementById('add-semester-modal');
 const closeAddSemesterModal = document.getElementById('close-add-semester-modal');

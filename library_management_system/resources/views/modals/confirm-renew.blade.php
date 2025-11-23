@@ -15,88 +15,86 @@
             </button>
         </div>
 
-        <!-- Content -->
-        <div class="px-6 py-5 overflow-y-auto">
-            <!-- Borrower Info Banner -->
-            <div class="border border-gray-200 rounded-lg p-3 mb-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-accent to-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        <span id="confirm-renew-borrower-initials">--</span>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 font-medium">Renewing for</p>
-                        <p id="confirm-renew-borrower-name" class="font-bold text-gray-900"></p>
-                    </div>
-                </div>
-                <p id="confirm-renew-borrower-id" class="text-xs text-gray-500 font-mono"></p>
-            </div>
-
-            <!-- Book Details Card -->
-            <div class="bg-white rounded-xl border border-gray-200 p-4 relative">
-                <!-- Status Badge -->
-                <div id="confirm-renew-status-badge" class="absolute top-3 right-3"></div>
-                <div class="flex gap-4">
-                    <!-- Book Cover -->
-                    <img id="confirm-renew-book-cover" src="" alt="Book Cover" class="w-24 h-36 object-cover rounded-lg shadow-sm border border-gray-200 flex-shrink-0">
-
-                    <!-- Book Info -->
-                    <div class="flex-1 space-y-2">
+        <form id="confirm-renew-form" novalidate>
+            @csrf
+            <!-- Content -->
+            <div class="px-6 py-5 overflow-y-auto">
+                <!-- Renewer Info Banner -->
+                <div class="border border-gray-200 rounded-lg p-3 mb-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-accent to-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                            <span id="confirm-renew-renewer-initials">--</span>
+                        </div>
                         <div>
-                            <h4 id="confirm-renew-book-title" class="text-lg font-bold text-gray-900"></h4>
-                            <p id="confirm-renew-book-author" class="text-xs text-gray-600"></p>
+                            <p class="text-xs text-gray-500 font-medium">Renewing for</p>
+                            <p id="confirm-renew-renewer-name" class="font-bold text-gray-900"></p>
                         </div>
-
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                    </div>
+                    <p id="confirm-renew-renewer-id" class="text-xs text-gray-500 font-mono"></p>
+                </div>
+                <!-- Book Details Card -->
+                <div class="bg-white rounded-xl border border-gray-200 p-4 relative">
+                    <!-- Status Badge -->
+                    <div id="confirm-renew-status-badge" class="absolute top-3 right-3"></div>
+                    <div class="flex gap-4">
+                        <!-- Book Cover -->
+                        <img id="confirm-renew-book-cover" src="" alt="Book Cover" class="w-24 h-36 object-cover rounded-lg shadow-sm border border-gray-200 flex-shrink-0">
+                        <!-- Book Info -->
+                        <div class="flex-1 space-y-2">
                             <div>
-                                <p class="text-gray-500 uppercase tracking-wide">ISBN</p>
-                                <p id="confirm-renew-book-isbn" class="font-semibold text-gray-800 font-mono text-[10px]"></p>
+                                <h4 id="confirm-renew-book-title" class="text-lg font-bold text-gray-900"></h4>
+                                <p id="confirm-renew-book-author" class="text-xs text-gray-600"></p>
                             </div>
-                            <div>
-                                <p class="text-gray-500 uppercase tracking-wide">Copy No.</p>
-                                <p id="confirm-renew-copy-number" class="font-semibold text-gray-800"></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 uppercase tracking-wide">Initial Borrow Date</p>
-                                <p id="confirm-renew-initial-borrow-date" class="font-semibold text-gray-800"></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 uppercase tracking-wide">Current Due Date</p>
-                                <p id="confirm-renew-current-due-date" class="font-semibold text-gray-800"></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 uppercase tracking-wide">Times Renewed</p>
-                                <p id="confirm-renew-current-due-date" class="font-semibold text-gray-800">0 / 2</p>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                                <div>
+                                    <p class="text-gray-500 uppercase tracking-wide">ISBN</p>
+                                    <p id="confirm-renew-book-isbn" class="font-semibold text-gray-800 font-mono text-[10px]"></p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 uppercase tracking-wide">Copy No.</p>
+                                    <p id="confirm-renew-copy-number" class="font-semibold text-gray-800"></p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 uppercase tracking-wide">Initial Borrow Date</p>
+                                    <p id="confirm-renew-initial-borrow-date" class="font-semibold text-gray-800"></p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 uppercase tracking-wide">Current Due Date</p>
+                                    <p id="confirm-renew-current-due-date" class="font-semibold text-gray-800"></p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 uppercase tracking-wide">Times Renewed</p>
+                                    <p id="confirm-renew-current-due-date" class="font-semibold text-gray-800">0 / 2</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- Due Date Selection -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mt-4">
+                    <label for="confirm-renew-due-date" class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        New Due Date
+                    </label>
+                    <input type="date" id="new-due-date" name="new-due-date" value="2025-08-10" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition">
+                    <div id="new-due-date-error-placeholder" class="error-placeholder"></div>
+                    <p class="text-xs text-gray-600 mt-2"><span id="confirm-renew-borrow-duration"></span></p>
+                </div>
             </div>
-
-            <!-- Due Date Selection -->
-            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mt-4">
-                <label for="confirm-renew-due-date" class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <!-- Footer Actions -->
+            <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+                <button id="confirm-renew-cancel-borrow-button" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-all shadow-sm">
+                    Cancel
+                </button>
+                <button id="confirm-renew-confirm-borrow-button" class="px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    New Due Date
-                </label>
-                <div id="confirm-renew-due-date-error-placeholder" class="error-placeholder"></div>
-                <input type="date" id="confirm-renew-due-date" name="confirm-renew-due-date" value="2025-08-10" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition">
-                <p class="text-xs text-gray-600 mt-2"><span id="confirm-renew-borrow-duration"></span></p>
+                    Confirm Renewal
+                </button>
             </div>
-        </div>
-
-        <!-- Footer Actions -->
-        <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-            <button id="confirm-renew-cancel-borrow-button" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-all shadow-sm">
-                Cancel
-            </button>
-            <button id="confirm-renew-confirm-borrow-button" class="px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Confirm Renewal
-            </button>
-        </div>
+        </form>
     </div>
 </div>

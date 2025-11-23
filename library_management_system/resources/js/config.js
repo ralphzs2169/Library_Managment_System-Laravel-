@@ -17,11 +17,6 @@ export const API_ROUTES ={
 
     // Add other API routes as needed
 };
-export const SEARCH_COLUMN_INDEXES = {
-    BOOK_CATALOG: [2, 3], // Title, Author, ISBN
-    SEMESTER_CATALOG: [1], // Semester Name
-    BORROWERS_LIST: [2, 3], // Borrower Name, ID Number
-}
 
 export const BOOK_ROUTES = {
     INDEX: '/librarian/books/index',
@@ -45,18 +40,22 @@ export const SEMESTER_ROUTES = {
     CHECK_ACTIVE: '/staff/check-active-semester',
 };
 
-export const BORROW_TRANSACTION_ROUTES = {
-    INDEX: '/staff/borrow-transaction',
-    BORROW: '/staff/borrow-transaction/borrow',
-    RETURN: '/staff/borrow-transaction/return',
+export const TRANSACTION_ROUTES = {
+    INDEX: '/staff/transaction',
+    BORROW: '/staff/transaction/borrow',
+    RETURN: '/staff/transaction/return',
+    VALIDATE_RENEWAL: '/staff/transaction/renewal/validate',
+    PERFORM_RENEWAL: '/staff/transaction/renewal/perform',
 }
 
 export const PENALTY_ROUTES = {
     UPDATE: (id) => `/staff/penalties/${id}`,
 };
 
-export const VALIDATION_ERROR = 422;
-export const AUTHORIZATION_ERROR = 403;
+export const VALIDATION_ERROR = 422;      // Input format or missing fields
+export const AUTHORIZATION_ERROR = 403;   // User not allowed to perform action
+export const BUSINESS_RULE_VIOLATION = 400;   // Request violates a business rule
+export const NOT_FOUND = 404;   // Request violates a business rule
 
 export const SETTINGS_ROUTES = {
     FETCH: '/settings',

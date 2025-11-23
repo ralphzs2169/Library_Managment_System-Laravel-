@@ -22,6 +22,10 @@ use App\Enums\IssueReportType;
 use App\Enums\IssueReportStatus;
 use App\Models\Payment;
 use App\Enums\LibraryStatus;
+use App\Enums\ActivityLogActions;
+use App\Models\RenewalTransaction;
+use Illuminate\Support\Facades\Log;
+use App\Policies\RenewalPolicy;
 
 class UserService
 {
@@ -78,6 +82,10 @@ public function getBorrowerDetails(int $userId)
         ->whereNull('returned_at')
         ->whereIn('status', ['borrowed', 'overdue'])
         ->get();
+
+    foreach ($activeBorrows as $transaction) {
+        $transaction->can_renew = RenewalPolicy::canRenew($user, $transaction, false);
+    }
 
     // Get all transactions that have unpaid or partially paid penalties
   $transactionsWithActivePenalties = BorrowTransaction::with(['bookCopy.book.author', 'penalties.payments'])
@@ -347,7 +355,7 @@ public function getBorrowerDetails(int $userId)
         }
 
         $paidAmount = $penalty->payments->sum('amount');
-    $remainingAmount = $penalty->amount - $paidAmount;
+        $remainingAmount = $penalty->amount - $paidAmount;
 
         // Validate input
         $validator = Validator::make(
@@ -428,4 +436,96 @@ public function getBorrowerDetails(int $userId)
         });
     }
 
+    // public function validateRenewRequest(Request $request)
+    // {
+    //     // Ensure borrower exists
+    //     $renewer = User::find($request->input('renewer_id'));
+    //     if (!$renewer) {
+    //         return ['result' => 'not_found', 'message' => 'Renewer not found.'];
+    //     }
+
+    //     // Ensure transaction exists
+    //     $transactionId = $request->input('transaction_id');
+    //     if (!$transactionId) {
+    //         return ['result' => 'not_found', 'message' => 'Transaction not found.'];
+    //     }
+
+    //     // Check if active transaction exists
+    //     $transaction = BorrowTransaction::where('user_id', $renewer->id)
+    //         ->where('id', $transactionId)
+    //         ->whereNull('returned_at')
+    //         ->first();
+
+    //     if (!$transaction) {
+    //         return ['result' => 'not_found', 'message' => 'No active borrow transaction found for this book.'];
+    //     }
+        
+    //      // 1. For students, check active semester
+    //     if ($renewer->role === 'student') {
+    //         $hasActive = Semester::where('status', 'active')->exists();
+    //         if (!$hasActive) {
+    //             return ['result' => 'business_rule_violation', 'message' => 'No active semester found. Students can only borrow during an active semester.'];
+    //         }
+    //     }
+
+    //     // 2. Check for outstanding penalties
+    //     if ($renewer->library_status === 'suspended') {
+    //         return ['result' => 'business_rule_violation', 'message' => 'Renewal suspended due to an outstanding penalty.'];
+    //     }
+
+    //     // 3. Check minimum days before renewal
+    //     $minDaysBeforeRenewal = $renewer->role === 'student'
+    //         ? (int) config('settings.renewing.student_min_days_before_renewal')
+    //         : (int) config('settings.renewing.teacher_min_days_before_renewal');
+
+    //     $currentDueDate = Carbon::parse($transaction->due_at)->startOfDay();
+    //     $today = now()->startOfDay();
+    //     $daysBeforeDue = $today->diffInDays($currentDueDate);
+
+    //     if ($daysBeforeDue > $minDaysBeforeRenewal) {
+    //         return [
+    //             'result' => 'business_rule_violation',
+    //             'message' => "Renewal not allowed. You can only renew {$minDaysBeforeRenewal} day(s) before the due date or later."
+    //         ];
+    //     }
+
+    //     // 4. Check renewal limit
+    //     $timesRenewed = $transaction->times_renewed;
+    //     $renewalLimit = $renewer->role === 'student'
+    //         ? (int)config('settings.renewing.student_renewal_limit')
+    //         : (int)config('settings.renewing.teacher_renewal_limit');
+
+    //     if ($timesRenewed >= $renewalLimit) {
+    //         return [
+    //             'result' => 'business_rule_violation',
+    //             'message' => "Borrower has reached the maximum number of renewals ({$renewalLimit})"
+    //         ];
+    //     }
+
+    //     // 5. Field validation for new due date
+    //     $renewDuration = $renewer->role === 'student'
+    //         ? (int) config('settings.renewing.student_duration', 7)
+    //         : (int) config('settings.renewing.teacher_duration', 10);
+
+    //     $validator = Validator::make($request->all(), [
+    //         'new-due-date' => [
+    //             'required',
+    //             'date',
+    //             'after:today',
+    //             function ($attribute, $value, $fail) use ($transaction, $renewDuration) {
+    //                 $newDueDate = Carbon::parse($value);
+    //                 $maxDueDate = Carbon::parse($transaction->due_at)->addDays($renewDuration);
+
+    //                 if ($newDueDate->gt($maxDueDate)) {
+    //                     $fail("The new due date cannot exceed {$renewDuration} day(s) from the current due date.");
+    //                 }
+    //             },
+    //         ],
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return ['result' => 'invalid_input', 'message' => 'Invalid Input found' ,'errors' => $validator->errors()];
+    //     }
+    //     return ['result' => 'success', 'renewer_fullname' => $renewer->full_name];
+    // }
 }

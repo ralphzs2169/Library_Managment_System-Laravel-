@@ -72,7 +72,7 @@ export function displayInputErrors(errors, form, allowScroll = true) {
 export function clearInputError(inputField, recompute = true) {
     // Add null check to prevent the error
     if (!inputField) {
-        console.warn('Input field is null');
+        
         return;
     }
 

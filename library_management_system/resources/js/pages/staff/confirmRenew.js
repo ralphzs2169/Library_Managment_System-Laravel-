@@ -1,27 +1,31 @@
 import { clearInputError } from '../../helpers.js';
 import { fetchSettings } from '../../api/settingsHandler.js';
+import { renewBook } from '../../api/staffTransactionHandler.js';
+import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
+import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
+import { showWarning } from '../../utils.js';
 
 let currentRenewer = null;
 let currentTransaction = null;
 
-export async function initializeConfirmRenewModal(modal, borrower, transaction, borrowDurationSetting) {
-    currentRenewer = borrower;
+export async function initializeConfirmRenewModal(modal, renewer, transaction) {
+    currentRenewer = renewer;
     currentTransaction = transaction;
 
-    // Borrower info
-    const borrowerName = modal.querySelector('#confirm-renew-borrower-name');
-    const borrowerId = modal.querySelector('#confirm-renew-borrower-id');
-    const borrowerInitials = modal.querySelector('#confirm-renew-borrower-initials');
-    if (borrowerName) borrowerName.textContent = borrower.full_name || 'N/A';
-    if (borrowerId) {
-        const idNumber = borrower.role === 'student'
-            ? borrower.students?.student_number
-            : borrower.teachers?.employee_number;
-        borrowerId.textContent = idNumber || 'N/A';
+    // renewer info
+    const renewerName = modal.querySelector('#renewer-name');
+    const renewerId = modal.querySelector('#renewer-id');
+    const renewerInitials = modal.querySelector('#renewer-initials');
+    if (renewerName) renewerName.textContent = renewer.full_name || 'N/A';
+    if (renewerId) {
+        const idNumber = renewer.role === 'student'
+            ? renewer.students?.student_number
+            : renewer.teachers?.employee_number;
+        renewerId.textContent = idNumber || 'N/A';
     }
-    if (borrowerInitials) {
-        const initials = (borrower.firstname?.charAt(0) || '') + (borrower.lastname?.charAt(0) || '');
-        borrowerInitials.textContent = initials || '--';
+    if (renewerInitials) {
+        const initials = (renewer.firstname?.charAt(0) || '') + (renewer.lastname?.charAt(0) || '');
+        renewerInitials.textContent = initials || '--';
     }
 
     // Book info
@@ -35,22 +39,39 @@ export async function initializeConfirmRenewModal(modal, borrower, transaction, 
     modal.querySelector('#confirm-renew-current-due-date').textContent = transaction.due_at ? new Date(transaction.due_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
 
     // Due date input
-    const dueDateInput = modal.querySelector('#confirm-renew-due-date');
-    const borrowDurationMsg = modal.querySelector('#confirm-renew-borrow-duration');
-    let borrowDuration = borrowDurationSetting;
-    if (!borrowDuration) {
-        const settings = await fetchSettings();
-        borrowDuration = settings['borrowing.borrow_duration'] || 10;
+    const dueDateInput = modal.querySelector('#new-due-date');
+    const renewDurationMsg = modal.querySelector('#confirm-renew-borrow-duration');
+
+   
+    const settings = await fetchSettings();
+
+    if(!settings) {
+        showWarning('Something went wrong', 'Please try again later.');
+        return;
     }
-    if (borrowDurationMsg) {
-        borrowDurationMsg.textContent = `Standard: ${borrowDuration} days from today`;
+
+    // Standard renew duration info
+    const renewDuration = (renewer.role === 'student')
+        ? settings['renewing.student_duration']
+        : settings['renewing.teacher_duration'];
+   
+    if (renewDurationMsg) {
+        renewDurationMsg.textContent = `Standard: ${renewDuration} days from today`;
     }
+
     if (dueDateInput) {
-        const today = new Date();
-        today.setDate(today.getDate() + parseInt(borrowDuration));
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
+        // Use the current due date as the base (NOT today)
+        const base = new Date(transaction.due_at);
+
+        // Add the renewal duration
+        base.setDate(base.getDate() + parseInt(renewDuration, 10));
+
+        // Format YYYY-MM-DD
+        const year = base.getFullYear();
+        const month = String(base.getMonth() + 1).padStart(2, '0');
+        const day = String(base.getDate()).padStart(2, '0');
+
+        // Set the input's value
         dueDateInput.value = `${year}-${month}-${day}`;
         // Attach clear error logic to input
         dueDateInput.addEventListener('change', () => clearInputError(dueDateInput));
@@ -58,14 +79,12 @@ export async function initializeConfirmRenewModal(modal, borrower, transaction, 
     }
 
     // Confirm button
-    const confirmBtn = modal.querySelector('#confirm-renew-confirm-borrow-button');
-    if (confirmBtn) {
-        const newBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-        newBtn.addEventListener('click', async function(e) {
+    const renewForm = document.getElementById('confirm-renew-form');
+    if (renewForm) {
+        renewForm.onsubmit = async function(e) {
             e.preventDefault();
-            await handleConfirmRenew();
-        });
+            await handleConfirmRenew(currentRenewer, currentTransaction);
+        };
     }
 
     // Cancel button
@@ -108,7 +127,7 @@ export async function initializeConfirmRenewModal(modal, borrower, transaction, 
                     ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} overdue
                 </span>
             `;
-        } else if (transaction.status === 'borrowed' && daysUntilDue <= (borrower.due_reminder_threshold ?? 3)) {
+        } else if (transaction.status === 'borrowed' && daysUntilDue <= (renewer.due_reminder_threshold ?? 3)) {
             badgeHTML = `
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -137,7 +156,7 @@ export async function initializeConfirmRenewModal(modal, borrower, transaction, 
     }
 }
 
-export function openConfirmRenewModal(borrower, transaction, borrowDurationSetting) {
+export function openConfirmRenewModal(renewer, transaction) {
     const modal = document.getElementById('confirm-renew-modal');
     const modalContent = document.getElementById('confirm-renew-content');
     modal.classList.remove('hidden');
@@ -147,7 +166,7 @@ export function openConfirmRenewModal(borrower, transaction, borrowDurationSetti
         modalContent.classList.remove('scale-95', 'opacity-0');
         modalContent.classList.add('scale-100', 'opacity-100');
     });
-    initializeConfirmRenewModal(modal, borrower, transaction, borrowDurationSetting);
+    initializeConfirmRenewModal(modal, renewer, transaction);
 }
 
 // Add close/cancel/back logic as needed, similar to confirmBorrow.js
@@ -184,4 +203,24 @@ function returnToBorrowerProfileModal() {
     }, 150);
 }
 
+async function handleConfirmRenew(currentRenewer, currentTransaction) {
 
+    const renewForm = document.getElementById('confirm-renew-form');
+    
+    // Prepare form data
+    const formData = new FormData(renewForm);
+    formData.append('transaction_id', currentTransaction.id);
+    formData.append('renewer_id', currentRenewer.id);    
+    formData.append('previous_due_date', currentTransaction.due_at);    
+    
+    // Call the borrow handler
+    const result = await renewBook(formData);
+    if (result) {
+        const modal = document.getElementById('borrower-profile-modal');
+        console.log('currentRenewer:', currentRenewer);
+        const { borrower, dueReminderThreshold } = await fetchBorrowerDetails(currentRenewer.id);
+        const freshBorrowerDetails = borrower;
+        await initializeBorrowerProfileUI(modal, freshBorrowerDetails, dueReminderThreshold, true);
+        closeConfirmRenewModal();
+    }
+}

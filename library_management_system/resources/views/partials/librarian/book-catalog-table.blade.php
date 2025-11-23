@@ -9,7 +9,7 @@
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Author</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Category</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Copies</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Status</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-42 min-w-42 max-w-42 whitespace-nowrap">Status</th>
                 <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
             </tr>
         </thead>
@@ -54,8 +54,19 @@
                     </span>
                 </td>
                 <td class="px-4 py-3">
+                    @php
+                    $filteredStatus = request('status');
+                    $totalCopies = $book->copies->count();
+                    $filteredCopies = $filteredStatus && $filteredStatus !== 'all'
+                    ? $book->copies->where('status', $filteredStatus)->count()
+                    : null;
+                    @endphp
                     <span class="text-gray-800 text-sm">
-                        {{ $book->copies->count() }} {{ $book->copies->count() === 1 ? 'copy' : 'copies' }}
+                        @if($filteredStatus && $filteredStatus !== 'all')
+                        <span class="font-semibold">{{ $filteredCopies }}</span>/{{ $totalCopies }} {{ $totalCopies === 1 ? 'copy' : 'copies' }}
+                        @else
+                        {{ $totalCopies }} {{ $totalCopies === 1 ? 'copy' : 'copies' }}
+                        @endif
                     </span>
                 </td>
                 <td class="px-4 py-3">

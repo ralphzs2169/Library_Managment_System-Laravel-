@@ -13,9 +13,7 @@ export function initPagination(loadFunction) {
 }
 
 export function initSearch(searchSelector, loadFunction, tableContainerSelector, columnIndexes = [1, 2]) {
-    console.log('Initializing search handler');
     const searchInput = document.querySelector(searchSelector);
-    console.log('Search input element:', searchInput);
     if (!searchInput) return;
 
     // Highlight on initial load
@@ -37,7 +35,7 @@ export function initFilter(selector, loadFunction) {
 
 export function highlightSearchMatches(searchTerm, containerSelector = '#members-table-container', columnIndexes = [1, 2]) {
     if (!searchTerm || searchTerm.trim().length === 0) return;
-    console.log(`Highlighting search term: "${searchTerm}" in container: "${containerSelector}" for columns:`, columnIndexes);
+  
     const term = searchTerm.trim().toLowerCase();
     const container = document.querySelector(containerSelector);
     if (!container) return;

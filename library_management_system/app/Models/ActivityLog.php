@@ -17,6 +17,7 @@ class ActivityLog extends Model
     const ACTION_RESERVED = 'reserved';
     const ACTION_PAID = 'paid';
     const ACTION_AUTO_ENDED = 'auto_ended';
+    const ACTION_RENEWED = 'renewed';
 
     const ACTIONS = [
         self::ACTION_CREATED,

@@ -1,10 +1,18 @@
 <x-layout>
-    <section class="md:pl-78 p-6 pt-4 min-h-screen bg-background">
+    <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
-        <div class="bg-white shadow-sm rounded-xl p-5 mb-6">
-            <div class="flex items-center">
-                <img src="{{ asset('build/assets/icons/settings.svg') }}" alt="Settings Icon" class="inline-block w-10 h-10 mr-2">
-                <h1 class="text-2xl font-bold text-gray-800">System Settings</h1>
+        <div class="bg-white shadow-sm rounded-xl p-5 mb-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-accent to-teal-600 rounded-xl flex items-center justify-center shadow-md">
+                        <img src="{{ asset('build/assets/icons/settings.svg') }}" alt="Settings Icon" class="w-10 h-10">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Library Settings</h1>
+                        <p class="text-sm text-gray-500 mt-0.5">Manage library policies for borrowing, renewals, penalties, and notifications</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -44,6 +52,81 @@
                             <div class="error-placeholder flex-1 text-sm" id="borrow_duration-error-placeholder"></div>
                             <input id="borrow_duration" type="number" name="borrow_duration" value="{{ $settings['borrowing.borrow_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
                             <p class="mt-1 text-xs text-gray-500">Default number of days for book borrowing</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Renewing Rules -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <img src="{{ asset('build/assets/icons/renewing.svg') }}" alt="Renewing Icon" class="w-6 h-6">
+                        Renewing Rules
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Student Renewal Config -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col gap-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <img src="{{ asset('build/assets/icons/student.svg') }}" alt="Student Icon" class="w-5 h-5">
+                                <h3 class="text-base font-semibold text-purple-700">Student Renewal Settings</h3>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Max Renewals (Student) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Renewals</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="student_renewal_limit-error-placeholder"></div>
+                                    <input id="student_renewal_limit" type="number" name="student_renewal_limit" value="{{ $settings['renewing.student_renewal_limit'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="10">
+                                    <p class="mt-1 text-xs text-gray-500">Maximum renewals allowed per borrow cycle.</p>
+                                </div>
+                                <!-- Renewal Duration (Student) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Renewal Duration (Days)</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="student_duration-error-placeholder"></div>
+                                    <input id="student_duration" type="number" name="student_duration" value="{{ $settings['renewing.student_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
+                                    <p class="mt-1 text-xs text-gray-500">Days added to due date per renewal.</p>
+                                </div>
+                                <!-- Min Days Before Renewal (Student) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Min Days Before Renewal</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="student_min_days_before_renewal-error-placeholder"></div>
+                                    <input id="student_min_days_before_renewal" type="number" name="student_min_days_before_renewal" value="{{ $settings['renewing.student_min_days_before_renewal'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
+                                    <p class="mt-1 text-xs text-gray-500">Minimum days after borrowing before renewal is allowed.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Teacher Renewal Config -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col gap-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <img src="{{ asset('build/assets/icons/teacher.svg') }}" alt="Teacher Icon" class="w-5 h-5">
+                                <h3 class="text-base font-semibold text-blue-700">Teacher Renewal Settings</h3>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Max Renewals (Teacher) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Renewals</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="teacher_renewal_limit-error-placeholder"></div>
+                                    <input id="teacher_renewal_limit" type="number" name="teacher_renewal_limit" value="{{ $settings['renewing.teacher_renewal_limit'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="10">
+                                    <p class="mt-1 text-xs text-gray-500">Maximum renewals allowed per borrow cycle.</p>
+                                </div>
+                                <!-- Renewal Duration (Teacher) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Renewal Duration (Days)</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="teacher_duration-error-placeholder"></div>
+                                    <input id="teacher_duration" type="number" name="teacher_duration" value="{{ $settings['renewing.teacher_duration'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
+                                    <p class="mt-1 text-xs text-gray-500">Days added to due date per renewal.</p>
+                                </div>
+                                <!-- Min Days Before Renewal (Teacher) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Min Days Before Renewal</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="teacher_min_days_before_renewal-error-placeholder"></div>
+                                    <input id="teacher_min_days_before_renewal" type="number" name="teacher_min_days_before_renewal" value="{{ $settings['renewing.teacher_min_days_before_renewal'] ?? '' }}" class="w-full bg-[#F2F2F2] font-extralight border border-[#B1B1B1] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" min="1" max="90">
+                                    <p class="mt-1 text-xs text-gray-500">Minimum days after borrowing before renewal is allowed.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

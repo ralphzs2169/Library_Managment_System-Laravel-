@@ -1,11 +1,12 @@
 import { showBorrowBookContent, restoreProfileContent } from './borrowBook.js';
-import { borrowBook } from '../../api/borrowTransactionHandler.js';
+import { borrowBook } from '../../api/staffTransactionHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { fetchSettings } from '../../api/settingsHandler.js';
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
 // Store borrower data for navigation
 let currentBorrower = null;
+let currentBook = null;
 
 const copySelect = document.getElementById('book_copy_id');
 const dueDateInput = document.getElementById('due_date');

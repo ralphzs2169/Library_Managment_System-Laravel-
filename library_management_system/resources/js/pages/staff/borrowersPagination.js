@@ -1,64 +1,36 @@
-import {  debounce } from "../../utils.js";
-import { loadBorrowers } from "../../api/borrowerHandler.js";
-import { highlightSearchMatches } from "../../tableControls.js";
+import { loadBorrowers } from "../../api/borrowerHandler";
+import { initPagination, initSearch } from "../../tableControls.js";
+import { SEARCH_COLUMN_INDEXES } from "../../utils/tableFilters.js";
+import { BORROWER_FILTERS } from "../../utils/tableFilters.js";
+// Add filter event listeners
+const borrowerStatusFilter = document.getElementById('borrower-status-filter');
+const borrowerRoleFilter = document.getElementById('borrower-role-filter');
+const resetFiltersBtn = document.getElementById('reset-borrower-filters');
+const searchInput = document.getElementById('borrowers-search');
 
-export const filters = {
-    search: '',
-    status: 'all',
-    role: 'all',
-    page: 1
-};
+initPagination(loadBorrowers);
+initSearch('#borrowers-search', loadBorrowers, '#borrowers-table-body', SEARCH_COLUMN_INDEXES.BORROWERS);
 
-document.addEventListener('click', async (e) => {
-    if (e.target.matches('.pagination-btn') && !e.target.disabled) {
-        const page = e.target.getAttribute('data-page');
-        if (!page) return;
+if (borrowerRoleFilter) {
+    borrowerRoleFilter.addEventListener('change', () => loadBorrowers(1));
+}
 
-        e.preventDefault();
-        loadBorrowers(page);
-    }
-});
+if (borrowerStatusFilter) {
+    borrowerStatusFilter.addEventListener('change', () => loadBorrowers(1));
+}
 
-// Highlight search matches on initial page load
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.querySelector('input[name="search"]');
-    const searchTerm = searchInput?.value?.trim();
-    
-    if (searchTerm) {
-        highlightSearchMatches(searchTerm, '#borrowers-table-container', [1, 2]);
-    }
-});
-
-// Search input
-const searchInput = document.querySelector('input[name="search"]');
-if (searchInput) {
-    searchInput.addEventListener('input', debounce(() => {
+// Reset filters functionality
+if (resetFiltersBtn) {
+    resetFiltersBtn.addEventListener('click', () => {
+        // Reset all filter inputs to default values
+        if (searchInput) searchInput.value = '';
+        if (borrowerRoleFilter) borrowerRoleFilter.value = '';
+        if (borrowerStatusFilter) borrowerStatusFilter.value = '';
+        
+        BORROWER_FILTERS.search = '';
+        BORROWER_FILTERS.role = '';
+        BORROWER_FILTERS.status = '';
+        // Reload books with default filters
         loadBorrowers(1);
-    }, 500));
-}
-
-// Filter dropdowns
-const statusFilter = document.querySelector('select[name="status"]');
-const roleFilter = document.querySelector('select[name="role"]');
-
-if (statusFilter) {
-    statusFilter.addEventListener('change', () => loadBorrowers(1));
-}
-
-if (roleFilter) {
-    roleFilter.addEventListener('change', () => loadBorrowers(1));
-}
-
-// Get current filter values
-export function getCurrentFilters() {
-    const searchInput = document.querySelector('input[name="search"]');
-    const statusFilter = document.querySelector('select[name="status"]');
-    const roleFilter = document.querySelector('select[name="role"]');
-    
-    return {
-        search: searchInput?.value || '',
-        status: statusFilter?.value || '',
-        role: roleFilter?.value || '',
-        page: 1
-    };
+    });
 }

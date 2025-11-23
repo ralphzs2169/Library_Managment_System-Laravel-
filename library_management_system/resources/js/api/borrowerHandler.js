@@ -2,20 +2,24 @@ import { showError, showWarning, showConfirmation, showToast } from "../utils.js
 import { PENALTY_ROUTES } from "../config.js";
 import { VALIDATION_ERROR } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
-import { getCurrentFilters } from "../pages/staff/borrowersPagination.js";
-import { filters } from "../pages/staff/borrowersPagination.js";
+import { BORROWER_FILTERS } from "../utils/tableFilters.js";
+import { highlightSearchMatches } from "../tableControls.js";
+import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters.js";
 
-export async function loadBorrowers(page = filters.page, scrollUp = true) {
-    const container = document.querySelector('#members-table-container');
-    if (!container) return;
-    
-    Object.assign(filters, getCurrentFilters(), { page });
-    const params = new URLSearchParams({
-        page,
-        ...filters
-    });
-
+export async function loadBorrowers(page = BORROWER_FILTERS.page, scrollUp = true) {
     try {
+        BORROWER_FILTERS.page = page; // Update current page in filters
+
+        const searchInput = document.querySelector('#borrowers-search');
+        const borrowerRoleFilter = document.querySelector('#borrower-role-filter');
+        const borrowerStatusFilter = document.querySelector('#borrower-status-filter');
+
+        if (searchInput) BORROWER_FILTERS.search = searchInput.value || '';
+        if (borrowerRoleFilter) BORROWER_FILTERS.role = borrowerRoleFilter.value;
+        if (borrowerStatusFilter) BORROWER_FILTERS.status = borrowerStatusFilter.value;
+
+        const params = new URLSearchParams(BORROWER_FILTERS);
+
         const response = await fetch(`?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -23,23 +27,28 @@ export async function loadBorrowers(page = filters.page, scrollUp = true) {
             }
         });
 
-        if (response.ok) {
-            const html = await response.text();
-            container.innerHTML = html;
-            
-            // Highlight search matches after content is loaded
-            if (filters.search) {
-                highlightSearchMatches(filters.search, '#members-table-container', [1, 2]);
-            }
-            
-            if (scrollUp) {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        } else {
+        const html = await response.text();
+
+        if(!response.ok) {
             showError('Something went wrong', 'Unable to load members. Please try again.');
+            return;
+        }
+            
+        const container = document.querySelector('#borrowers-table-container');
+        if(container) {
+            container.innerHTML = html;
+        }
+
+        const searchTerm = searchInput?.value?.trim();
+        if (searchTerm) {
+            highlightSearchMatches(searchTerm, '#borrowers-table-container', SEARCH_COLUMN_INDEXES.BORROWERS_LIST);
+        }
+
+        if( scrollUp ) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     } catch (error) {
-        showError('Something went wrong', 'Unable to load members. Please try again.');
+        showError('Something went wrong',  error.message ||  'Unable to load members. Please try again.');
     }
 }
 
@@ -57,7 +66,7 @@ export async function fetchBorrowerDetails(userId) {
                 showError('Something went wrong', 'Failed to load borrower details.');
                 return;
            }
-
+           
             return { borrower: data.user, dueReminderThreshold: data.due_reminder_threshold, borrowDuration: data.borrow_duration };
         } catch (error) {
             showError('Network Error', 'Unable to load borrower details. Please try again later.');

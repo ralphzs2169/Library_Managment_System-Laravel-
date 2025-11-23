@@ -1,7 +1,9 @@
-import {  SEARCH_COLUMN_INDEXES, VALIDATION_ERROR, BOOK_ROUTES } from "../config.js";
+import { VALIDATION_ERROR, BOOK_ROUTES } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
 import { showSuccessWithRedirect, showWarning, showConfirmation, showError, showInfo, showToast } from "../utils.js";
 import { highlightSearchMatches } from "../tableControls.js";
+import { BOOK_FILTERS } from "../utils/tableFilters.js";
+import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters.js";
 
 export async function addBookHandler(bookData, form) {
     // Step 1: Validate only
@@ -155,7 +157,8 @@ export async function editBookHandler(bookDetails, form) {
         showWarning('Something went wrong', result.message || 'Failed to update book. Please try again later.');
         return;
     }
-
+    
+    loadBooks(undefined, false);
     showToast('Book updated successfully!', 'success');
 }
 
@@ -180,21 +183,22 @@ export async function fetchBookDetails(book) {
     }
 }
 
-export async function loadBooks(page = 1) {
+export async function loadBooks(page = BOOK_FILTERS.page, scrollUp = true) {
     try {
+        BOOK_FILTERS.page = page; // Update current page in filters
+
         const searchInput = document.querySelector('#books-search');
         const sortSelect = document.querySelector('#books-sort');
         const categoryFilter = document.querySelector('#books-category-filter');
         const statusFilter = document.querySelector('#books-status-filter');
 
-        const params = new URLSearchParams({
-            page,
-            search: searchInput?.value || '',
-            sort: sortSelect?.value || 'newest',
-            category: categoryFilter?.value || '',
-            status: statusFilter?.value || 'all'
-        });
-
+        if (searchInput) BOOK_FILTERS.search = searchInput?.value || '';
+        if (sortSelect) BOOK_FILTERS.sort = sortSelect?.value || BOOK_FILTERS.sort;
+        if (categoryFilter) BOOK_FILTERS.category = categoryFilter?.value || BOOK_FILTERS.category;
+        if (statusFilter) BOOK_FILTERS.status = statusFilter?.value || BOOK_FILTERS.status;
+        
+        const params = new URLSearchParams(BOOK_FILTERS);
+        
         const response = await fetch(`${BOOK_ROUTES.INDEX}?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -220,7 +224,9 @@ export async function loadBooks(page = 1) {
             highlightSearchMatches(searchTerm, '#books-table-container', SEARCH_COLUMN_INDEXES.BOOK_CATALOG);
         }
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if( scrollUp ) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     } catch (error) {
         showError('Something went wrong', error.message || 'Failed to load books.');
     }

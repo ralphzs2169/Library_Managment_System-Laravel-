@@ -65,26 +65,29 @@
                 <div class="flex-1 max-w-md">
                     <div class="relative">
                         <img src="{{ asset('build/assets/icons/search.svg') }}" alt="Search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                        <input type="text" placeholder="Search by name or ID number..." class="w-full pl-12 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" name="search" value="{{ request('search') }}">
+                        <input id="borrowers-search" type="text" placeholder="Search by name or ID number..." class="w-full pl-12 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" name="search" value="{{ request('search') }}">
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <select name="role" class="px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
+                    <select id="borrower-role-filter" name="role" class="px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
                         <option value="">Role: All</option>
                         <option value="student" {{ request('role') === 'student' ? 'selected' : '' }}>Role: Students</option>
                         <option value="teacher" {{ request('role') === 'teacher' ? 'selected' : '' }}>Role: Teachers</option>
                     </select>
-                    <select name="status" class="px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
+                    <select id="borrower-status-filter" name="status" class="px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
                         <option value="">Status: All</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Status: Active</option>
                         <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Status: Suspended</option>
                         <option value="cleared" {{ request('status') === 'cleared' ? 'selected' : '' }}>Status: Cleared</option>
                     </select>
+                    <button type="button" id="reset-borrower-filters" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition whitespace-nowrap">
+                        Reset Filters
+                    </button>
                 </div>
             </div>
 
             <!-- Responsive Table Container -->
-            <div id="members-table-container">
+            <div id="borrowers-table-container">
                 @include('partials.staff.borrowers-table', ['users' => $users])
             </div>
         </div>

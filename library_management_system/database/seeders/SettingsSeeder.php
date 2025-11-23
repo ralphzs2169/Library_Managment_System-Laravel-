@@ -18,6 +18,15 @@ class SettingsSeeder extends Seeder
             ['key' => 'borrowing.max_books_per_teacher', 'value' => 5, 'group' => 'borrowing'],
             ['key' => 'borrowing.borrow_duration', 'value' => 7, 'group' => 'borrowing'],
 
+
+            // Renewal Rules
+            ['key' => 'renewing.student_renewal_limit', 'value' => 2, 'group' => 'renewing'],
+            ['key' => 'renewing.teacher_renewal_limit', 'value' => 3, 'group' => 'renewing'],
+            ['key' => 'renewing.student_duration', 'value' => 7, 'group' => 'renewing'],
+            ['key' => 'renewing.teacher_duration', 'value' => 10, 'group' => 'renewing'],
+            ['key' => 'renewing.student_min_days_before_renewal', 'value' => 3, 'group' => 'renewing'],
+            ['key' => 'renewing.teacher_min_days_before_renewal', 'value' => 1, 'group' => 'renewing'],
+
             // Penalty settings
             ['key' => 'penalty.rate_per_day', 'value' => 3.32, 'group' => 'penalty'],
             ['key' => 'penalty.max_amount', 'value' => 200, 'group' => 'penalty'],

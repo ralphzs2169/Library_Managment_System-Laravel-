@@ -15,6 +15,7 @@ class BorrowTransaction extends Model
         'returned_at',
         'due_at',
         'status',
+        'times_renewed',
     ];
 
     protected $casts = [
@@ -53,6 +54,11 @@ class BorrowTransaction extends Model
          return $this->belongsTo(BookCopy::class, 'book_copy_id');
     }
 
+    public function renewalTransactions()
+    {
+        return $this->hasMany(RenewalTransaction::class);
+    }
+    
     public function penalties()
     {
         return $this->hasMany(Penalty::class);

@@ -9,6 +9,10 @@ use App\Models\Book;
 use App\Services\UserService;
 use App\Models\Semester;
 use App\Models\BookCopy;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use App\Policies\RenewalPolicy;
 
 class UserController extends Controller
 {
@@ -111,8 +115,12 @@ class UserController extends Controller
             $bookCopy = BookCopy::findOrFail($request->input('book_copy_id'));
             $transaction = $this->userService->borrowBook($request, $bookCopy);
             return $this->jsonResponse('success', 'Book borrowed successfully', 201, ['transaction' => $transaction]);
+        } catch (ModelNotFoundException $e) {
+            Log::error($e);
+            return $this->jsonResponse('error', 'The borrower or book copy could not be found.', 404);
         } catch (\Exception $e) {
-            return $this->jsonResponse('error', 'Failed to borrow book: ' . $e->getMessage(), 500);
+            Log::error($e);
+            return $this->jsonResponse('error', 'Something went wrong while borrowing the book. Please try again later.', 500);
         }
     }
 
@@ -131,8 +139,12 @@ class UserController extends Controller
         try {
             $transaction = $this->userService->returnBook($request);
             return $this->jsonResponse('success', 'Book returned successfully', 200, ['transaction' => $transaction]);
+        } catch (ModelNotFoundException $e) {
+            Log::error($e);
+            return $this->jsonResponse('error', 'The book or transaction could not be found.', 404);
         } catch (\Exception $e) {
-            return $this->jsonResponse('error', 'Failed to return book: ' . $e->getMessage(), 500);
+            Log::error($e);
+            return $this->jsonResponse('error', 'Something went wrong while returning the book. Please try again later.', 500);
         }
     }
 
@@ -154,8 +166,12 @@ class UserController extends Controller
         try {
             $penalty = $this->userService->updatePenalty($request, $penaltyId);
             return $this->jsonResponse('success', 'Penalty updated successfully', 200, ['penalty' => $penalty]);
+        } catch (ModelNotFoundException $e) {
+            Log::error($e);
+            return $this->jsonResponse('error', 'The penalty could not be found.', 404);
         } catch (\Exception $e) {
-            return $this->jsonResponse('error', 'Failed to update penalty: ' . $e->getMessage(), 500);
+            Log::error($e);
+            return $this->jsonResponse('error', 'Something went wrong while processing the penalty. Please try again later.', 500);
         }
     }
 }
