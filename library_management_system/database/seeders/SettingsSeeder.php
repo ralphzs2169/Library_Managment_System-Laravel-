@@ -19,7 +19,6 @@ class SettingsSeeder extends Seeder
             ['key' => 'borrowing.student_duration', 'value' => 7, 'group' => 'borrowing'],
             ['key' => 'borrowing.teacher_duration', 'value' => 14, 'group' => 'borrowing'],
 
-
             // Renewal Rules
             ['key' => 'renewing.student_renewal_limit', 'value' => 2, 'group' => 'renewing'],
             ['key' => 'renewing.teacher_renewal_limit', 'value' => 3, 'group' => 'renewing'],
@@ -27,6 +26,13 @@ class SettingsSeeder extends Seeder
             ['key' => 'renewing.teacher_duration', 'value' => 10, 'group' => 'renewing'],
             ['key' => 'renewing.student_min_days_before_renewal', 'value' => 3, 'group' => 'renewing'],
             ['key' => 'renewing.teacher_min_days_before_renewal', 'value' => 1, 'group' => 'renewing'],
+
+            // Reservation Rules
+            ['key' => 'reservation.student_pickup_window_days', 'value' => 2, 'group' => 'reservation'],
+            ['key' => 'reservation.teacher_pickup_window_days', 'value' => 2, 'group' => 'reservation'],
+            ['key' => 'reservation.queue_max_length', 'value' => 5, 'group' => 'reservation'],
+            ['key' => 'reservation.student_max_pending_reservations', 'value' => 5, 'group' => 'reservation'],
+            ['key' => 'reservation.teacher_max_pending_reservations', 'value' => 5, 'group' => 'reservation'],
 
             // Penalty settings
             ['key' => 'penalty.rate_per_day', 'value' => 3.32, 'group' => 'penalty'],

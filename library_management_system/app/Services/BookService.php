@@ -16,13 +16,38 @@ use App\Models\Settings;
 use App\Enums\PenaltyType;
 use App\Enums\PenaltyStatus;
 use Exception;
-
+use Illuminate\Support\Facades\Log;
+use App\Policies\BookPolicy;
+use App\Enums\ReservationStatus;
+use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class BookService {
 
-    public function showAvailableBooks($filters){
-        $query = Book::whereHas('copies', function ($q) {
-            $q->where('status', 'available')
+    protected $reservationService;
+
+    public function __construct(ReservationService $reservationService)
+    {
+        $this->reservationService = $reservationService;
+    }
+
+    private const TRANSACTION_TYPES = ['borrow', 'reservation'];
+
+    public function getBooksForBorrowOrReserve($filters, $transactionType = self::TRANSACTION_TYPES[0], $member_id){
+        $statusToCheck  = null;
+
+        // Determine status to check based on transaction type
+        if ($transactionType === self::TRANSACTION_TYPES[0]) 
+            // For borrowing, check for available copies
+            $statusToCheck  = BookCopyStatus::AVAILABLE;
+        else if ($transactionType === self::TRANSACTION_TYPES[1]) 
+            // For reservation, check for borrowed copies
+            $statusToCheck  = BookCopyStatus::BORROWED;
+
+
+        // Query books with copies matching the status and doesnt have a pending issue report
+        $query = Book::with('reservations')->whereHas('copies', function ($q) use ($statusToCheck ) {
+            $q->where('status', $statusToCheck )
             ->whereDoesntHave('pendingIssueReport');
         });
 
@@ -78,19 +103,71 @@ class BookService {
             $query->orderBy('title', 'asc'); // default sort
         }
 
-        // Paginate and eager load relations
-        $books = $query->with(['author', 'genre.category', 'copies'])
-                    ->paginate(10)
-                    ->withQueryString();
+        $member = User::findOrFail($member_id);
 
-        // Compute copies_available for each book
-        $books->getCollection()->transform(function ($book) {
-            $book->copies_available = $book->copies->where('status', 'available')->count();
-            $book->category_name = optional($book->genre->category)->name ?? 'N/A';
-            return $book;
+        $query->with(['author', 'genre.category', 
+            'copies' => function ($q) use ($statusToCheck) {
+                $q->where('status', $statusToCheck);
+            }
+        ]);
+
+        // Determine the appropriate policy method
+        $policyMethod = $transactionType === 'borrow'
+            ? [BookCopyPolicy::class, 'canBeBorrowed']
+            : [BookPolicy::class, 'canBeReserved'];
+
+        // --- MANUAL PAGINATION AND FILTERING LOGIC  ---
+
+        // 1. Get pagination parameters
+        $perPage = 15;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $offset = ($currentPage * $perPage) - $perPage;
+
+        // 2. Execute the full query to get all books matching the search/status criteria (no pagination limit yet)
+        $allBooks = $query->get();
+
+        // Ensure all copies are loaded for policy checks
+        $allBooks->each(function ($book) {
+            $book->load('copies');
+        });
+         
+        Log::info('Total books fetched before policy filtering: ' . $allBooks->count());
+        // 3. Filter the collection based on the policy result
+        $filteredCollection = $allBooks->filter(function ($book) use ($member, $policyMethod) {
+            $result = call_user_func($policyMethod, $book, $member);
+            Log::info('Policy check for book: ' . $book->title . ': ' . json_encode($result));
+            // Exclude the book if policy fails or no eligible copies are loaded
+            if ($result['result'] !== 'success' || $book->copies->isEmpty()) {
+                Log::info('Excluding book: ' . $book->title . ' due to policy failure or no eligible copies.');
+                return false;
+            }
+
+            return true;
         });
 
-        return $books;
+        // 4. Transform the remaining, eligible books (calculate final properties)
+        $transformedCollection = $filteredCollection->map(function ($book) {
+            // These properties are now set ONLY for eligible books
+            $book->eligible_copies = $book->copies->count();
+            $book->category_name = optional($book->genre->category)->name ?? 'N/A';
+            $book->next_queue_position = $book->reservations->where('status', ReservationStatus::PENDING)->count() + 1;
+
+            return $book;
+        });
+        
+        // 5. Slice the collection to get only the items for the current page
+        $currentPageItems = $transformedCollection->slice($offset, $perPage)->values();
+
+        // 6. Create a LengthAwarePaginator instance using the filtered count
+        $books = new LengthAwarePaginator(
+            $currentPageItems,                      // Items for the current page
+            $transformedCollection->count(),        // Total count of ELIGIBLE items
+            $perPage,                               
+            $currentPage,                           
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
+
+        return $books->withQueryString();
     }
 
     public function createBookWithAuthorAndCopies(Request $request){
@@ -389,6 +466,8 @@ class BookService {
                         'copy_number' => $nextCopyNumber,
                         'status' => $newStatus
                     ]);
+                    
+                    $this->reservationService->promoteNextPendingReservation($book->copies()->where('status', 'available')->first());
                     continue;
                 }
 
@@ -434,6 +513,10 @@ class BookService {
 
                     if ($currentStatus === BookCopyStatus::BORROWED && $newStatus === BookCopyStatus::DAMAGED) {
                         throw new Exception("Cannot directly mark a borrowed book as damaged. Damage reports must be submitted by staff and approved through the proper process.");
+                    }
+
+                    if($newStatus === BookCopyStatus::AVAILABLE){
+                        $this->reservationService->promoteNextPendingReservation($copy);
                     }
 
                     // if ($currentStatus === BookCopyStatus::LOST && $newStatus === BookCopyStatus::AVAILABLE) {
@@ -518,6 +601,8 @@ class BookService {
                     if (!$copy->update(['status' => $newStatus])) {
                         $errors[] = "Failed to update status for copy ID: {$copy->id}";
                     }
+
+                    $this->reservationService->promoteNextPendingReservation($copy);
                 }
             });
         } catch (\Exception $e) {

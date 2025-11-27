@@ -10,12 +10,7 @@ use App\Models\Semester;
 
 class BorrowPolicy
 {
-    /**
-     * Check if a user can borrow a book.
-     * Returns an array with 'result' key (success, not_found, invalid_input, business_rule_violation)
-     */
 
-    // Add logic to check if the book is available
     public static function canBorrow($includeInputValidation = true, array $data = [])
     {
         // 1. Ensure borrower exists
@@ -56,7 +51,7 @@ class BorrowPolicy
             }
         }
 
-        // 3. Field validation
+        // 4. Field validation
         if ($includeInputValidation) {
             $duration = $borrower->role === 'student'
                 ? (int) config('settings.borrowing.student_duration', 7)

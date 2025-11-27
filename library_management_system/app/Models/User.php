@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\ReservationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -55,6 +57,7 @@ class User extends Authenticatable
         ];
     }
 
+    
     public function getFullnameAttribute()
     {
         $middle_name = $this->middle_initial ? "{$this->middle_initial}. " : '';
@@ -94,6 +97,30 @@ class User extends Authenticatable
             });
     }
 
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'borrower_id');
+    }
+
+    public function pendingReservations()
+    {
+        return $this->reservations()
+            ->where('status', ReservationStatus::PENDING);
+    }
+
+    public function readyReservations()
+    {
+        return $this->reservations()
+            ->where('status', ReservationStatus::READY_FOR_PICKUP);
+    }
+
+    public function activeReservations()
+    {
+        return $this->hasMany(Reservation::class, 'borrower_id')
+            ->with(['book.author', 'book.genre.category'])
+            ->whereIn('status', [ReservationStatus::PENDING, ReservationStatus::READY_FOR_PICKUP]);
+    }
+    
     
     public function activityLogs()
     {
@@ -109,7 +136,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(Teacher::class, 'user_id');
     }
-
+    
     public function borrowTransactions()
     {
         return $this->hasMany(BorrowTransaction::class, 'user_id');

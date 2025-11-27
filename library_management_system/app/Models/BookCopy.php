@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\BookCopyStatus;
+use App\Enums\IssueReportStatus;
 
 class BookCopy extends Model
 {
@@ -28,7 +29,7 @@ class BookCopy extends Model
     public function pendingIssueReport()
     {
         return $this->hasOne(IssueReport::class)
-            ->where('status', 'pending');
+            ->where('status', IssueReportStatus::PENDING);
     }
 
     public function borrowTransaction()

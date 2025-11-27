@@ -1,5 +1,6 @@
 import { API_ROUTES, BASE_URL } from '../config.js';
-import { showError, showSuccessWithRedirect, showLoader, hideLoader, confirmLogout, apiRequest, getJsonHeaders } from '../utils.js';
+import { showError, showSuccessWithRedirect, confirmLogout } from "../utils/alerts.js";
+import { apiRequest, getJsonHeaders, showLoader, hideLoader } from '../utils.js';
 import { displayInputErrors } from '../helpers.js';
 
 export async function loginHandler(username, password, form) {

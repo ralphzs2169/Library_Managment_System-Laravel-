@@ -151,4 +151,10 @@ class SemesterController extends Controller
             return $this->jsonResponse('error', 'Failed to deactivate semester: ' . $e->getMessage(), 500);
         }
     }
+
+    public function checkActiveSemester()
+    {
+        $hasActive = $this->semesterService->hasActiveSemester();
+        return response()->json(['has_active_semester' => $hasActive]);
+    }
 }

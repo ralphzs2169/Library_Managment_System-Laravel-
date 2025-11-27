@@ -10,7 +10,7 @@
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Dept/Year</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Status</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Borrowed</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Penalties</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Unpaid Fines</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Reservations</th>
             </tr>
         </thead>
@@ -27,8 +27,8 @@
             </tr>
             @else
             @foreach($users as $index => $user)
-            <tr type="button" data-user-id="{{ $user->id }}" class="open-borrower-modal hover:bg-accent/5 transition-colors cursor-pointer active:hover:bg-accent/10 active:scale-[0.99]">
-                <td class="px-4 py-3 text-gray-600">
+            <tr type="button" data-user-id="{{ $user->id }}" class="open-borrower-modal transition-colors cursor-pointer active:scale-[0.99] align-middle {{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100">
+                <td class="px-4 py-3 text-black">
                     {{ $users->firstItem() + $index }}
                 </td>
                 <td class="py-2 text-center">
@@ -37,68 +37,61 @@
                         {{ strtoupper(substr($user->firstname,0,1)) }}{{ strtoupper(substr($user->lastname,0,1)) }}
                     </div>
                 </td>
+
+                {{-- Borrower Name Column --}}
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
 
                         <span class="font-medium text-gray-800 whitespace-nowrap">{{ $user->getFullnameAttribute() }}</span>
                     </div>
                 </td>
-                <td class="py-3 px-4 text-gray-600 font-mono text-xs">
+
+                {{-- ID Number Column --}}
+                <td class="py-3 px-4 text-black font-mono text-xs">
                     @if($user->role === 'teacher')
                     {{ $user->teachers->employee_number }}
                     @elseif($user->role === 'student')
                     {{ $user->students->student_number }}
                     @endif
                 </td>
-                <td class="py-3 px-4">
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold
-                        @if($user->role === 'student') bg-blue-100 text-blue-700 border border-blue-100 w-full
-                        @elseif($user->role === 'teacher') bg-green-200 text-green-700 border border-green-100 w-full
-                        @else bg-gray-100 text-gray-600 border border-gray-200 @endif">
-                        @if($user->role === 'student')
 
-                        <img src="{{ asset('build/assets/icons/student-role-badge.svg') }}" alt="Student Badge" class="w-3.5 h-3.5">
-                        @elseif($user->role === 'teacher')
-                        <img src="{{ asset('build/assets/icons/teacher-role-badge.svg') }}" alt="Teacher Badge" class="w-3.5 h-3.5">
-                        @else
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
-                        </svg>
-                        @endif
-                        {{ ucfirst($user->role) }}
-                    </span>
-                </td>
-                <td class="py-3 px-4 text-gray-600 whitespace-nowrap text-xs">
+                {{-- Role Column --}}
+                <td class="py-3 px-4 text-black whitespace-nowrap text-xs"> {{ ucfirst($user->role) }} </td>
+
+                {{-- Department/Year Level Column --}}
+                <td class=" py-3 px-4 text-black whitespace-nowrap text-xs">
                     @if($user->role === 'teacher')
                     {{ $user->teachers->department->name }}
                     @elseif($user->role === 'student')
                     {{ $user->students->department->name }} - {{ $user->students->year_level }}
                     @endif
                 </td>
+
+                {{-- Library Status Column --}}
                 <td class="py-3 px-4">
                     @if ($user->library_status === 'active')
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700 border w-full border-green-100">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-semibold bg-green-200 text-green-700 border w-full border-green-100">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Active
                     </span>
                     @elseif ($user->library_status === 'suspended')
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border w-full border-red-100">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-semibold bg-red-100 text-red-700 border w-full border-red-100">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                         Suspended
                     </span>
                     @elseif ($user->library_status === 'cleared')
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-semibold bg-gray-100 text-black border border-gray-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                         Cleared
                     </span>
                     @else
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-semibold bg-gray-100 text-black border border-gray-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
                         </svg>
@@ -106,6 +99,8 @@
                     </span>
                     @endif
                 </td>
+
+                {{-- Active Borrowings Column --}}
                 <td class="py-3 px-4">
                     @if ($user->active_borrowings_count === 1) <span class="text-gray-700 font-medium text-xs">
                         {{ $user->active_borrowings_count }} book
@@ -116,6 +111,8 @@
                     </span>
                     @endif
                 </td>
+
+                {{-- Total Unpaid Fines Column --}}
                 <td class="py-3 px-4">
                     @if ($user->total_unpaid_fines > 0)
                     <span class="text-red-700 text-xs font-bold">{{ '₱ ' . number_format($user->total_unpaid_fines, 2) }}</span>
@@ -123,11 +120,51 @@
                     <span class="text-gray-500 text-xs">None</span>
                     @endif
                 </td>
-                <td class="py-3 px-4">
-                    @if ($user->active_borrowings_count === 0)
-                    <span class="text-gray-500 text-xs">None</span>
-                    @endif
+
+                {{-- Pending Reservation Column Count --}}
+                <td class="py-3 px-4 align-middle">
+                    @php
+                    $pendingReservations = $user->pendingReservations()->count();
+                    $readyReservations = $user->readyReservations ? $user->readyReservations()->count() : 0;
+                    @endphp
+
+                    <div class="flex flex-col gap-1 min-h-[48px] justify-center">
+                        @if ($pendingReservations > 0)
+                        @php
+                        $pendingBadgeConfig = [
+                        'class' => 'bg-yellow-200 text-yellow-800',
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>'
+                        ];
+                        @endphp
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-full text-xs {{ $pendingBadgeConfig['class'] }}">
+                            {!! $pendingBadgeConfig['icon'] !!}
+                            {{ $pendingReservations }} Pending
+                        </span>
+                        @endif
+
+                        @if ($readyReservations > 0)
+                        @php
+                        $readyBadgeConfig = [
+                        'class' => 'bg-green-200 text-green-700',
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>'
+                        ];
+                        @endphp
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-full text-xs {{ $readyBadgeConfig['class'] }}">
+                            {!! $readyBadgeConfig['icon'] !!}
+                            {{ $readyReservations }} Ready for Pickup
+                        </span>
+                        @endif
+
+                        @if ($pendingReservations === 0 && $readyReservations === 0)
+                        <span class="text-gray-500 text-xs">None</span>
+                        @endif
+                    </div>
                 </td>
+
             </tr>
             @endforeach
             @endif
@@ -137,7 +174,7 @@
 
 @if($users->isNotEmpty())
 <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-    <p class="text-sm text-gray-600">
+    <p class="text-sm text-black">
         Showing <span class="font-semibold text-gray-800">{{ $users->firstItem() }}-{{ $users->lastItem() }}</span>
         of <span class="font-semibold text-gray-800">{{ $users->total() }}</span> borrowers
     </p>

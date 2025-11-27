@@ -1,7 +1,13 @@
-import { showBorrowBookContent, restoreProfileContent } from './borrowBook.js';
+import { showBookSelectionContent, restoreProfileContent} from './bookSelection.js';
 import { borrowBook } from '../../api/staffTransactionHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { fetchSettings } from '../../api/settingsHandler.js';
+import { closeConfirmReservationModal } from './transactions/confirmReservation.js';
+import { closeBorrowerModal, openBorrowerProfileModal } from './borrower/borrowerProfileModal.js';
+import { fetchCopiesForReservation } from '../../api/bookHandler.js';
+import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js'; 
+import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
+import { closeConfirmReturnModal } from './confirmReturn.js';
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
 // Store borrower data for navigation
@@ -11,7 +17,7 @@ let currentBook = null;
 const copySelect = document.getElementById('book_copy_id');
 const dueDateInput = document.getElementById('due_date');
 
-export async function initializeConfirmBorrowModal(modal, borrower, book) {
+export async function initializeConfirmBorrowModal(modal, borrower, book, isFromReservation = false) {
     currentBorrower = borrower;
     currentBook = book;
     
@@ -20,7 +26,7 @@ export async function initializeConfirmBorrowModal(modal, borrower, book) {
         const borrowerName = modal.querySelector('#confirm-borrower-name');
         const borrowerId = modal.querySelector('#confirm-borrower-id');
         
-        if (borrowerName) borrowerName.textContent = borrower.full_name || 'N/A';
+        if (borrowerName) borrowerName.textContent = borrower.fullname || 'N/A';
         if (borrowerId) {
             const idNumber = borrower.role === 'student' 
                 ? borrower.students?.student_number 
@@ -29,7 +35,23 @@ export async function initializeConfirmBorrowModal(modal, borrower, book) {
         }
     }
 
+    // const book = currentBook;
+    // attach a flag to the back button to indicate if coming from reservation
+    const backButton = document.getElementById('back-to-borrow-book-button');
+    let copiesForReservation = [];
+    if (isFromReservation) {
+        backButton.dataset.fromReservation = 'true';
+        backButton.dataset.borrowerId = borrower.id;
+        console.log('Fetching copies for reservation for borrower ID:', currentBorrower.id, 'and book ID:', currentBook.id);
+        copiesForReservation = await fetchCopiesForReservation(currentBorrower.id, currentBook.id);
+
+    } else {
+        backButton.dataset.fromReservation = 'false';
+        backButton.dataset.borrowerId = '';
+    }
+    
     if (book) { 
+
         const profileIcon = modal.querySelector('#confirm-borrower-initials');
         if (profileIcon && borrower) {
             const names = borrower.firstname.charAt(0).toUpperCase() + (borrower.lastname?.charAt(0).toUpperCase() || '');
@@ -52,7 +74,7 @@ export async function initializeConfirmBorrowModal(modal, borrower, book) {
         if (bookGenre) bookGenre.textContent = book.genre?.name || 'N/A';
         
         // Populate copy number dropdown
-        populateCopyNumbers(modal, book);
+        populateCopyNumbers(modal, book, isFromReservation, copiesForReservation);
     }
 
    const settings = await fetchSettings();
@@ -108,26 +130,34 @@ export async function initializeConfirmBorrowModal(modal, borrower, book) {
         
         newBtn.addEventListener('click', async function(e) {
             e.preventDefault();
-            await handleConfirmBorrow();
+            const result = await handleConfirmBorrow(isFromReservation);
+             if (result) {
+                // returnToBorrowerProfile();
+                const modal = document.getElementById('borrower-profile-modal');
+                const freshBorrowerDetails = await fetchBorrowerDetails(borrower.id);
+                await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true);    
+                closeConfirmReturnModal();
+            }
         });
     }
 }
 
-function populateCopyNumbers(modal, book) {
+function populateCopyNumbers(modal, book ,isFromReservation = false, copiesForReservation) {
     const copySelect = modal.querySelector('#book_copy_id');
     const copiesAvailableText = modal.querySelector('#copies-available-text');
-    
     if (!copySelect) return;
-    
-    // Clear existing options
+
     copySelect.innerHTML = '';
-    
-    // Filter available copies (status: 'available' only)
-    const availableCopies = (book.copies || []).filter(copy => 
-        copy.status === 'available'
-    );
-    
-    // Populate with available copies
+
+    let availableCopies = [];
+    let infoMessage = '';
+
+    if (isFromReservation) {
+        availableCopies = copiesForReservation;
+    } else {
+        availableCopies = (book.copies || []).filter(copy => copy.status === 'available');
+    }
+
     availableCopies.forEach(copy => {
         const option = document.createElement('option');
         option.value = copy.id;
@@ -136,18 +166,19 @@ function populateCopyNumbers(modal, book) {
         option.dataset.status = copy.status;
         copySelect.appendChild(option);
     });
-    
-    // Enable the select
+ 
+
     copySelect.disabled = false;
-    
-    // Update available text
+
     if (copiesAvailableText) {
         copiesAvailableText.textContent = `${availableCopies.length} ${availableCopies.length === 1 ? 'copy' : 'copies'} available`;
         copiesAvailableText.classList.remove('text-red-600');
         copiesAvailableText.classList.add('text-green-600', 'font-semibold');
+        if (infoMessage) {
+            copiesAvailableText.textContent += ` (${infoMessage})`;
+        }
     }
-    
-    // Auto-select first copy (since there's no placeholder)
+
     copySelect.selectedIndex = 0;
 }
 
@@ -155,7 +186,14 @@ const backToBorrowBookButton = document.getElementById('back-to-borrow-book-butt
 if (backToBorrowBookButton) {
     backToBorrowBookButton.addEventListener('click', function(e) {
         e.preventDefault();
-        returnToBorrowBookModal();
+
+        if (backToBorrowBookButton.dataset.fromReservation === 'true') {
+        
+            closeConfirmBorrowModal();
+            openBorrowerProfileModal(backToBorrowBookButton.dataset.borrowerId, false, 'reservations-tab');
+            return;
+        } 
+        returnToBookSelection('borrow', currentBorrower);
     });
 }
 
@@ -171,7 +209,7 @@ const cancelBorrowBtn = document.getElementById('cancel-borrow-button');
 if (cancelBorrowBtn) {
     cancelBorrowBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        returnToBorrowBookModal();
+        returnToBookSelection('borrow', currentBorrower);
     });
 }
 
@@ -181,13 +219,16 @@ document.addEventListener('click', function(event) {
     }
 });
 
-export function openConfirmBorrowModal(borrower, book, ) {
+export function openConfirmBorrowModal(borrower, book, isFromReservation = false ) {
     currentBorrower = borrower;
     currentBook = book;
     
     const modal = document.getElementById('confirm-borrow-modal');
     const modalContent = document.getElementById('confirm-borrow-content');
     
+    if (isFromReservation) {
+        closeBorrowerModal(false);
+    }
     // Show modal immediately but invisible
     modal.classList.remove('hidden');
     
@@ -200,7 +241,7 @@ export function openConfirmBorrowModal(borrower, book, ) {
     });
     
     // Initialize modal with data
-    initializeConfirmBorrowModal(modal, borrower, book  );
+    initializeConfirmBorrowModal(modal, borrower, book, isFromReservation);
 }
 
 export function closeConfirmBorrowModal() {
@@ -228,16 +269,20 @@ export function closeConfirmBorrowModal() {
     }, 150);
 }
 
-function returnToBorrowBookModal() {
+export function returnToBookSelection(transactionType, member) {
     // Close confirm modal
-    closeConfirmBorrowModal();
+    if (transactionType === 'borrow') {
+        closeConfirmBorrowModal();
+    } else if (transactionType === 'reservation') {
+        closeConfirmReservationModal();
+    }
     
     // Reopen borrower modal with borrow book view
     setTimeout(() => {
         const borrowerModal = document.getElementById('borrower-profile-modal');
         const borrowerModalContent = document.getElementById('borrower-profile-content');
         
-        if (borrowerModal && currentBorrower) {
+        if (borrowerModal && member) {
             // Show borrower modal
             borrowerModal.classList.remove('hidden');
             
@@ -250,15 +295,20 @@ function returnToBorrowBookModal() {
             });
             
             // Show borrow book content with restored state (pass true)
-            showBorrowBookContent(borrowerModal, currentBorrower, true);
+            if (transactionType === 'borrow') {
+                showBookSelectionContent(borrowerModal, member, 'borrow', true);
+            } else if (transactionType === 'reservation') {
+                showBookSelectionContent(borrowerModal, member, 'reservation', true);
+            }
         }
     }, 150); // Wait for close animation to complete
 }
 
-async function handleConfirmBorrow() {
+async function handleConfirmBorrow(isFromReservation = false) {
     const copySelect = document.getElementById('book_copy_id');
     const dueDateInput = document.getElementById('due_date');
-    
+
+    console.log('Handling confirm borrow. isFromReservation:', isFromReservation);
     const selectedCopyId = copySelect?.value;
     const dueDate = dueDateInput?.value;
     
@@ -267,6 +317,12 @@ async function handleConfirmBorrow() {
     formData.append('book_copy_id', selectedCopyId);
     formData.append('borrower_id', currentBorrower.id);
     formData.append('due_date', dueDate);
+
+    if(isFromReservation) {
+        formData.append('is_from_reservation', '1');
+    } else {
+        formData.append('is_from_reservation', '0');
+    }
     
     // Call the borrow handler
     await borrowBook(formData);

@@ -3,7 +3,7 @@ import { fetchSettings } from '../../api/settingsHandler.js';
 import { renewBook } from '../../api/staffTransactionHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
-import { showWarning } from '../../utils.js';
+import { showWarning } from '../../utils/alerts.js';
 
 let currentRenewer = null;
 let currentTransaction = null;

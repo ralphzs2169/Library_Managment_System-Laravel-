@@ -16,14 +16,11 @@ use Illuminate\Support\Facades\Validator;
 use App\Enums\BookCopyStatus;
 use App\Enums\PenaltyType;
 use App\Enums\PenaltyStatus;
-use App\Enums\BorrowTransactionStatus;
-use App\Models\IssueReport;
-use App\Enums\IssueReportType;
-use App\Enums\IssueReportStatus;
 use App\Models\Payment;
-use App\Enums\LibraryStatus;
+use App\Enums\ReservationStatus;
 use App\Policies\BorrowPolicy;
 use App\Policies\RenewalPolicy;
+use App\Policies\ReservationPolicy;
 
 class UserService
 {
@@ -45,7 +42,7 @@ public function getBorrowerDetails(int $userId)
         $transaction->can_renew = RenewalPolicy::canRenew($borrower, $transaction, false);
     }
 
-        // Get all transactions that have unpaid or partially paid penalties
+    // Get all transactions that have unpaid or partially paid penalties
     $transactionsWithActivePenalties = BorrowTransaction::with(['bookCopy.book.author', 'penalties.payments'])
         ->where('user_id', $userId)
         ->whereHas('penalties', fn($query) => $query->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]))
@@ -71,7 +68,6 @@ public function getBorrowerDetails(int $userId)
                     return $transactionCopy;
                 });
         });
-
 
 
         $today = now()->startOfDay();
@@ -106,142 +102,40 @@ public function getBorrowerDetails(int $userId)
             return $transaction;
         });
 
+
+        $activeReservations = $borrower->activeReservations()->get();
+
+        // Separate pending for queue calculation
+        $pendingReservations = $activeReservations->where('status', ReservationStatus::PENDING);
+
+        $positionsByBook = $pendingReservations
+            ->groupBy('book_id')
+            ->map(fn($reservationsForBook) => $reservationsForBook->pluck('id')->flip());
+
+        // Assign queue position and date_expired
+        $activeReservations->each(function ($reservation) use ($positionsByBook) {
+            if ($reservation->status === ReservationStatus::PENDING) {
+                $reservation->queue_position = $positionsByBook[$reservation->book_id][$reservation->id] + 1;
+                $reservation->date_expired = null;
+            } else { // READY_FOR_PICKUP
+                $reservation->queue_position = 0;
+                $pickupWindowDays = $reservation->borrower->role === 'teacher'
+                    ? (int) config('settings.reservation.teacher_pickup_window_days')
+                    : (int) config('settings.reservation.student_pickup_window_days');
+                $reservation->date_expired = $reservation->pickup_deadline ?? now()->addDays($pickupWindowDays);
+            }
+        });
+
         // Assign to user
-        $borrower->total_unpaid_fines = $borrower->getTotalUnpaidFinesAttribute();
-        $borrower->full_name = $borrower->getFullnameAttribute();
+        $borrower->total_unpaid_fines;
+        $borrower->full_name;
         $borrower->active_borrows = $activeBorrows->values();
         $borrower->can_borrow = BorrowPolicy::canBorrow(false, ['borrower_id' => $userId]);
+        $borrower->can_reserve = ReservationPolicy::canReserve($borrower, null, false );
         $borrower->transactions_with_penalties = $transactionsWithActivePenalties->values();
+        $borrower->active_reservations = $activeReservations;
+
         return ['borrower' => $borrower ];
-    }
-
-    public function returnBook(Request $request)
-    {
-        return DB::transaction(function () use ($request) {
-            $borrower = User::findOrFail($request->input('borrower_id'));
-            $bookCopyId = $request->input('book_copy_id');
-            $reportDamaged = $request->boolean('report_damaged');
-
-            $transaction = BorrowTransaction::where('user_id', $borrower->id)
-                ->where('book_copy_id', $bookCopyId)
-                ->whereNull('returned_at')
-                ->firstOrFail();
-
-            $bookCopy = BookCopy::with('book')->findOrFail($bookCopyId);
-            $book = $bookCopy->book;
-
-            // Check if returned late
-            $dueDate = \Carbon\Carbon::parse($transaction->due_at)->startOfDay();
-            $returnedDate = now()->startOfDay();
-            $isLate = $returnedDate->gt($dueDate);
-
-            // Determine final transaction status and copy status
-            $hasPenalty = false;
-            if($isLate){
-                $transactionStatus = BorrowTransactionStatus::RETURNED;
-                $copyStatus = BookCopyStatus::AVAILABLE;
-
-                $penalty = Penalty::create([
-                    'borrow_transaction_id' => $transaction->id,
-                    'amount' => min(round($dueDate->diffInDays($returnedDate) * (float)config('settings.penalty.rate_per_day', 0), 2), (float)config('settings.penalty.max_amount', 0)),
-                    'type' => PenaltyType::LATE_RETURN,
-                    'status' => PenaltyStatus::UNPAID,
-                    'issued_at' => now(),
-                ]);
-
-                if (!$penalty) {
-                    throw new \Exception('Failed to create penalty record.');
-                } else {
-                    $hasPenalty = true;
-                }
-
-                if ($reportDamaged) {
-                    // If also damaged, override statuses
-                    $transactionStatus = BorrowTransactionStatus::RETURNED;
-                    $copyStatus = BookCopyStatus::PENDING_ISSUE_REVIEW;
-
-                    IssueReport::create([
-                        'book_copy_id' => $bookCopy->id,
-                        'borrower_id' => $borrower->id,
-                        'reported_by' => $request->user()->id,
-                        'report_type' => IssueReportType::DAMAGE,
-                        'description' => $request->input('damage_description', 'Reported damaged upon return.'),
-                        'status' => IssueReportStatus::PENDING,
-                    ]);
-                }
-                
-            } else if ($reportDamaged) {
-                // If damaged, status is 'damaged' regardless of being late
-                $transactionStatus = BorrowTransactionStatus::RETURNED;
-                $copyStatus = BookCopyStatus::PENDING_ISSUE_REVIEW;
-
-                    IssueReport::create([
-                        'book_copy_id' => $bookCopy->id,
-                        'borrower_id' => $borrower->id,
-                        'reported_by' => $request->user()->id,
-                        'report_type' => IssueReportType::DAMAGE,
-                        'description' => $request->input('damage_description', 'Reported damaged upon return.'),
-                        'status' => IssueReportStatus::PENDING,
-                    ]);
-            } else {
-                // Not damaged - mark as 'returned'
-                $transactionStatus = BorrowTransactionStatus::RETURNED;
-                $copyStatus = BookCopyStatus::AVAILABLE;
-            }
-
-            // Update transaction
-             $transaction->update([
-                'returned_at' => now(),
-                'status' => $transactionStatus,
-            ]);
-
-            // Update book copy status
-            $bookCopy->update(['status' => $copyStatus]);
-
-            if ($hasPenalty) {
-                // Suspend borrower
-                $borrower->update(['library_status' => LibraryStatus::SUSPENDED]);
-            }
-
-            // Create activity log
-            $damagedText = $reportDamaged ? ' (reported as damaged)' : '';
-            $lateText = $isLate && !$reportDamaged ? ' (returned late)' : '';
-            ActivityLog::create([
-                'action' => 'returned',
-                'details' => $borrower->full_name . ' returned "' . $book->title . '" (Copy #' . $bookCopy->copy_number . ')' . $damagedText . $lateText,
-                'entity_type' => 'Borrow Transaction',
-                'entity_id' => $transaction->id,
-                'user_id' => $request->user()->id,
-            ]);
-
-            return $transaction;
-        });
-    }
-
-    public function validateReturnRequest(Request $request)
-    {
-        // Ensure borrower exists
-        $borrower = User::find($request->input('borrower_id'));
-        if (!$borrower) {
-            return ['status' => 'invalid', 'message' => 'Borrower not found.'];
-        }
-
-        $bookCopyId = $request->input('book_copy_id');
-        if (!$bookCopyId) {
-            return ['status' => 'invalid', 'message' => 'Missing book copy identifier.'];
-        }
-
-        // Check if active transaction exists
-        $transaction = BorrowTransaction::where('user_id', $borrower->id)
-            ->where('book_copy_id', $bookCopyId)
-            ->whereNull('returned_at')
-            ->first();
-
-        if (!$transaction) {
-            return ['status' => 'invalid', 'message' => 'No active borrow transaction found for this book.'];
-        }
-
-        return ['status' => 'valid'];
     }
 
     public function validatePenaltyUpdate(Request $request)
@@ -339,96 +233,4 @@ public function getBorrowerDetails(int $userId)
         });
     }
 
-    // public function validateRenewRequest(Request $request)
-    // {
-    //     // Ensure borrower exists
-    //     $renewer = User::find($request->input('renewer_id'));
-    //     if (!$renewer) {
-    //         return ['result' => 'not_found', 'message' => 'Renewer not found.'];
-    //     }
-
-    //     // Ensure transaction exists
-    //     $transactionId = $request->input('transaction_id');
-    //     if (!$transactionId) {
-    //         return ['result' => 'not_found', 'message' => 'Transaction not found.'];
-    //     }
-
-    //     // Check if active transaction exists
-    //     $transaction = BorrowTransaction::where('user_id', $renewer->id)
-    //         ->where('id', $transactionId)
-    //         ->whereNull('returned_at')
-    //         ->first();
-
-    //     if (!$transaction) {
-    //         return ['result' => 'not_found', 'message' => 'No active borrow transaction found for this book.'];
-    //     }
-        
-    //      // 1. For students, check active semester
-    //     if ($renewer->role === 'student') {
-    //         $hasActive = Semester::where('status', 'active')->exists();
-    //         if (!$hasActive) {
-    //             return ['result' => 'business_rule_violation', 'message' => 'No active semester found. Students can only borrow during an active semester.'];
-    //         }
-    //     }
-
-    //     // 2. Check for outstanding penalties
-    //     if ($renewer->library_status === 'suspended') {
-    //         return ['result' => 'business_rule_violation', 'message' => 'Renewal suspended due to an outstanding penalty.'];
-    //     }
-
-    //     // 3. Check minimum days before renewal
-    //     $minDaysBeforeRenewal = $renewer->role === 'student'
-    //         ? (int) config('settings.renewing.student_min_days_before_renewal')
-    //         : (int) config('settings.renewing.teacher_min_days_before_renewal');
-
-    //     $currentDueDate = Carbon::parse($transaction->due_at)->startOfDay();
-    //     $today = now()->startOfDay();
-    //     $daysBeforeDue = $today->diffInDays($currentDueDate);
-
-    //     if ($daysBeforeDue > $minDaysBeforeRenewal) {
-    //         return [
-    //             'result' => 'business_rule_violation',
-    //             'message' => "Renewal not allowed. You can only renew {$minDaysBeforeRenewal} day(s) before the due date or later."
-    //         ];
-    //     }
-
-    //     // 4. Check renewal limit
-    //     $timesRenewed = $transaction->times_renewed;
-    //     $renewalLimit = $renewer->role === 'student'
-    //         ? (int)config('settings.renewing.student_renewal_limit')
-    //         : (int)config('settings.renewing.teacher_renewal_limit');
-
-    //     if ($timesRenewed >= $renewalLimit) {
-    //         return [
-    //             'result' => 'business_rule_violation',
-    //             'message' => "Borrower has reached the maximum number of renewals ({$renewalLimit})"
-    //         ];
-    //     }
-
-    //     // 5. Field validation for new due date
-    //     $renewDuration = $renewer->role === 'student'
-    //         ? (int) config('settings.renewing.student_duration', 7)
-    //         : (int) config('settings.renewing.teacher_duration', 10);
-
-    //     $validator = Validator::make($request->all(), [
-    //         'new-due-date' => [
-    //             'required',
-    //             'date',
-    //             'after:today',
-    //             function ($attribute, $value, $fail) use ($transaction, $renewDuration) {
-    //                 $newDueDate = Carbon::parse($value);
-    //                 $maxDueDate = Carbon::parse($transaction->due_at)->addDays($renewDuration);
-
-    //                 if ($newDueDate->gt($maxDueDate)) {
-    //                     $fail("The new due date cannot exceed {$renewDuration} day(s) from the current due date.");
-    //                 }
-    //             },
-    //         ],
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return ['result' => 'invalid_input', 'message' => 'Invalid Input found' ,'errors' => $validator->errors()];
-    //     }
-    //     return ['result' => 'success', 'renewer_fullname' => $renewer->full_name];
-    // }
 }

@@ -1,6 +1,6 @@
 import { API_ROUTES } from "../config.js";
-import { showSuccessWithRedirect, showConfirmation, showInfo, apiRequest, getJsonHeaders, showError } from "../utils.js";
-
+import { showSuccessWithRedirect, showConfirmation, showInfo, showError } from "../utils/alerts.js";
+import { apiRequest, getJsonHeaders } from "../utils.js";
 
 export async function addGenreHandler(categoryId, genreName) {
     // Step 1: Validate only

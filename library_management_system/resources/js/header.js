@@ -1,4 +1,4 @@
-import { confirmLogout } from './utils.js';
+import { confirmLogout } from "./utils/alerts.js";
 
 const profileDropdown = document.getElementById('profileDropdown');
 const dropdownMenu = document.getElementById('dropdownMenu');

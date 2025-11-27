@@ -58,6 +58,12 @@ class SettingsController extends Controller
                 'lost_fee_multiplier' => 'required|numeric|min:0|max:5',
                 'damaged_fee_multiplier' => 'required|numeric|min:0|max:5',
                 'reminder_days_before_due' => 'required|integer|min:1|max:14',
+
+                'reservation_student_pickup_window_days' => 'required|integer|min:1|max:14',
+                'reservation_teacher_pickup_window_days' => 'required|integer|min:1|max:14',
+                'reservation_queue_max_length' => 'required|integer|min:1|max:50',
+                'reservation_student_max_pending_reservations' => 'required|integer|min:1|max:20',
+                'reservation_teacher_max_pending_reservations' => 'required|integer|min:1|max:20',
             ], [
                 'max_books_per_student.required' => 'The max books per student field is required.',
                 'max_books_per_teacher.required' => 'The max books per teacher field is required.',
@@ -79,6 +85,12 @@ class SettingsController extends Controller
                 'lost_fee_multiplier.required' => 'The lost book multiplier field is required.',
                 'damaged_fee_multiplier.required' => 'The damaged book multiplier field is required.',
                 'reminder_days_before_due.required' => 'The reminder days field is required.',
+
+                'reservation_student_pickup_window_days.required' => 'The student pickup window is required.',
+                'reservation_teacher_pickup_window_days.required' => 'The teacher pickup window is required.',
+                'reservation_queue_max_length.required' => 'The reservation queue max length is required.',
+                'reservation_student_max_pending_reservations.required' => 'The student max pending reservations is required.',
+                'reservation_teacher_max_pending_reservations.required' => 'The teacher max pending reservations is required.',
             ]);
 
             // Check for changes

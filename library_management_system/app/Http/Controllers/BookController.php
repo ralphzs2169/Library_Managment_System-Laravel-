@@ -12,16 +12,18 @@ use App\Models\Category;
 use App\Models\Genre;
 use Illuminate\Support\Facades\Log;
 use App\Services\BookService;
-
+use App\Services\ReservationService;
 use Illuminate\Support\Facades\Validator;
 
 class BookController extends Controller
 {
     protected $bookService;
+    protected $reservationService;
 
-    public function __construct(BookService $bookService)
+    public function __construct(BookService $bookService, ReservationService $reservationService)
     {
         $this->bookService = $bookService;
+        $this->reservationService = $reservationService;
     }
 
     /**
@@ -104,7 +106,7 @@ class BookController extends Controller
         }
 
         $books = $query->with(['author', 'genre.category', 'copies'])
-                       ->paginate(10)
+                       ->paginate(15)
                        ->withQueryString();
 
         if ($request->ajax()) {
@@ -115,10 +117,10 @@ class BookController extends Controller
         return view('pages.librarian.book-catalog', compact('books', 'categories'));
     }
 
-    public function showAvailableBooks(Request $request)
+    public function getBooksForBorrowOrReserve(Request $request, $transactionType, $member_id)
     {
         $filters = $request->only(['search', 'sort']);
-        $books = $this->bookService->showAvailableBooks($filters);
+        $books = $this->bookService->getBooksForBorrowOrReserve($filters, $transactionType, $member_id);
 
         return response()->json([
             'data' => $books->items(),
@@ -131,6 +133,8 @@ class BookController extends Controller
         ]);
     }
 
+    
+    
     /**
      * Show the form for creating a new resource.
      */
@@ -221,6 +225,28 @@ class BookController extends Controller
     public function update(Request $request, Book $book)
     {
         $result = $this->bookService->updateBook($request, $book);
+        
+            //  $copiesInput = $request->input('copies', []);
+
+        // foreach ($copiesInput as $copyId => $newStatus) {
+
+        //     $bookCopy = BookCopy::findOrFail($copyId);
+        //     // If new copy is added, check for reservations and lend this copy to the first reserver
+        //     if ($copyId < 0) {
+        //         $this->reservationService->checkForReservations($bookCopy);
+        //     }
+
+        //     if (!$bookCopy) {
+        //         continue; // Skip if copy not found
+        //     }
+
+        //     // Update status if it has changed
+        // }
+        
+        // // $
+        // // if ($result['status'] === 'success') {
+        // //     $this->reservationService->checkForReservations();
+        // // }
         
         // Handle invalid status (business rule violations)
         if (isset($result['status']) && $result['status'] === 'invalid') {

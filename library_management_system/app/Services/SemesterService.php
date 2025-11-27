@@ -237,4 +237,9 @@ class SemesterService
 
         return $changes;
     }
+
+    public function hasActiveSemester()
+    {
+        return Semester::where('status', 'active')->exists();
+    }
 }

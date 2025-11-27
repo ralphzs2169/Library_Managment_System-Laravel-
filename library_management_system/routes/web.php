@@ -12,6 +12,8 @@ use App\Http\Controllers\RenewalController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\ReturnController;
 
 use Illuminate\Http\Request;
 use App\Models\Genre;
@@ -72,25 +74,31 @@ Route::prefix('staff')
     ->middleware(['auth', 'role:staff'])
     ->name('staff.')
     ->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])->name('dashboard');
-        Route::get('/books/available', [BookController::class, 'showAvailableBooks'])->name('books.available');
-        Route::get('borrower/{user}', [UserController::class, 'borrowerDetails'])->name('borrower.details');
-        Route::get('/check-active-semester', function () {
-            $hasActive = \App\Models\Semester::where('status', 'active')->exists();
-            return response()->json(['has_active_semester' => $hasActive]);
-        });
 
-        Route::post('/transaction/borrow/validate', [BorrowController::class, 'validateBorrow'])->name('staff-transaction.borrow.validate');
-        Route::post('/transaction/borrow/perform', [BorrowController::class, 'performBorrow'])->name('staff-transaction.borrow.perform');
+        Route::get('/dashboard', [DashboardController::class, 'staffDashboard']);
 
-        Route::post('/transaction/return', [UserController::class, 'returnBook'])->name('staff-transaction.return');
+        Route::get('/books/selection/{transaction_type}/{member_id}', [BookController::class, 'getBooksForBorrowOrReserve']);
 
-        Route::post('/transaction/renewal/validate', [RenewalController::class, 'validateRenewal'])->name('staff-transaction.renewal.validate');
-        Route::post('/transaction/renewal/perform', [RenewalController::class, 'performRenewal'])->name('staff-transaction.renewal.perform');
+        Route::get('borrower/{user}', [UserController::class, 'borrowerDetails']);
+        Route::get('/check-active-semester', [SemesterController::class, 'checkActiveSemester']);
 
-        Route::put('/penalties/{penalty}', [UserController::class, 'updatePenalty'])->name('penalties.update');
+        Route::post('/transaction/borrow/validate', [BorrowController::class, 'validateBorrow']);
+        Route::post('/transaction/borrow/perform', [BorrowController::class, 'performBorrow']);
+
+        Route::post('/transaction/return/validate', [ReturnController::class, 'validateReturn']);
+        Route::post('/transaction/return/perform', [ReturnController::class, 'performReturn']);
+
+        Route::post('/transaction/renewal/validate', [RenewalController::class, 'validateRenewal']);
+        Route::post('/transaction/renewal/perform', [RenewalController::class, 'performRenewal']);
+
+        Route::post('/transaction/reservation/validate', [ReservationController::class, 'validateReservation']);
+        Route::post('/transaction/reservation/perform', [ReservationController::class, 'performReservation']);
+        Route::get('/transaction/reservation/{user}/book/{book}/available-copies', [ReservationController::class, 'availableCopiesForReservation']);
+        Route::post('/transaction/reservation/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
+        
+        Route::put('/penalties/{penalty}', [UserController::class, 'updatePenalty']);
     });
 
-Route::middleware('auth')->get('/settings', [SettingsController::class, 'allSettings'])->name('settings');
+Route::middleware('auth')->get('/settings', [SettingsController::class, 'allSettings']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

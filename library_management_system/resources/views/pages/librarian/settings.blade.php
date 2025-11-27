@@ -154,6 +154,75 @@
                 </div>
             </div>
 
+            <!-- Reservation Rules -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <img src="{{ asset('build/assets/icons/reservation.svg') }}" alt="Reservation Icon" class="w-6 h-6">
+                        Reservation Rules
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Student Reservation Config -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col gap-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <img src="{{ asset('build/assets/icons/student.svg') }}" alt="Student Icon" class="w-5 h-5">
+                                <h3 class="text-base font-semibold text-purple-700">Student Reservation Settings</h3>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Pickup Window (Student) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Pickup Window (Days)</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="reservation_student_pickup_window_days-error-placeholder"></div>
+                                    <input id="reservation_student_pickup_window_days" type="number" name="reservation_student_pickup_window_days" value="{{ $settings['reservation.student_pickup_window_days'] ?? '' }}" class="w-full bg-[#F2F2F2] border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent transition" min="1" max="14">
+                                    <p class="mt-1 text-xs text-gray-500">Days allowed for student to pick up reserved book</p>
+                                </div>
+                                <!-- Max Pending Reservations (Student) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Pending Reservations</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="reservation_student_max_pending_reservations-error-placeholder"></div>
+                                    <input id="reservation_student_max_pending_reservations" type="number" name="reservation_student_max_pending_reservations" value="{{ $settings['reservation.student_max_pending_reservations'] ?? '' }}" class="w-full bg-[#F2F2F2] border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent transition" min="1" max="20">
+                                    <p class="mt-1 text-xs text-gray-500">Maximum pending reservations allowed for a student</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Teacher Reservation Config -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col gap-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <img src="{{ asset('build/assets/icons/teacher.svg') }}" alt="Teacher Icon" class="w-5 h-5">
+                                <h3 class="text-base font-semibold text-blue-700">Teacher Reservation Settings</h3>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Pickup Window (Teacher) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Pickup Window (Days)</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="reservation_teacher_pickup_window_days-error-placeholder"></div>
+                                    <input id="reservation_teacher_pickup_window_days" type="number" name="reservation_teacher_pickup_window_days" value="{{ $settings['reservation.teacher_pickup_window_days'] ?? '' }}" class="w-full bg-[#F2F2F2] border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent transition" min="1" max="14">
+                                    <p class="mt-1 text-xs text-gray-500">Days allowed for teacher to pick up reserved book</p>
+                                </div>
+                                <!-- Max Pending Reservations (Teacher) -->
+                                <div class="field-container flex flex-col">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Pending Reservations</label>
+                                    <div class="error-placeholder flex-1 text-sm" id="reservation_teacher_max_pending_reservations-error-placeholder"></div>
+                                    <input id="reservation_teacher_max_pending_reservations" type="number" name="reservation_teacher_max_pending_reservations" value="{{ $settings['reservation.teacher_max_pending_reservations'] ?? '' }}" class="w-full bg-[#F2F2F2] border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent transition" min="1" max="20">
+                                    <p class="mt-1 text-xs text-gray-500">Maximum pending reservations allowed for a teacher</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Queue Length -->
+                    <div class="mt-6">
+                        <div class="field-container flex flex-col max-w-md">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reservation Queue Max Length</label>
+                            <div class="error-placeholder flex-1 text-sm" id="reservation_queue_max_length-error-placeholder"></div>
+                            <input id="reservation_queue_max_length" type="number" name="reservation_queue_max_length" value="{{ $settings['reservation.queue_max_length'] ?? '' }}" class="w-full bg-[#F2F2F2] border border-[#B1B1B1] rounded-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent transition" min="1" max="50">
+                            <p class="mt-1 text-xs text-gray-500">Maximum number of reservations allowed in queue per book</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Penalty Settings -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4">

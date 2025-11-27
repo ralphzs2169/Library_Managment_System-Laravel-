@@ -1,5 +1,5 @@
-import { showError, showInfo, showWarning, showConfirmation, showSuccessWithRedirect } from "../utils.js";
-import { SEMESTER_ROUTES, VALIDATION_ERROR } from "../config.js";
+import { showError, showInfo, showWarning, showConfirmation, showSuccessWithRedirect } from "../utils/alerts.js";
+import { SEMESTER_ROUTES, INVALID_INPUT } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
 import { highlightSearchMatches } from "../tableControls.js";
 export async function getCreateSemesterForm() {
@@ -45,7 +45,7 @@ export async function storeNewSemester(semesterData, form) {
     const result = await response.json();
 
     if (!response.ok) {
-        if (response.status === VALIDATION_ERROR) { 
+        if (response.status === INVALID_INPUT) { 
             displayInputErrors(result.errors, form.id, false); 
             return;
         }
@@ -101,7 +101,7 @@ export async function activateSemester(semesterId, semesterName) {
 
 
      if (!response.ok) {
-        if (response.status === VALIDATION_ERROR) { 
+        if (response.status === INVALID_INPUT) { 
             showWarning('Action not allowed', 'Cannot activate this semester because another one is currently active.');
             return;
         }
@@ -181,7 +181,7 @@ export async function updateSemester(semesterId, semesterData, form) {
     const result = await response.json();
 
     if (!response.ok) {
-        if (response.status === VALIDATION_ERROR) { 
+        if (response.status === INVALID_INPUT) { 
             displayInputErrors(result.errors, 'edit-semester-form', false); 
             return;
         }
@@ -242,7 +242,7 @@ export async function deactivateSemester(semesterId, semesterName) {
     const result = await response.json();
 
     if (!response.ok) {
-        if (response.status === VALIDATION_ERROR) { 
+        if (response.status === INVALID_INPUT) { 
             showWarning('Action not allowed', 'This semester cannot be deactivated.');
             return;
         }

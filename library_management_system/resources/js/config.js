@@ -25,6 +25,7 @@ export const BOOK_ROUTES = {
     EDIT: (id) => `/librarian/books/${id}/edit`,
     UPDATE: (id) => `/librarian/books/${id}`,
     AVAILABLE_BOOKS: (params) => `/staff/books/available?${params}`,
+    BOOK_SELECTION: (transaction_type, member_id, params) => `/staff/books/selection/${transaction_type}/${member_id}?${params}`,
 };
 
 
@@ -43,20 +44,26 @@ export const SEMESTER_ROUTES = {
 export const TRANSACTION_ROUTES = {
     INDEX: '/staff/transaction',
 
-    BORROW_VALIDATE: '/staff/transaction/borrow/validate',
-    BORROW_PERFORM: '/staff/transaction/borrow/perform',
+    VALIDATE_BORROW: '/staff/transaction/borrow/validate',
+    PERFORM_BORROW: '/staff/transaction/borrow/perform',
 
-    RETURN: '/staff/transaction/return',
+    VALIDATE_RETURN: '/staff/transaction/return/validate',
+    PERFORM_RETURN: '/staff/transaction/return/perform',
 
     VALIDATE_RENEWAL: '/staff/transaction/renewal/validate',
     PERFORM_RENEWAL: '/staff/transaction/renewal/perform',
+
+    VALIDATE_RESERVATION: '/staff/transaction/reservation/validate',
+    PERFORM_RESERVATION: '/staff/transaction/reservation/perform',
+    AVAILABLE_COPIES_FOR_RESERVATION: (userId, bookId) => `/staff/transaction/reservation/${userId}/book/${bookId}/available-copies`,
+    CANCEL_RESERVATION: (reservationId) => `/staff/transaction/reservation/${reservationId}/cancel`,
 }
 
 export const PENALTY_ROUTES = {
     UPDATE: (id) => `/staff/penalties/${id}`,
 };
 
-export const VALIDATION_ERROR = 422;      // Input format or missing fields
+export const INVALID_INPUT = 422;      // Input format or missing fields
 export const AUTHORIZATION_ERROR = 403;   // User not allowed to perform action
 export const BUSINESS_RULE_VIOLATION = 400;   // Request violates a business rule
 export const NOT_FOUND = 404;   // Request violates a business rule

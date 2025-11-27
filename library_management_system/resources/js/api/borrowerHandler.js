@@ -1,6 +1,6 @@
-import { showError, showWarning, showConfirmation, showToast } from "../utils.js";
+import { showError, showWarning, showConfirmation, showToast } from "../utils/alerts.js";
 import { PENALTY_ROUTES } from "../config.js";
-import { VALIDATION_ERROR } from "../config.js";
+import { INVALID_INPUT } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
 import { BORROWER_FILTERS } from "../utils/tableFilters.js";
 import { highlightSearchMatches } from "../tableControls.js";
@@ -95,7 +95,7 @@ export async function updatePenalty(paymentDetails, form) {
         let result = await response.json();
     
         if (!response.ok) {
-            if (response.status === VALIDATION_ERROR) {
+            if (response.status === INVALID_INPUT) {
                 // Check for invalid status (business rule violation)
                 displayInputErrors(result.errors, form, false);
                 return false;

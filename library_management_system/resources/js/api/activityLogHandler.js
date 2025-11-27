@@ -1,4 +1,5 @@
-import { showError, getJsonHeaders } from "../utils";
+import { getJsonHeaders } from "../utils";
+import { showError } from "../utils/alerts.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('activity-logs-container');

@@ -1,6 +1,6 @@
-import { SETTINGS_ROUTES, VALIDATION_ERROR } from "../config.js";
+import { SETTINGS_ROUTES, INVALID_INPUT } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
-import { showSuccessWithRedirect, showWarning, showConfirmation, showInfo, showToast } from "../utils.js";
+import { showSuccessWithRedirect, showWarning, showConfirmation, showInfo, showToast } from "../utils/alerts.js";
 
 export async function updateSettingsHandler(settingsData, form) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -21,7 +21,7 @@ export async function updateSettingsHandler(settingsData, form) {
     const result = await response.json();
 
     if (!response.ok) {
-        if (response.status === VALIDATION_ERROR) {
+        if (response.status === INVALID_INPUT) {
             displayInputErrors(result.errors, form); // Pass form element, not string
             showToast('Please fix the errors in the form.', 'error');
             return;

@@ -1,6 +1,6 @@
-import { VALIDATION_ERROR, BOOK_ROUTES } from "../config.js";
+import { INVALID_INPUT, BOOK_ROUTES, TRANSACTION_ROUTES , BUSINESS_RULE_VIOLATION} from "../config.js";
 import { displayInputErrors } from "../helpers.js";
-import { showSuccessWithRedirect, showWarning, showConfirmation, showError, showInfo, showToast } from "../utils.js";
+import { showSuccessWithRedirect, showWarning, showConfirmation, showError, showInfo, showToast } from "../utils/alerts.js";
 import { highlightSearchMatches } from "../tableControls.js";
 import { BOOK_FILTERS } from "../utils/tableFilters.js";
 import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters.js";
@@ -21,7 +21,7 @@ export async function addBookHandler(bookData, form) {
     const result = await response.json();
 
     if (!response.ok) {
-        if (response.status === VALIDATION_ERROR) { 
+        if (response.status === INVALID_INPUT) { 
             displayInputErrors(result.errors, form); 
             return;
         }
@@ -57,21 +57,21 @@ export async function addBookHandler(bookData, form) {
 }
 
 //
-export async function fetchAllAvailableBooks({ search = '' , sort = 'title_asc', page = 1 } = {}) {
+export async function fetchBooksSelectionContent({ search = '' , sort = 'title_asc', page = 1 } = {}, transactionType = 'borrow', memberId) {
     try {
-
          const params = new URLSearchParams({
             search,
             sort,
             page
         });
         
-        const response = await fetch(BOOK_ROUTES.AVAILABLE_BOOKS(params.toString()), {
+        const response = await fetch(BOOK_ROUTES.BOOK_SELECTION(transactionType, memberId, params.toString()), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
             }
         });
+
         const result = await response.json();
 
         if (!response.ok) {
@@ -81,7 +81,7 @@ export async function fetchAllAvailableBooks({ search = '' , sort = 'title_asc',
 
          return { data: result.data, meta: result.meta };
     } catch (error) {
-        showError('Network Error', 'Unable to load books. Please try again later.');
+        showError('Network Error', error + 'Unable to load books. Please try again later.');
     }
 }
 
@@ -107,7 +107,7 @@ export async function editBookHandler(bookDetails, form) {
     let result = await response.json();
 
     if (!response.ok) {
-        if (response.status === VALIDATION_ERROR) {
+        if (response.status === INVALID_INPUT) {
             // Check for invalid status (business rule violation)
             if (result.status === 'invalid') {
                 showWarning('Invalid Status Change', result.message);
@@ -229,5 +229,36 @@ export async function loadBooks(page = BOOK_FILTERS.page, scrollUp = true) {
         }
     } catch (error) {
         showError('Something went wrong', error.message || 'Failed to load books.');
+    }
+
+}
+
+// get available copies when finalizing reservation
+export async function fetchCopiesForReservation(memberId, bookId) {
+    try {
+
+        const response = await fetch(TRANSACTION_ROUTES.AVAILABLE_COPIES_FOR_RESERVATION(memberId, bookId), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.status === BUSINESS_RULE_VIOLATION) {
+            showWarning('Something went wrong', result.message);
+            closeConfirmBorrowModal();
+            return false;
+        } 
+
+        if (!response.ok) {
+            showError('Something went wrong', 'Failed to load books.');
+            return;
+        }
+     
+        return result.data.available_copies.available_copies;
+    } catch (error) {
+        showError('Network Error', error + 'Unable to load books. Please try again later.');
     }
 }

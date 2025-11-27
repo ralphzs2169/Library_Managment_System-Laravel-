@@ -36,7 +36,7 @@ class BorrowController extends Controller
     {
         try {
             $bookCopy = BookCopy::findOrFail($request->input('book_copy_id'));
-            $transaction = $this->borrowService->borrowBook($request, $bookCopy);
+            $transaction = $this->borrowService->borrowBook($request, $bookCopy, $request->boolean('is_from_reservation', false));
             return $this->jsonResponse('success', 'Book borrowed successfully', 201, ['transaction' => $transaction]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);
@@ -46,4 +46,5 @@ class BorrowController extends Controller
             return $this->jsonResponse('error', 'Something went wrong while borrowing the book. Please try again later.', 500);
         }
     }
+
 }

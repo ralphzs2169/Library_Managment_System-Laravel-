@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\ReservationStatus;
 
 class Book extends Model
 {
@@ -34,6 +35,18 @@ class Book extends Model
     public function copies()
     {
         return $this->hasMany(BookCopy::class);
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }   
+    
+    public function readyToPickupCopies(Reservation $reservation)
+    {
+        return $this->with('books')
+            ->where('reservation_id', $reservation->id)
+            ->where('status', ReservationStatus::READY_FOR_PICKUP);
     }
 
     /** @use HasFactory<\Database\Factories\BookFactory> */

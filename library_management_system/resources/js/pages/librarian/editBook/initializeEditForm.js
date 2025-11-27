@@ -1,6 +1,6 @@
 import { editBookHandler } from "../../../api/bookHandler.js";
 import { initImagePreview } from "../imagePreview.js";
-import { showError } from "../../../utils.js";
+import { showError } from "../../../utils/alerts.js";
 import { clearInputError } from "../../../helpers.js";
 import { handleCategoryChange } from "../addNewBook.js";
 import { updatePendingIssueResolvedFlag, resetAllCopiesToOriginal } from "./editBookHelpers.js";

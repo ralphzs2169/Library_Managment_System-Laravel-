@@ -1,9 +1,9 @@
 import { returnBook } from '../../api/staffTransactionHandler.js';
-import { clearInputError } from '../../helpers.js';
-import { restoreProfileContent } from './borrowBook.js';
+import { restoreProfileContent } from './bookSelection.js';
 import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { fetchSettings } from '../../api/settingsHandler.js';
+
 const confirmReturnModal = document.getElementById('confirm-return-modal');
 
 // Store current data for navigation
@@ -16,14 +16,20 @@ export async function initializeConfirmReturnModal(modal, borrower, transaction)
     
     const settings = await fetchSettings();
     const dueReminderThreshold = parseInt(settings['notifications.reminder_days_before_due']);
-    
+
+    if (!dueReminderThreshold || isNaN(dueReminderThreshold)) {
+            showWarning('Configuration Issue', 'Due reminder threshold is not properly configured. Please check application settings.');
+            closeBorrowerModal();
+            return;
+    }
+
     // Populate borrower info
     if (borrower) {
         const borrowerName = modal.querySelector('#confirm-return-borrower-name');
         const borrowerId = modal.querySelector('#confirm-return-borrower-id');
         const borrowerInitials = modal.querySelector('#confirm-return-borrower-initials');
         
-        if (borrowerName) borrowerName.textContent = borrower.full_name || 'N/A';
+        if (borrowerName) borrowerName.textContent = borrower.fullname || 'N/A';
         if (borrowerId) {
             const idNumber = borrower.role === 'student' 
                 ? borrower.students?.student_number 

@@ -39,6 +39,12 @@ class SettingsService
             'lost_fee_multiplier' => 'penalty.lost_fee_multiplier',
             'damaged_fee_multiplier' => 'penalty.damaged_fee_multiplier',
             'reminder_days_before_due' => 'notifications.reminder_days_before_due',
+
+            'reservation_student_pickup_window_days' => 'reservation.student_pickup_window_days',
+            'reservation_teacher_pickup_window_days' => 'reservation.teacher_pickup_window_days',
+            'reservation_queue_max_length' => 'reservation.queue_max_length',
+            'reservation_student_max_pending_reservations' => 'reservation.student_max_pending_reservations',
+            'reservation_teacher_max_pending_reservations' => 'reservation.teacher_max_pending_reservations',
         ];
 
         $changes = [];
@@ -114,6 +120,11 @@ class SettingsService
                 'notifications.reminder_days_before_due' => $request->input('reminder_days_before_due'),
                 'notifications.enable_borrower_notifications' => $request->has('enable_borrower_notifications') ? 1 : 0,
                 'notifications.show_overdue_notifications' => $request->has('show_overdue_notifications') ? 1 : 0,
+                'reservation.student_pickup_window_days' => $request->input('reservation_student_pickup_window_days'),
+                'reservation.teacher_pickup_window_days' => $request->input('reservation_teacher_pickup_window_days'),
+                'reservation.queue_max_length' => $request->input('reservation_queue_max_length'),
+                'reservation.student_max_pending_reservations' => $request->input('reservation_student_max_pending_reservations'),
+                'reservation.teacher_max_pending_reservations' => $request->input('reservation_teacher_max_pending_reservations'),
             ];
 
             foreach ($settings as $key => $value) {

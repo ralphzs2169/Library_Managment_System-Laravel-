@@ -1,15 +1,16 @@
 <div id="borrower-profile-modal" class="fixed inset-0 flex items-center hidden justify-center bg-background-unfocused bg-opacity-0 z-60 transition-opacity duration-150">
-    <div id="borrower-profile-content" class="bg-gray-100 rounded-2xl shadow-2xl w-[95%] max-w-6xl max-h-[90vh] overflow-hidden flex flex-col transform scale-95 opacity-0 transition-all duration-150">
+    <div id="borrower-profile-content" class="bg-gray-100 rounded-lg shadow-2xl w-[95%] max-w-6xl max-h-[90vh] overflow-hidden flex flex-col transform scale-95 opacity-0 transition-all duration-150">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-            <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                <img src="{{ asset("build/assets/icons/member-profile.svg")}}" alt="Borrower Profile Icon" class="w-6 h-6">
+        <div class="bg-secondary drop-shadow-xs px-6 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                <img src="{{ asset("build/assets/icons/user.svg")}}" alt="Borrower Profile Icon" class="w-6 h-6">
                 Borrower Profile
             </h2>
             <button id="close-borrower-modal" class="cursor-pointer text-gray-500 hover:text-gray-700 hover:scale-110 transition">
-                <img src="{{ asset("build/assets/icons/close-gray.svg")}}" alt="Close Borrower Profile Modal" class="w-6 h-6">
+                <img src="{{ asset("build/assets/icons/close.svg")}}" alt="Close Borrower Profile Modal" class="w-6 h-6">
             </button>
         </div>
+
 
         <!-- Scrollable Content -->
         <div id="borrower-profile-scrollable-content" class="overflow-y-auto flex-1">
@@ -131,23 +132,20 @@
                                         <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Total Unpaid Fine</p>
                                         <p id="borrower-total-fine-ampount" class="font-bold text-red-600"></p>
                                     </div>
-                                    <div>
-                                        <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Reservations</p>
-                                        <p id="borrower-reservations" class="font-semibold text-gray-800"></p>
-                                    </div>
+
                                 </div>
 
                                 <!-- Action Buttons -->
                                 <div class="flex flex-wrap gap-3 mt-5">
-                                    <button id="borrow-book-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
-                                        <img src="{{ asset("build/assets/icons/add-white.svg")}}" alt="Borrow Icon" class="w-5 h-5">
+                                    <button id="borrow-book-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
+                                        <img src="{{ asset("build/assets/icons/add-book-white.svg")}}" alt="Borrow Icon" class="w-5 h-5">
                                         Borrow a Book
                                     </button>
-                                    {{-- <button id="approve-reservation-button" class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
-                                <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Approve Icon" class="w-5 h-5">
-                                    Approve Reservation
-                                    </button> --}}
-                                    <button id="mark-as-cleared-button" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
+                                    <button id="add-reservation-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/90 cursor-pointer text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
+                                        <img src="{{ asset("build/assets/icons/reservation-white.svg")}}" alt="Approve Icon" class="w-5 h-5">
+                                        Add Reservation
+                                    </button>
+                                    <button id="mark-as-cleared-button" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                         {{-- <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Mark as Cleared Icon" class="w-5 h-5"> --}}
                                         Mark as Cleared
                                     </button>
@@ -157,36 +155,36 @@
                     </div>
 
 
-                    <!-- Tabbed Container for Borrowed Books & Penalties -->
+                    <!-- Tabbed Container for Borrowed Books, Penalties & Reservations -->
 
                     <!-- Tabs Header -->
                     <div class="relative pt-10 px-6 pb-6">
                         <div class="flex w-fit items-start absolute z-10 top-0 left-[23px]">
                             <button type="button" id="tab-borrowed-btn" class="borrower-tab-btn relative cursor-pointer bg-gray-100 border-y border-1 border-gray-200 px-6 py-2.5 flex items-center gap-2 text-sm font-medium rounded-t-xl hover:bg-gray-50 transition
-                        sm:px-6 sm:py-2.5
-                        px-3 py-2">
+                                            sm:px-6 sm:py-2.5
+                                            px-3 py-2">
                                 <img id="tab-borrowed-icon" src="{{ asset('build/assets/icons/currently-borrowed.svg') }}" alt="Currently Borrowed Icon" class="w-5 h-5 tab-icon">
                                 <span class="truncate max-w-[50px] sm:max-w-none">Currently Borrowed</span>
-                                <span id="badge-borrowed-count" class="absolute z-10 -top-1 -right-1 flex items-center justify-center w-5 h-5  bg-blue-700 text-white text-xs font-semibold rounded-full shadow">
+                                <span id="badge-borrowed-count" class="absolute z-10 -top-1 -right-1 flex items-center justify-center w-5 h-5  bg-accent text-white text-xs font-semibold rounded-full shadow">
                                     <span id="borrowed-count" class="flex items-center justify-center w-full h-full"></span>
                                 </span>
                             </button>
                             <button type="button" id="tab-penalties-btn" class="borrower-tab-btn relative cursor-pointer bg-gray-100 border-y border-1 border-gray-200 px-6 py-2.5 flex items-center gap-2 text-sm font-medium rounded-t-xl hover:bg-gray-50 transition
-                        sm:px-6 sm:py-2.5
-                        px-3 py-2">
+                                            sm:px-6 sm:py-2.5
+                                            px-3 py-2">
                                 <img id="tab-penalties-icon" src="{{ asset('build/assets/icons/unpaid.svg') }}" alt="Unpaid Penalties Icon" class="w-5 h-5 tab-icon">
                                 <span class="truncate max-w-[50px] sm:max-w-none">Unpaid Penalties</span>
-                                <span id="badge-penalties-count" class="absolute z-10 -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-red-600 text-white text-xs font-semibold rounded-full shadow">
+                                <span id="badge-penalties-count" class="absolute z-10 -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-accent text-white text-xs font-semibold rounded-full shadow">
                                     <span id="penalties-count" class="flex items-center justify-center w-full h-full"></span>
                                 </span>
 
                             </button>
                             <button type="button" id="tab-reservations-btn" class="borrower-tab-btn relative cursor-pointer bg-gray-100 border-y border-1 border-gray-200 px-6 py-2.5 flex items-center gap-2 text-sm font-medium rounded-t-xl hover:bg-gray-50 transition
-                        sm:px-6 sm:py-2.5
-                        px-3 py-2">
+                                            sm:px-6 sm:py-2.5
+                                            px-3 py-2">
                                 <img id="tab-reservations-icon" src="{{ asset('build/assets/icons/reservation.svg') }}" alt="Reservations Icon" class="w-5 h-5 tab-icon">
                                 <span class="truncate max-w-[50px] sm:max-w-none">Reservations</span>
-                                <span id="badge-reservations-count" class="absolute z-10 -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-yellow-500 text-white text-xs font-semibold rounded-full shadow">
+                                <span id="badge-reservations-count" class="absolute z-10 -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-accent text-white text-xs font-semibold rounded-full shadow">
                                     <span id="reservations-count" class="flex items-center justify-center w-full h-full"></span>
                                 </span>
                             </button>
@@ -196,6 +194,7 @@
                         <div class="bg-white shadow-sm border-t border-gray-200 p-6 rounded-tr-xl rounded-br-xl rounded-bl-xl">
 
                             <!-- Tabs Content -->
+
                             <div id="borrower-tab-content">
                                 <!-- Borrowed Books Table (default visible) -->
                                 <div id="tab-borrowed-content">
@@ -242,7 +241,7 @@
                                         <table class="w-full text-sm">
                                             <thead>
                                                 <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">No.</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-12 ">No.</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Book</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Returned On</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  w-38 min-w-38 max-w-38 whitespace-nowrap">Reason</th>
@@ -255,6 +254,39 @@
                                                 <tr>
                                                     <td colspan="7" class="py-10 text-center text-gray-500 text-sm">
                                                         Loading unpaid fines/penalties...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {{-- Reservations Table (hidden by default) --}}
+                                <div id="tab-reservations-content" class="hidden">
+                                    <div class="mb-4 flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-accent to-teal-600 rounded-lg flex items-center justify-center shadow-md">
+                                            <img src="{{ asset('build/assets/icons/reservation-white.svg')}}" alt="Unpaid Fines/Penalties Icon" class="w-6 h-6">
+                                        </div>
+                                        <h2 class="text-lg font-semibold text-gray-900">Reservations</h2>
+                                        <span id="reservations-header-count" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">2</span>
+                                    </div>
+                                    <div class="overflow-x-auto rounded-xl border border-gray-200">
+                                        <table class="w-full text-sm table-fixed">
+                                            <thead>
+                                                <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-8">No.</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs truncate w-1/4">Book</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-14">Queue</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-32">Status</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-26">Reserved at</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-26">Pikcup Deadline</th>
+                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-40">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="active-reservations-tbody" class="bg-white divide-y divide-gray-100">
+                                                <tr>
+                                                    <td colspan="5" class="py-10 text-center text-gray-500 text-sm">
+                                                        Loading reservations...
                                                     </td>
                                                 </tr>
                                             </tbody>

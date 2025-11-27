@@ -7,13 +7,19 @@ use App\Models\BorrowTransaction;
 use App\Models\Semester;
 use App\Models\User;
 use App\Models\ActivityLog;
+use App\Policies\BookPolicy;
 use Illuminate\Support\Facades\DB;
+use App\Policies\BorrowPolicy;
+use Carbon\Carbon;
+use App\Enums\BookCopyStatus;
+use App\Enums\ReservationStatus;
+use App\Models\Book;
 
 class BorrowService
 {
-    public function borrowBook($request, $bookCopy)
+    public function borrowBook($request, $bookCopy, $isFromReservation = false)
     {
-         return DB::transaction(function () use ($request, $bookCopy) {
+         return DB::transaction(function () use ($request, $bookCopy, $isFromReservation) {
             $bookCopy->refresh(); // reload latest status
 
             if ($bookCopy->status !== 'available' || $bookCopy->pendingIssueReport()->exists()) {
@@ -47,6 +53,21 @@ class BorrowService
                 'entity_id' => $transaction->id,
                 'user_id' => $request->user()->id,
             ]);
+
+            if ($isFromReservation) {
+                $reservation = $borrower->reservations()
+                    ->where('book_id', $book->id)
+                    ->where('status', ReservationStatus::READY_FOR_PICKUP)
+                    ->latest()
+                    ->first();
+
+                if (!$reservation) {
+                    throw new \Exception('No active reservation found for this book.');
+                }
+          
+                $reservation->update(['status' => ReservationStatus::COMPLETED]);
+                
+            }
 
             return $transaction;
         });
