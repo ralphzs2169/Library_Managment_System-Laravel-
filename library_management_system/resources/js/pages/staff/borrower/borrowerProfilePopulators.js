@@ -24,8 +24,9 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
         populateTotalFines(modal, borrower);
         // populateReservationCountBadge(modal, borrower);
 
-        setupBorrowBookButton(modal, borrower);
-        setupAddReservationButton(modal, borrower);
+        setupProfileButton(modal, borrower, 'borrow');
+        setupProfileButton(modal, borrower, 'reservation');
+
         
         // Borrower Section Tabs/Tables
         populateCurrentlyBorrowedBooks(modal, borrower);
@@ -42,39 +43,71 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
     }
 }
 
-function setupBorrowBookButton(modal, borrower) {
-    const borrowBookBtn = modal.querySelector('#borrow-book-btn');
+function setupProfileButton(modal, borrower, type) {
+    let button = '';
+    let defaultIcon = '';
+    let disabledIcon = '';
+    let condition = false;
 
-    resetButton(borrowBookBtn);
-    // Remove any existing click listener first
-    borrowBookBtn.replaceWith(borrowBookBtn.cloneNode(true)); 
-    const newBtn = modal.querySelector('#borrow-book-btn');
-
-    if (borrower.can_borrow.result === 'success') {
-        newBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            showBookSelectionContent(modal, borrower, 'borrow', false);
-        });
-        return;
+    switch (type) {
+        case 'borrow':
+            button = modal.querySelector("#borrow-book-btn");
+            defaultIcon = '/build/assets/icons/add-book-white.svg';
+            disabledIcon = '/build/assets/icons/add-book-gray.svg';
+            condition = borrower.can_borrow.result === 'success';
+            break;
+        case 'reservation':
+            button = modal.querySelector("#add-reservation-btn");
+            defaultIcon = '/build/assets/icons/reservation-white.svg';
+            disabledIcon = '/build/assets/icons/reservation-gray.svg';
+            condition = borrower.can_reserve.result === 'success';
+            break;
+        default:
+            return; // nothing to do
     }
 
-    disableButton(newBtn, borrower.can_borrow.message || 'Borrowing not allowed.');
+    // Reset button to default state
+    resetButton(button, defaultIcon);
+
+    // Clone the button to remove old event listeners
+    const clone = button.cloneNode(true);
+    button.parentNode.replaceChild(clone, button);
+    button = clone;
+
+    let isAuthorized = false;
+    let disableMessage = '';
+    
+    switch (type) {
+        case 'borrow':
+            if (borrower.can_borrow.result === 'success'){
+               isAuthorized = true;
+               break;
+            }
+            disableMessage = borrower.can_borrow.message;
+            break;
+        case 'reservation':
+            if (borrower.can_reserve.result === 'success'){
+                isAuthorized = true;
+                break;
+            }
+            disableMessage = borrower.can_reserve.message;
+            break;
+        default:
+            return; 
+    }
+
+    if (isAuthorized) {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            showBookSelectionContent(modal, borrower, type, false);
+        });
+        return;
+    } 
+    disableButton(button, disableMessage, disabledIcon);
 }
 
-function setupAddReservationButton(modal, reserver) {
-    const addReservationBtn = modal.querySelector('#add-reservation-btn');
 
-    resetButton(addReservationBtn);
-    // Remove any existing click listener first
-    addReservationBtn.replaceWith(addReservationBtn.cloneNode(true)); 
-    const newBtn = modal.querySelector('#add-reservation-btn'); 
 
-    newBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        showBookSelectionContent(modal, reserver, 'reservation', false);
-    });
-
-}
 
 function populateProfilePicture(modal, borrower) {  
     const profilePicture = modal.querySelector('#borrower-profile-picture');

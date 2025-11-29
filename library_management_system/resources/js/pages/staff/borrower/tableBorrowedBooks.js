@@ -1,4 +1,4 @@
-import { fetchSettings } from '../../../api/settingsHandler.js';
+import { fetchSettings } from '../../../ajax/settingsHandler.js';
 import { showWarning } from '../../../utils/alerts.js';
 import { openConfirmReturnModal } from '../confirmReturn.js';
 import { openConfirmRenewModal } from '../confirmRenew.js';

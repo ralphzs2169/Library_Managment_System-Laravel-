@@ -45,7 +45,7 @@ export async function borrowBook(borrowData) {
     // Step 2: Show confirmation
     const isConfirmed = await showConfirmation(
         'Confirm Borrowing?',
-         `You are about to borrow this book for ${result.data.borrower_fullname}. Proceed?`,
+         `You are about to lend this book for ${result.data.borrower_fullname}. Proceed?`,
         'Yes, confirm'
     );
     

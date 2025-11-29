@@ -1,7 +1,7 @@
 
 import { clearInputError } from "../../helpers.js";
-import { addCategoryHandler, deleteCategoryHandler, editCategoryHandler } from "../../api/categoryHandler.js";
-import { addGenreHandler, editGenreHandler, deleteGenreHandler } from "../../api/genreHandler.js";
+import { addCategoryHandler, deleteCategoryHandler, editCategoryHandler } from "../../ajax/categoryHandler.js";
+import { addGenreHandler, editGenreHandler, deleteGenreHandler } from "../../ajax/genreHandler.js";
 import { showDangerConfirmation } from "../../utils/alerts.js";
 
 function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId, onSubmit, parentId = null) {

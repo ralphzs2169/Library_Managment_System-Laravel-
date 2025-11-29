@@ -1,4 +1,4 @@
-import { getCreateSemesterForm, storeNewSemester, activateSemester, fetchSemesterDetails, updateSemester, deactivateSemester, loadSemesters } from '../../api/semesterHandler.js';
+import { getCreateSemesterForm, storeNewSemester, activateSemester, fetchSemesterDetails, updateSemester, deactivateSemester, loadSemesters } from '../../ajax/semesterHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { initPagination, initSearch, initFilter } from '../../tableControls.js';
 import { SEARCH_COLUMN_INDEXES } from '../../utils/tableFilters.js';

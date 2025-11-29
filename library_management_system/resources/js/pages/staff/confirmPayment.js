@@ -1,6 +1,6 @@
-import { updatePenalty } from '../../api/borrowerHandler.js';
+import { updatePenalty } from '../../ajax/penaltyHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
-import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
+import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { renderPenaltyStatusBadge } from './borrower/tablePenalties.js';
 
@@ -36,22 +36,7 @@ function renderPenaltyReasonBadge(type) {
     }
 }
 
-export function attachPaymentActions(tbody, borrower) {
-    tbody.querySelectorAll('button.pay-penalty-button').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const transaction = JSON.parse(this.dataset.transaction);
-         
-            if (transaction) {
-                // Close borrower profile modal before opening payment modal
-         
-                openPaymentModal(borrower, transaction);
-            }
-        });
-    });
-}
-
-function openPaymentModal(borrower, transaction) {
+export function openPaymentModal(borrower, transaction) {
     const modal = document.getElementById('confirm-payment-modal');
     const content = document.getElementById('confirm-payment-content');
     if (!modal || !content) return;

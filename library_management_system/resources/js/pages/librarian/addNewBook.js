@@ -1,7 +1,7 @@
-import { addBookHandler } from "../../api/bookHandler.js";
+import { addBookHandler } from "../../ajax/bookHandler.js";
 import { blurActiveElement, clearInputError } from "../../helpers.js";
 import { initImagePreview } from "../librarian/imagePreview.js";
-import { fetchGenresByCategory } from "../../api/genreHandler.js";
+import { fetchGenresByCategory } from "../../ajax/genreHandler.js";
 
 // Individual element references (no refs object)
 const addBookform = document.getElementById('add-book-form');

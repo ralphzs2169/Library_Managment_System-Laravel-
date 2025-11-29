@@ -11,6 +11,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('semesters:check-status')->everyMinute(); //testing
         $schedule->command('borrows:check-overdue')->everyMinute(); //testing
+        $schedule->command('reservations:check-expired')->everyMinute(); //testing
     }
 
     protected function commands()

@@ -1,6 +1,6 @@
 import { clearInputError, blurActiveElement } from '../helpers.js';
 import { BASE_URL } from '../config.js';
-import { loginHandler } from '../api/authHandler.js';
+import { loginHandler } from '../ajax/authHandler.js';
 
 // password visibility toggle
 const togglePassword = document.getElementById('togglePassword');

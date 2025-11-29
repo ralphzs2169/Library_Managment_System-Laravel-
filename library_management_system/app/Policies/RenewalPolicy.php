@@ -7,6 +7,7 @@ use App\Models\BorrowTransaction;
 use App\Models\Semester;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use App\Enums\ReservationStatus;
 
 class RenewalPolicy
 {
@@ -54,8 +55,6 @@ class RenewalPolicy
             return ['result' => 'business_rule_violation', 'message' => 'This book has already been returned.'];
         }
 
-        
-
         // 4. Check active semester for students
         if ($renewer->role === 'student') {
             $hasActive = Semester::where('status', 'active')->exists();
@@ -85,6 +84,18 @@ class RenewalPolicy
             return [
                 'result' => 'business_rule_violation',
                 'message' => "{$capitalizedRole}s can only renew {$minDaysBeforeRenewal} day(s) before the due date or later."
+            ];
+        }
+
+        // 7.  Check for any pending reservations under this book title
+        $hasPendingReservations = $transaction->bookCopy->book->reservations()
+                ->where('status', ReservationStatus::PENDING)
+                ->exists();
+
+        if ($hasPendingReservations){
+            return [
+                'result' => 'business_rule_violation',
+                'message' => "This title has a pending reservation by another member."
             ];
         }
 

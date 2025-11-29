@@ -15,5 +15,5 @@ class ActivityLogActions {
     const AUTO_ENDED = 'auto_ended';
     const RENEWED = 'renewed';
     const READY_FOR_PICKUP = 'reservation_ready_for_pickup';
-
+    const AUTO_EXPIRED = 'reservation_expired';
 }

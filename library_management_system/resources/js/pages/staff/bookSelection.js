@@ -1,4 +1,4 @@
-import { fetchBooksSelectionContent } from '../../api/bookHandler.js';
+import { fetchBooksSelectionContent } from '../../ajax/bookHandler.js';
 import { closeBorrowerModal } from './borrower/borrowerProfileModal.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { openConfirmBorrowModal } from './confirmBorrow.js';
@@ -39,17 +39,17 @@ export function showBookSelectionContent(modal, member, transactionType, restore
     const modalTitle = (transactionType === 'borrow' ? 'Borrow' : 'Reserve') + ` Book Selection`;
     modalContent.innerHTML = `
         <!-- Header -->
-        <div class="bg-secondary drop-shadow-xs px-6 py-4 flex items-center justify-between">
+        <div class="bg-modal-header drop-shadow-md px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <button id="back-to-profile-button" class="cursor-pointer  hover:scale-110 transition">
-                    <img src="${window.location.origin}/build/assets/icons/back.svg" alt="Back" class="w-6 h-6">
+                    <img src="${window.location.origin}/build/assets/icons/back-gray.svg" alt="Back" class="w-6 h-6">
                 </button>
-                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                <h2 class="text-xl font-semibold text-black flex items-center gap-2">
                     ${modalTitle}
                 </h2>
             </div>
             <button id="close-member-modal" class="cursor-pointer  hover:scale-110 transition">
-                <img src="${window.location.origin}/build/assets/icons/close.svg" alt="Close" class="w-6 h-6">
+                <img src="${window.location.origin}/build/assets/icons/close-gray.svg" alt="Close" class="w-6 h-6">
             </button>
         </div>
 

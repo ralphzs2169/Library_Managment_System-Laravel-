@@ -57,11 +57,11 @@ export const TRANSACTION_ROUTES = {
     PERFORM_RESERVATION: '/staff/transaction/reservation/perform',
     AVAILABLE_COPIES_FOR_RESERVATION: (userId, bookId) => `/staff/transaction/reservation/${userId}/book/${bookId}/available-copies`,
     CANCEL_RESERVATION: (reservationId) => `/staff/transaction/reservation/${reservationId}/cancel`,
+
+    UPDATE_PENALTY: (id) => `/staff/transaction/penalty/${id}`,
+    CANCEL_PENALTY: (penaltyId, borrowerId) =>  `/staff/transaction/${borrowerId}/penalty/${penaltyId}/cancel`,
 }
 
-export const PENALTY_ROUTES = {
-    UPDATE: (id) => `/staff/penalties/${id}`,
-};
 
 export const INVALID_INPUT = 422;      // Input format or missing fields
 export const AUTHORIZATION_ERROR = 403;   // User not allowed to perform action

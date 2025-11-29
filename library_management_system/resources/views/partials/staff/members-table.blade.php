@@ -4,14 +4,13 @@
             <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">No.</th>
                 <th class="py-3 text-center font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap"></th>
-                <th class="py-3 px-2 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Borrower Name</th>
+                <th class="py-3 px-2 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-1/6">Borrower Name</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">ID Number</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Role</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Dept/Year</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Status</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Borrowed</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Unpaid Fines</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Reservations</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-20">Currently Borrowed</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-46 ">Reservations</th>
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-100">
@@ -56,7 +55,25 @@
                 </td>
 
                 {{-- Role Column --}}
-                <td class="py-3 px-4 text-black whitespace-nowrap text-xs"> {{ ucfirst($user->role) }} </td>
+                <td class="py-3 px-4 text-black whitespace-nowrap text-xs">
+                    @php
+                    if ($user->role === 'student') {
+                    $roleBadgeClass = 'bg-blue-100 text-blue-700 border border-blue-100';
+                    $iconHTML = '<img src="/build/assets/icons/student-role-badge.svg" alt="Student Badge" class="w-3.5 h-3.5">';
+                    } elseif ($user->role === 'teacher') {
+                    $roleBadgeClass = 'bg-green-100 text-green-700 border border-green-100';
+                    $iconHTML = '<img src="/build/assets/icons/teacher-role-badge.svg" alt="Teacher Badge" class="w-3.5 h-3.5">';
+                    } else {
+                    $roleBadgeClass = 'bg-gray-100 text-gray-600 border border-gray-200';
+                    $iconHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" /></svg>';
+                    }
+                    @endphp
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-semibold {!! $roleBadgeClass !!}">
+                        {!! $iconHTML !!}
+                        {{ ucfirst($user->role) }}
+                    </span>
+                </td>
 
                 {{-- Department/Year Level Column --}}
                 <td class=" py-3 px-4 text-black whitespace-nowrap text-xs">
@@ -109,15 +126,6 @@
                     <span class="text-gray-700 font-medium text-xs">
                         {{ $user->active_borrowings_count }} books
                     </span>
-                    @endif
-                </td>
-
-                {{-- Total Unpaid Fines Column --}}
-                <td class="py-3 px-4">
-                    @if ($user->total_unpaid_fines > 0)
-                    <span class="text-red-700 text-xs font-bold">{{ '₱ ' . number_format($user->total_unpaid_fines, 2) }}</span>
-                    @else
-                    <span class="text-gray-500 text-xs">None</span>
                     @endif
                 </td>
 

@@ -40,30 +40,6 @@ class UserController extends Controller
     }
 
 
-    public function updatePenalty(Request $request, $penaltyId)
-    {
-        if ($request->validate_only) {
-            $result = $this->userService->validatePenaltyUpdate($request);
+   
 
-            if ($result['status'] === 'invalid') {
-                return response()->json([
-                    'status' => 'error',
-                    'errors' => $result['errors']
-                ], 422);
-            }
-
-            return $this->jsonResponse('valid', 'Validation passed', 200);
-        }
-
-        try {
-            $penalty = $this->userService->updatePenalty($request, $penaltyId);
-            return $this->jsonResponse('success', 'Penalty updated successfully', 200, ['penalty' => $penalty]);
-        } catch (ModelNotFoundException $e) {
-            Log::error($e);
-            return $this->jsonResponse('error', 'The penalty could not be found.', 404);
-        } catch (\Exception $e) {
-            Log::error($e);
-            return $this->jsonResponse('error', 'Something went wrong while processing the penalty. Please try again later.', 500);
-        }
-    }
 }

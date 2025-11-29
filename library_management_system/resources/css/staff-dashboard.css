@@ -1,0 +1,13 @@
+.tab-underline-accent {
+    position: absolute;
+    left: 10%;
+    bottom: 0;
+    width: 80%;
+    height: 3px;
+    background: var(--color-accent);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: background 0.2s;
+    content: "";
+    display: block;
+}

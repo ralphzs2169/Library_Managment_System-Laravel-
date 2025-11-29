@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('borrower_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('book_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('status', ['pending', 'ready_for_pickup', 'completed', 'cancelled', 'expired'])->default('pending');
-            $table->dateTime('pickup_deadline')->nullable();
+            $table->dateTime('pickup_start_date')->nullable();
             $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->enum('created_by', ['borrower', 'staff']);
             $table->timestamps();

@@ -14,13 +14,14 @@ use App\Models\Penalty;
 use App\Models\Semester;
 use Illuminate\Support\Facades\Validator;
 use App\Enums\BookCopyStatus;
-use App\Enums\PenaltyType;
+use App\Enums\LibraryStatus;
 use App\Enums\PenaltyStatus;
 use App\Models\Payment;
 use App\Enums\ReservationStatus;
 use App\Policies\BorrowPolicy;
 use App\Policies\RenewalPolicy;
 use App\Policies\ReservationPolicy;
+
 
 class UserService
 {
@@ -119,10 +120,7 @@ public function getBorrowerDetails(int $userId)
                 $reservation->date_expired = null;
             } else { // READY_FOR_PICKUP
                 $reservation->queue_position = 0;
-                $pickupWindowDays = $reservation->borrower->role === 'teacher'
-                    ? (int) config('settings.reservation.teacher_pickup_window_days')
-                    : (int) config('settings.reservation.student_pickup_window_days');
-                $reservation->date_expired = $reservation->pickup_deadline ?? now()->addDays($pickupWindowDays);
+                $reservation->date_expired = $reservation->pickup_deadline;
             }
         });
 
@@ -231,6 +229,20 @@ public function getBorrowerDetails(int $userId)
 
             return $penalty;
         });
+    }
+
+    public function resetToActiveIfClear(User $user){
+        
+        $hasRemainingPenalties = $user->borrowTransactions()
+        ->whereHas('penalties', function ($q) {
+            $q->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]);
+        })
+        ->exists();
+
+        if (!$hasRemainingPenalties) {
+            $user->library_status = LibraryStatus::ACTIVE;
+            $user->save();
+        }
     }
 
 }

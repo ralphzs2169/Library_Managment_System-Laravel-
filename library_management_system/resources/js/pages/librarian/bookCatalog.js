@@ -1,4 +1,4 @@
-import { fetchBookDetails, loadBooks } from '../../api/bookHandler.js';
+import { fetchBookDetails, loadBooks } from '../../ajax/bookHandler.js';
 import { clearAllErrors } from '../../helpers.js';
 import { initPagination, initSearch } from '../../tableControls.js';
 import { SEARCH_COLUMN_INDEXES } from '../../utils/tableFilters.js';

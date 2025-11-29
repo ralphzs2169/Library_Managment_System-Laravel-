@@ -1,8 +1,8 @@
 import { clearInputError } from '../../helpers.js';
-import { fetchSettings } from '../../api/settingsHandler.js';
-import { renewBook } from '../../api/staffTransactionHandler.js';
+import { fetchSettings } from '../../ajax/settingsHandler.js';
+import { renewBook } from '../../ajax/staffTransactionHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
-import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
+import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { showWarning } from '../../utils/alerts.js';
 
 let currentRenewer = null;
@@ -16,7 +16,7 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
     const renewerName = modal.querySelector('#renewer-name');
     const renewerId = modal.querySelector('#renewer-id');
     const renewerInitials = modal.querySelector('#renewer-initials');
-    if (renewerName) renewerName.textContent = renewer.full_name || 'N/A';
+    if (renewerName) renewerName.textContent = renewer.fullname || 'N/A';
     if (renewerId) {
         const idNumber = renewer.role === 'student'
             ? renewer.students?.student_number

@@ -1,8 +1,8 @@
-import { returnBook } from '../../api/staffTransactionHandler.js';
+import { returnBook } from '../../ajax/staffTransactionHandler.js';
 import { restoreProfileContent } from './bookSelection.js';
-import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
+import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
-import { fetchSettings } from '../../api/settingsHandler.js';
+import { fetchSettings } from '../../ajax/settingsHandler.js';
 
 const confirmReturnModal = document.getElementById('confirm-return-modal');
 
@@ -37,9 +37,8 @@ export async function initializeConfirmReturnModal(modal, borrower, transaction)
             borrowerId.textContent = idNumber || 'N/A';
         }
         if (borrowerInitials) {
-            const names = (borrower.full_name || '').split(' ').filter(Boolean);
-            const initials = names.length ? (names[0][0] + (names[1]?.[0] || '')).toUpperCase() : '--';
-            borrowerInitials.textContent = initials;
+            const initials = (borrower.firstname?.charAt(0) || '') + (borrower.lastname?.charAt(0) || '');
+            borrowerInitials.textContent = initials || '--';
         }
     }
 

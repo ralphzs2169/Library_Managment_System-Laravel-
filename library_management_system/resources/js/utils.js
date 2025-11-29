@@ -140,14 +140,23 @@ export function debounce(fn, delay) {
 }
 
 
-export function resetButton(button) {
+export function resetButton(button, defaultIcon) {
     // Remove disabled state
     console.log('Resetting button:', button);
+    button.classList.add('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow');
+    button.classList.remove(
+        'cursor-not-allowed',
+        'opacity-50',
+        'bg-gray-300',
+        'text-gray-500'
+    );
     button.disabled = false;
-    button.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
-    button.classList.add('hover:bg-accent/80', 'bg-accent', 'cursor-pointer');
-    button.style.backgroundColor = ''; // Clear inline styles
     
+    const img = button.querySelector('img');
+    if (img) {
+        img.src = defaultIcon;
+    }
+
     // Remove any existing tooltip
     const existingTooltip = button.parentElement.querySelector('.tooltip');
     if (existingTooltip) {
@@ -166,36 +175,40 @@ export function resetButton(button) {
     button.onclick = null;
 }
 
-export function disableButton(button, msg = '') {
+export function disableButton(button, tooltipMsg = '', icon) {
     button.disabled = true;
-    button.classList.remove('bg-accent', 'hover:bg-accent/80', 'cursor-pointer');
-    button.classList.add('opacity-50', 'cursor-not-allowed');
-    button.style.backgroundColor = '#9ca3af'; // Force gray background via inline style to override all classes
-    
-    // Wrap in relative container
+    button.classList.remove('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow');
+    button.classList.add(
+        'cursor-not-allowed',
+        'opacity-50',
+        'bg-gray-300',
+        'text-gray-500'
+    );
+
+    const img = button.querySelector('img');
+    if (img) {
+        img.src = icon;
+    }
+
     const wrapper = document.createElement('div');
-    wrapper.className = 'relative inline-block';
+    wrapper.className = 'relative inline-block group';
+
     button.parentNode.insertBefore(wrapper, button);
     wrapper.appendChild(button);
-    
-    // Add tooltip
+
     const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg border border-gray-300 pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap z-50';
-    tooltip.innerHTML = `
-        ${msg}
-        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-    `;
-    
-    wrapper.appendChild(tooltip);
-    
-    // Show/hide tooltip
-    wrapper.addEventListener('mouseenter', () => {
-        tooltip.classList.remove('opacity-0');
-        tooltip.classList.add('opacity-100');
-    });
-    
-    wrapper.addEventListener('mouseleave', () => {
-        tooltip.classList.remove('opacity-100');
-        tooltip.classList.add('opacity-0');
-    });
+tooltip.className =
+    'absolute bottom-full -left-10 mb-3 px-3 py-2 bg-gray-900 text-white ' +
+    'text-xs rounded-lg shadow-lg text-center whitespace-normal break-words max-w-xl ' +
+    'opacity-0 transition-opacity duration-200 pointer-events-none group-hover:opacity-100';
+
+tooltip.innerHTML = `
+    ${tooltipMsg}
+    <div class="absolute top-full right-20 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+`;
+
+wrapper.appendChild(tooltip);
 }
+
+
+

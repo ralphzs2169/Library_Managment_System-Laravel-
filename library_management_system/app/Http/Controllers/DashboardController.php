@@ -48,11 +48,16 @@ class DashboardController extends Controller
             $query->where('library_status', $request->status);
         }
 
+        // Default sort: active first, then suspended, then cleared, then firstname descending
+        $query->orderByRaw("
+            FIELD(library_status, 'active', 'suspended', 'cleared')
+        ")->orderBy('firstname', 'asc');
+
         $users = $query->paginate(20)->withQueryString();
 
         // If AJAX request, return only the table partial
         if ($request->ajax()) {
-            return view('partials.staff.borrowers-table', compact('users'))->render();
+            return view('partials.staff.members-table', compact('users'))->render();
         }
 
         return view('pages.staff.dashboard', compact('users'));

@@ -1,4 +1,4 @@
-import { fetchBorrowerDetails } from '../../../api/borrowerHandler.js';
+import { fetchBorrowerDetails } from '../../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrowerProfilePopulators.js';
 import { restoreProfileContent } from '../bookSelection.js';
 import { initializeBorrowerTabs } from './tabbedContainer.js';

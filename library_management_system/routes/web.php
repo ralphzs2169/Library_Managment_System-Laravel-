@@ -8,6 +8,7 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowController;
+use App\Http\Controllers\PenaltyController;
 use App\Http\Controllers\RenewalController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SemesterController;
@@ -96,7 +97,8 @@ Route::prefix('staff')
         Route::get('/transaction/reservation/{user}/book/{book}/available-copies', [ReservationController::class, 'availableCopiesForReservation']);
         Route::post('/transaction/reservation/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
         
-        Route::put('/penalties/{penalty}', [UserController::class, 'updatePenalty']);
+        Route::put('/transaction/penalty/{penalty}', [PenaltyController::class, 'updatePenalty']);
+        Route::post('/transaction/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
     });
 
 Route::middleware('auth')->get('/settings', [SettingsController::class, 'allSettings']);

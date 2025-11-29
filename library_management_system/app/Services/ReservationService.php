@@ -62,7 +62,7 @@ class ReservationService
     {
         return DB::transaction(function () use ($reservation, $newStatus) {
             $reservation->update(['status' => $newStatus]);
-            $reservation->pickup_deadline = now()->addDays(3);
+            $reservation->pickup_start_date = now();
             $reservation->save();
 
             $actionType = match ($newStatus) {

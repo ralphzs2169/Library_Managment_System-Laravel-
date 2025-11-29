@@ -1,9 +1,9 @@
 // import { showBookSelectionContent, restoreProfileContent } from '../bookSelection.js';
 import { clearInputError } from '../../../helpers.js';
 import { returnToBookSelection } from '../confirmBorrow.js';
-import { fetchBorrowerDetails } from '../../../api/borrowerHandler.js';
+import { fetchBorrowerDetails } from '../../../ajax/borrowerHandler.js';
 // import { fetchSettings } from '../../../api/settingsHandler.js';
-import { addReservation } from '../../../api/staffTransactionHandler.js';
+import { addReservation } from '../../../ajax/staffTransactionHandler.js';
 import { openBorrowerProfileModal } from '../borrower/borrowerProfileModal.js';
 import { showWarning } from '../../../utils/alerts.js';
 
@@ -148,7 +148,7 @@ async function handleConfirmReservation() {
     if (result) {
         closeConfirmReservationModal();
         setTimeout(() => {
-            openBorrowerProfileModal(currentReserver.id);
+            openBorrowerProfileModal(currentReserver.id, true, 'reservations-tab');
         }, 160); // Wait for modal close animation
     } 
 }

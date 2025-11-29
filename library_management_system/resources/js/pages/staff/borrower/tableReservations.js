@@ -1,7 +1,7 @@
 import { openConfirmBorrowModal } from "../confirmBorrow";
 import { formatDate } from '../../../utils.js';
-import { cancelReservation } from '../../../api/staffTransactionHandler.js';
-import { fetchBorrowerDetails } from '../../../api/borrowerHandler.js';
+import { cancelReservation } from '../../../ajax/staffTransactionHandler.js';
+import { fetchBorrowerDetails } from '../../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrowerProfilePopulators.js';
 import { closeConfirmReturnModal } from '../confirmReturn.js';
 
@@ -84,26 +84,64 @@ export function populateReservationsTable(modal, borrower) {
         }
 
         // Actions: Pickup and Cancel buttons
-        const pickupButton = `
-            <button class="pickup-reservation-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-xs font-medium transition-all shadow-sm" 
-                            data-reservation='${JSON.stringify({
-                                reservation_id: reservation.id,
-                                book_id: reservation.book.id,
-                                book_title: reservation.book.title,
-                                cover_image: reservation.book.cover_image,
-                                author_firstname: reservation.book.author.firstname,
-                                author_lastname: reservation.book.author.lastname,
-                                genre_name: reservation.book.genre.name,
-                                category_name: reservation.book.genre.category.name,
-                                isbn: reservation.book.isbn,
-                                publication_year: reservation.book.publication_year
-                            }).replace(/'/g, "&#39;")}'>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Pickup
-            </button>
-        `;
+        let pickupButton = '';
+
+        if (reservation.status === 'ready_for_pickup') {
+            if (borrower.can_borrow.result === 'success'){
+                pickupButton = `
+                    <button class="pickup-reservation-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-xs font-medium transition-all shadow-sm" 
+                        data-reservation='${JSON.stringify({
+                            reservation_id: reservation.id,
+                            book_id: reservation.book.id,
+                            book_title: reservation.book.title,
+                            cover_image: reservation.book.cover_image,
+                            author_firstname: reservation.book.author.firstname,
+                            author_lastname: reservation.book.author.lastname,
+                            genre_name: reservation.book.genre.name,
+                            category_name: reservation.book.genre.category.name,
+                            isbn: reservation.book.isbn,
+                            publication_year: reservation.book.publication_year
+                        }).replace(/'/g, "&#39;")}'>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Pickup
+                    </button>
+                `; 
+                
+            } else {
+              pickupButton = `
+                <div class="relative inline-block group">
+                    <button disabled class="cursor-not-allowed inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-xs font-medium opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Pickup
+                    </button>
+                    <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                        ${borrower.can_borrow.message}
+                        <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                </div>
+            `;
+            }
+        } else {
+            pickupButton = `
+                <div class="relative inline-block group">
+                    <button disabled class="cursor-not-allowed inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-xs font-medium opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Pickup
+                    </button>
+                    <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                        This book is not yet ready for pickup
+                        <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                </div>
+            `;
+        }
+
         const cancelButton = `
             <button class="cancel-reservation-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition-all shadow-sm" 
                     data-reservation-id="${reservation.id}" 

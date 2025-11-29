@@ -12,6 +12,25 @@ export function initPagination(loadFunction) {
     });
 }
 
+export function initStaffDashboardPagination(loadFunction) {
+    // Remove previous listeners by replacing all pagination buttons with clones
+    document.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+    });
+
+    document.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!btn.disabled) {
+                const page = btn.getAttribute('data-page');
+                if (!page) return;
+                e.preventDefault();
+                loadFunction(page);
+            }
+        });
+    });
+}
+
 export function initSearch(searchSelector, loadFunction, tableContainerSelector, columnIndexes = [1, 2]) {
     const searchInput = document.querySelector(searchSelector);
     if (!searchInput) return;

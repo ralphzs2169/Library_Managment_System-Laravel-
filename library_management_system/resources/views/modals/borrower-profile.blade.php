@@ -1,13 +1,13 @@
 <div id="borrower-profile-modal" class="fixed inset-0 flex items-center hidden justify-center bg-background-unfocused bg-opacity-0 z-60 transition-opacity duration-150">
-    <div id="borrower-profile-content" class="bg-gray-100 rounded-lg shadow-2xl w-[95%] max-w-6xl max-h-[90vh] overflow-hidden flex flex-col transform scale-95 opacity-0 transition-all duration-150">
+    <div id="borrower-profile-content" class="bg-gray-100 rounded-lg shadow-2xl w-[95%] max-w-7xl max-h-[90vh] overflow-hidden flex flex-col transform scale-95 opacity-0 transition-all duration-150">
         <!-- Header -->
-        <div class="bg-secondary drop-shadow-xs px-6 py-4 flex items-center justify-between">
-            <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                <img src="{{ asset("build/assets/icons/user.svg")}}" alt="Borrower Profile Icon" class="w-6 h-6">
-                Borrower Profile
+        <div class="bg-modal-header drop-shadow-md px-6 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-black flex items-center gap-2">
+                <img src="{{ asset("build/assets/icons/member-profile-black.svg")}}" alt="Borrower Profile Icon" class="w-7 h-7">
+                Member Profile
             </h2>
             <button id="close-borrower-modal" class="cursor-pointer text-gray-500 hover:text-gray-700 hover:scale-110 transition">
-                <img src="{{ asset("build/assets/icons/close.svg")}}" alt="Close Borrower Profile Modal" class="w-6 h-6">
+                <img src="{{ asset("build/assets/icons/close-gray.svg")}}" alt="Close Borrower Profile Modal" class="w-6 h-6">
             </button>
         </div>
 
@@ -157,8 +157,8 @@
 
                     <!-- Tabbed Container for Borrowed Books, Penalties & Reservations -->
 
-                    <!-- Tabs Header -->
                     <div class="relative pt-10 px-6 pb-6">
+                        <!-- Tabs Header -->
                         <div class="flex w-fit items-start absolute z-10 top-0 left-[23px]">
                             <button type="button" id="tab-borrowed-btn" class="borrower-tab-btn relative cursor-pointer bg-gray-100 border-y border-1 border-gray-200 px-6 py-2.5 flex items-center gap-2 text-sm font-medium rounded-t-xl hover:bg-gray-50 transition
                                             sm:px-6 sm:py-2.5
@@ -238,16 +238,16 @@
                                         <span id="penalties-header-count" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">2</span>
                                     </div>
                                     <div class="overflow-x-auto rounded-xl border border-gray-200">
-                                        <table class="w-full text-sm">
+                                        <table class="w-full text-sm table-fixed">
                                             <thead>
                                                 <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-12 ">No.</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Book</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Returned On</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs truncate w-1/4">Book</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-30">Returned On</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  w-38 min-w-38 max-w-38 whitespace-nowrap">Reason</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Amount</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  whitespace-nowrap">Status</th>
-                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase truncate tracking-wider text-xs  w-42 min-w-42 max-w-42 whitespace-nowrap">Actions</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-24">Amount</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  whitespace-nowrap w-40">Status</th>
+                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase truncate tracking-wider text-xs  w-46 min-w-46 max-w-46 whitespace-nowrap">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="active-penalties-tbody" class="bg-white divide-y divide-gray-100">

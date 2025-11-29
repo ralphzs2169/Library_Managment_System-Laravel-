@@ -1,4 +1,4 @@
-import { updateSettingsHandler } from '../../api/settingsHandler.js';
+import { updateSettingsHandler } from '../../ajax/settingsHandler.js';
 import { clearInputError } from '../../helpers.js';
 
 const settingsForm = document.querySelector('#settings-form'); // Changed from 'form'

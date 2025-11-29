@@ -16,9 +16,24 @@
   --color-accent: #00ADB5;
   --color-background: #EEEEEE;
   --color-background-unfocused: #0000009f;
+  --color-modal-header: white;
+
 }
 
 
+.tab-underline-accent {
+    position: absolute;
+    left: 10%;
+    bottom: 0;
+    width: 80%;
+    height: 3px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    pointer-events: none;
+    transition: background 0.2s;
+    content: "";
+    display: block;
+}
 
   .field-container {
     position: relative;

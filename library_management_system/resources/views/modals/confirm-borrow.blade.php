@@ -1,18 +1,18 @@
 <div id="confirm-borrow-modal" class="fixed inset-0 flex items-center justify-center bg-background-unfocused hidden bg-opacity-0 z-50 transition-opacity duration-150">
     <div id="confirm-borrow-content" class="bg-white rounded-2xl shadow-2xl w-[95%] max-w-2xl my-8 max-h-[90vh] overflow-hidden flex flex-col transform scale-95 opacity-0 transition-all duration-150">
         <!-- Header -->
-        <div class="bg-secondary/100 px-6 py-4 flex items-center justify-between">
+        <div class="bg-modal-header drop-shadow-md px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <button id="back-to-borrow-book-button" class="cursor-pointer text-gray-600 hover:text-gray-800 transition">
-                    <img src="{{ asset('build/assets/icons/back.svg') }}" alt="Back" class="w-6 h-6">
+                    <img src="{{ asset('build/assets/icons/back-gray.svg') }}" alt="Back" class="w-6 h-6">
                 </button>
-                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                <h2 class="text-xl font-semibold text-black flex items-center gap-2">
 
-                    Confirm Borrowing
+                    Finalize Borrowing Details
                 </h2>
             </div>
             <button id="close-confirm-modal" class="cursor-pointer text-gray-500 hover:text-gray-700 hover:scale-110 transition">
-                <img src="{{ asset('build/assets/icons/close.svg') }}" alt="Close" class="w-6 h-6">
+                <img src="{{ asset('build/assets/icons/close-gray.svg') }}" alt="Close" class="w-6 h-6">
             </button>
         </div>
 

@@ -1,17 +1,17 @@
 <div id="confirm-renew-modal" class="fixed inset-0 flex items-center justify-center bg-background-unfocused hidden bg-opacity-0 z-70 transition-opacity duration-150">
     <div id="confirm-renew-content" class="bg-white rounded-2xl shadow-2xl w-[95%] max-w-2xl my-8 max-h-[90vh] overflow-hidden flex flex-col transform scale-95 opacity-0 transition-all duration-150">
         <!-- Header -->
-        <div class="bg-secondarypx-6 py-4 flex items-center justify-between">
+        <div class="bg-modal-header drop-shadow-md px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <button id="renew-back-to-borrower-profile" class="cursor-pointer text-gray-600 hover:text-gray-800 transition">
-                    <img src="{{ asset('build/assets/icons/back.svg') }}" alt="Back" class="w-6 h-6">
+                    <img src="{{ asset('build/assets/icons/back-gray.svg') }}" alt="Back" class="w-6 h-6">
                 </button>
-                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                    Confirm Renewal
+                <h2 class="text-xl font-semibold text-black flex items-center gap-2">
+                    Finalize Renewal Details
                 </h2>
             </div>
             <button id="renew-close-confirm-modal" class="cursor-pointer text-gray-500 hover:text-gray-700 hover:scale-110 transition">
-                <img src="{{ asset('build/assets/icons/close.svg') }}" alt="Close" class="w-6 h-6">
+                <img src="{{ asset('build/assets/icons/close-gray.svg') }}" alt="Close" class="w-6 h-6">
             </button>
         </div>
 
@@ -71,9 +71,9 @@
                     </div>
                 </div>
                 <!-- Due Date Selection -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mt-4">
+                <div class="border border-gray-200 rounded-xl p-3 mt-4">
                     <label for="renew-due-date" class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         New Due Date

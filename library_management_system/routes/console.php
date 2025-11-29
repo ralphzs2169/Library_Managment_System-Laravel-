@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('semesters:check-status')->everyMinute();
 Schedule::command('borrows:check-overdue')->everyMinute();
+Schedule::command('reservations:check-expired')->everyMinute();

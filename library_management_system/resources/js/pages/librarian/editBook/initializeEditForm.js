@@ -1,4 +1,4 @@
-import { editBookHandler } from "../../../api/bookHandler.js";
+import { editBookHandler } from "../../../ajax/bookHandler.js";
 import { initImagePreview } from "../imagePreview.js";
 import { showError } from "../../../utils/alerts.js";
 import { clearInputError } from "../../../helpers.js";

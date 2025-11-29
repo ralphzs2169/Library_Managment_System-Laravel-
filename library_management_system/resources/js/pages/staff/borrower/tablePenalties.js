@@ -1,5 +1,7 @@
-import { attachPaymentActions } from "../confirmPayment";
-import { formatDate } from '../../../utils.js';
+import { openPaymentModal, closePaymentModal } from "../confirmPayment";
+import { cancelPenalty } from "../../../ajax/penaltyHandler";
+import { fetchBorrowerDetails } from "../../../ajax/borrowerHandler";
+import { initializeBorrowerProfileUI } from "./borrowerProfilePopulators";
 
 export function populateActivePenalties(modal, borrower) {
     const tbody = modal.querySelector('#active-penalties-tbody');
@@ -126,9 +128,21 @@ export function populateActivePenalties(modal, borrower) {
                 </td>
                 <td class="py-3 px-4">
                     <div class="flex items-center justify-center gap-2">
-                        <button class="pay-penalty-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-xs tracking-wide font-medium transition-all shadow-sm" data-transaction="${JSON.stringify(transaction).replace(/"/g, '&quot;')}">
-                            <img src="/build/assets/icons/pay.svg" alt="Pay Fine Icon" class="w-4 h-4">
+                        <button class="pay-penalty-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-xs tracking-wide font-medium transition-all shadow-sm" 
+                            data-transaction="${JSON.stringify(transaction).replace(/"/g, '&quot;')}">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
                             Settle
+                        </button>
+                        
+                        <button class="cancel-penalty-button cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition-all shadow-sm" 
+                                data-penalty-id="${transaction.penalty.id}" 
+                                data-borrower-id="${borrower.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel
                         </button>
                     </div>
                     
@@ -140,6 +154,40 @@ export function populateActivePenalties(modal, borrower) {
     });
     
     attachPaymentActions(tbody, borrower);
+}
+
+
+function attachPaymentActions(tbody, borrower) {
+    tbody.querySelectorAll('button.pay-penalty-button').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const transaction = JSON.parse(this.dataset.transaction);
+         
+            if (transaction) {
+                // Close borrower profile modal before opening payment modal
+         
+                openPaymentModal(borrower, transaction);
+            }
+        });
+    });
+
+     tbody.querySelectorAll('button.cancel-penalty-button').forEach(btn => {
+        btn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            const penaltyId = this.dataset.penaltyId;
+            const borrowerId = this.dataset.borrowerId;
+
+            const result = await cancelPenalty(penaltyId, borrowerId);
+
+            if (result) {
+                // returnToBorrowerProfile();
+                const modal = document.getElementById('borrower-profile-modal');
+                const freshBorrowerDetails = await fetchBorrowerDetails(borrowerId);
+                await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true, 'penalties-tab');
+                closePaymentModal();
+            }
+        });
+    });
 }
 
 export function renderPenaltyStatusBadge(status) {

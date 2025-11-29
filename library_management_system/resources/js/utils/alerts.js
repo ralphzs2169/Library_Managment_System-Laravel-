@@ -1,4 +1,4 @@
-import { logoutHandler } from "../api/authHandler.js";
+import { logoutHandler } from "../ajax/authHandler.js";
 import Swal from 'sweetalert2';
 import Toaster from "toaster-ui";
 

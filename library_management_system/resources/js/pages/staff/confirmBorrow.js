@@ -1,12 +1,12 @@
 import { showBookSelectionContent, restoreProfileContent} from './bookSelection.js';
-import { borrowBook } from '../../api/staffTransactionHandler.js';
+import { borrowBook } from '../../ajax/staffTransactionHandler.js';
 import { clearInputError } from '../../helpers.js';
-import { fetchSettings } from '../../api/settingsHandler.js';
+import { fetchSettings } from '../../ajax/settingsHandler.js';
 import { closeConfirmReservationModal } from './transactions/confirmReservation.js';
 import { closeBorrowerModal, openBorrowerProfileModal } from './borrower/borrowerProfileModal.js';
-import { fetchCopiesForReservation } from '../../api/bookHandler.js';
+import { fetchCopiesForReservation } from '../../ajax/bookHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js'; 
-import { fetchBorrowerDetails } from '../../api/borrowerHandler.js';
+import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { closeConfirmReturnModal } from './confirmReturn.js';
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
