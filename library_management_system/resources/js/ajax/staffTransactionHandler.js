@@ -2,10 +2,10 @@ import { showError, showConfirmation, showWarning, showToast, showDangerConfirma
 import {  INVALID_INPUT, BUSINESS_RULE_VIOLATION, NOT_FOUND } from "../config.js";
 import { displayInputErrors, scrollToFirstErrorInModal } from "../helpers.js";
 import { TRANSACTION_ROUTES } from "../config.js";
-import { loadBorrowers } from "./borrowerHandler.js";
 import { closeConfirmBorrowModal } from "../pages/staff/confirmBorrow.js";
 import { closeConfirmRenewModal } from "../pages/staff/confirmRenew.js";
 import { closeConfirmReturnModal } from "../pages/staff/confirmReturn.js";
+import { loadMembers ,loadActiveBorrows, loadQueueReservations, loadUnpaidPenalties } from "./staffDashboardHandler.js";
 
 export async function borrowBook(borrowData) {
     // Add CSRF token
@@ -69,7 +69,7 @@ export async function borrowBook(borrowData) {
     }
 
     // Close modal first
-    loadBorrowers(undefined, false);
+    reloadStaffDashboardData();
     closeConfirmBorrowModal();
     showToast('Book Borrowed Successfully!', 'success');
 }
@@ -153,7 +153,7 @@ export async function returnBook(returnData) {
     }
 
     showToast('Book Returned Successfully!', 'success');
-    loadBorrowers(undefined, false);
+    reloadStaffDashboardData();
     return true;
 }
 
@@ -218,8 +218,8 @@ export async function renewBook(renewData) {
         return false;
     }
 
-    // Close modal first
-    loadBorrowers(undefined, false);
+    reloadStaffDashboardData();
+
     showToast('Renewal Successful!', 'success');
     return true;
 }
@@ -281,7 +281,8 @@ export async function addReservation(reservationData) {
         return false;
     }
 
-    loadBorrowers(undefined, false);
+    reloadStaffDashboardData();
+
     showToast('Reservation Successful!', 'success');
     return true;
 }
@@ -313,7 +314,15 @@ export async function cancelReservation(reservationId) {
         return false;
     }
 
-    loadBorrowers(undefined, false);
+   reloadStaffDashboardData();
+
     showToast('Reservation Cancelled!', 'success');
     return true;
+}
+
+export function reloadStaffDashboardData() {
+    loadMembers(undefined, false);
+    loadActiveBorrows(undefined, false);
+    loadUnpaidPenalties(undefined, false);
+    loadQueueReservations(undefined, false);
 }

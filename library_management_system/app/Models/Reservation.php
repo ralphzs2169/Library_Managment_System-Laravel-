@@ -42,18 +42,22 @@ class Reservation extends Model
         return null;
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function book()
     {
         return $this->belongsTo(Book::class);
     }
 
-    public function getQueuePositionAttribute()
-    {
-        return Reservation::where('book_id', $this->book_id)
-            ->where('status', ReservationStatus::PENDING)
-            ->orderBy('created_at')
-            ->pluck('id')
-            ->search($this->id) + 1;
-    }
+    // public function getQueuePositionAttribute()
+    // {
+    //     return Reservation::where('book_id', $this->book_id)
+    //         ->where('status', ReservationStatus::PENDING)
+    //         ->orderBy('created_at')
+    //         ->pluck('id')
+    //         ->search($this->id) + 1;
+    // }
 }

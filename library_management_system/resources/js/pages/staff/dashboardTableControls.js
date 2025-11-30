@@ -1,7 +1,7 @@
-import { BORROWER_FILTERS } from "../../utils/tableFilters.js";
+import { BORROWER_FILTERS, ACTIVE_BORROW_FILTERS, UNPAID_PENALTIES_FILTERS, QUEUE_RESERVATIONS_FILTERS } from "../../utils/tableFilters.js";
 import { initSearch, initFilter } from "../../tableControls.js";
-import { loadBorrowers } from "../../ajax/borrowerHandler.js";
-import { initStaffDashboardPagination } from "../../tableControls.js"; // <-- fix import path
+import { loadActiveBorrows, loadMembers, loadUnpaidPenalties, loadQueueReservations } from "../../ajax/staffDashboardHandler.js";
+import { initStaffDashboardPagination } from "../../tableControls.js";
 // Helper to remove all previous listeners by replacing the node
 function replaceNodeWithClone(selector) {
     const el = document.querySelector(selector);
@@ -22,10 +22,10 @@ export function initBorrowersTableControls() {
     const container = document.getElementById('members-table-container');
 
     // Use tableControls.js helpers
-    initStaffDashboardPagination(loadBorrowers); // <-- make sure this import is correct
-    initSearch('#borrowers-search', loadBorrowers, '#members-table-container', [2, 3]); // Adjust column indexes as needed
-    initFilter('#borrower-role-filter', loadBorrowers);
-    initFilter('#borrower-status-filter', loadBorrowers);
+    initStaffDashboardPagination(loadMembers);
+    initSearch('#borrowers-search', loadMembers, '#members-table-container', [2, 3]);
+    initFilter('#borrower-role-filter', loadMembers);
+    initFilter('#borrower-status-filter', loadMembers);
 
     // Reset button
     if (resetBtn) {
@@ -39,10 +39,114 @@ export function initBorrowersTableControls() {
             BORROWER_FILTERS.search = '';
             BORROWER_FILTERS.role = '';
             BORROWER_FILTERS.status = '';
-            loadBorrowers(1);
+            loadMembers(1);
         });
     }
 }
 
+export function initActiveBorrowsTableControls() {
+    // Remove previous listeners by replacing nodes
+    const searchInput = replaceNodeWithClone('#active-borrows-search');
+    const roleFilter = replaceNodeWithClone('#active-borrows-role-filter');
+    const statusFilter = replaceNodeWithClone('#active-borrows-status-filter');
+    const resetBtn = replaceNodeWithClone('#reset-active-borrows-filters');
+    const container = document.getElementById('active-borrows-table-container');
+
+    // Pagination
+    initStaffDashboardPagination(loadActiveBorrows);
+
+    // Search
+    initSearch('#active-borrows-search', loadActiveBorrows, '#active-borrows-table-container', [1, 3]); // Adjust column indexes if needed
+
+    // Filters
+    initFilter('#active-borrows-role-filter', loadActiveBorrows);
+    initFilter('#active-borrows-status-filter', loadActiveBorrows);
+
+    // Reset button
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            const searchInput = document.getElementById('active-borrows-search');
+            const roleFilter = document.getElementById('active-borrows-role-filter');
+            const statusFilter = document.getElementById('active-borrows-status-filter');
+            if (searchInput) searchInput.value = '';
+            if (roleFilter) roleFilter.value = '';
+            if (statusFilter) statusFilter.value = '';
+            ACTIVE_BORROW_FILTERS.search = '';
+            ACTIVE_BORROW_FILTERS.role = '';
+            ACTIVE_BORROW_FILTERS.status = '';
+            loadActiveBorrows(1);
+        });
+    }
+}
+
+export function initUnpaidPenaltiesTableControls() {
+    console.log("Initializing Unpaid Penalties Table Controls");
+    // Remove previous listeners by replacing nodes
+    const searchInput = replaceNodeWithClone('#unpaid-penalties-search');
+    const roleFilter = replaceNodeWithClone('#unpaid-penalties-role-filter');
+    const statusFilter = replaceNodeWithClone('#unpaid-penalties-status-filter');
+    const resetBtn = replaceNodeWithClone('#reset-unpaid-penalties-filters');
+    const container = document.getElementById('unpaid-penalties-table-container');
+
+    // Pagination
+    initStaffDashboardPagination(loadUnpaidPenalties);
+
+    // Search
+    initSearch('#unpaid-penalties-search', loadUnpaidPenalties, '#unpaid-penalties-table-container', [1, 3]); // Adjust column indexes if needed
+
+    // Filters
+    initFilter('#unpaid-penalties-role-filter', loadUnpaidPenalties);
+    initFilter('#unpaid-penalties-status-filter', loadUnpaidPenalties);
+
+    // Reset button
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            const searchInput = document.getElementById('unpaid-penalties-search');
+            const roleFilter = document.getElementById('unpaid-penalties-role-filter');
+            const statusFilter = document.getElementById('unpaid-penalties-status-filter');
+            if (searchInput) searchInput.value = '';
+            if (roleFilter) roleFilter.value = '';
+            if (statusFilter) statusFilter.value = '';
+            UNPAID_PENALTIES_FILTERS.search = '';
+            UNPAID_PENALTIES_FILTERS.role = '';
+            UNPAID_PENALTIES_FILTERS.status = '';
+            loadUnpaidPenalties(1);
+        });
+    }
+}
+
+export function initQueueReservationsTableControls() {
+    // Remove previous listeners by replacing nodes
+    const searchInput = replaceNodeWithClone('#queue-reservations-search');
+    const roleFilter = replaceNodeWithClone('#queue-reservations-role-filter');
+    const statusFilter = replaceNodeWithClone('#queue-reservations-status-filter');
+    const resetBtn = replaceNodeWithClone('#reset-queue-reservations-filters');
+    const container = document.getElementById('queue-reservations-table-container');
+
+    // Pagination
+    initStaffDashboardPagination(loadQueueReservations);
+
+    // Search
+    initSearch('#queue-reservations-search', loadQueueReservations, '#queue-reservations-table-container', [1, 3]); // Adjust column indexes if needed
+
+    // Filters
+    initFilter('#queue-reservations-role-filter', loadQueueReservations);
+    initFilter('#queue-reservations-status-filter', loadQueueReservations);
+    // Reset button
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            const searchInput = document.getElementById('queue-reservations-search');
+            const roleFilter = document.getElementById('queue-reservations-role-filter');
+            const statusFilter = document.getElementById('queue-reservations-status-filter');
+            if (searchInput) searchInput.value = '';
+            if (roleFilter) roleFilter.value = '';
+            if (statusFilter) statusFilter.value = '';
+            QUEUE_RESERVATIONS_FILTERS.search = '';
+            QUEUE_RESERVATIONS_FILTERS.status = '';
+            QUEUE_RESERVATIONS_FILTERS.expiry = '';
+            loadQueueReservations(1);
+        });
+    }
+}
 // Auto-run on import/load
 initBorrowersTableControls();

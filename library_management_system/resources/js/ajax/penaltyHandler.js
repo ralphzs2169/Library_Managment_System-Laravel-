@@ -1,5 +1,5 @@
 import { INVALID_INPUT, TRANSACTION_ROUTES } from "../config";
-import { loadBorrowers } from "./borrowerHandler";
+import { reloadStaffDashboardData } from "./staffTransactionHandler";
 import { showWarning, showToast, showError, showConfirmation, showDangerConfirmation } from "../utils/alerts";
 import { displayInputErrors } from "../helpers";
 
@@ -67,7 +67,7 @@ export async function updatePenalty(paymentDetails, form) {
     }
     
     showToast('Payment Successful!', 'success');
-    loadBorrowers(undefined, false);
+    reloadStaffDashboardData();
     return true;
         // showSuccessWithRedirect('Success', 'Book updated successfully!', window.location.href);
 }
@@ -99,7 +99,7 @@ export async function cancelPenalty(penaltyId, borrowerId) {
         return false;
     }
 
-    loadBorrowers(undefined, false);
+    reloadStaffDashboardData();
     showToast('Penalty Cancelled!', 'success');
     return true;
 }

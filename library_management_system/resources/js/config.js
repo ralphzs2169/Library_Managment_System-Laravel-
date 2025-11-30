@@ -41,6 +41,13 @@ export const SEMESTER_ROUTES = {
     CHECK_ACTIVE: '/staff/check-active-semester',
 };
 
+export const STAFF_DASHBOARD_ROUTES = {
+    MEMBERS: '/staff/dashboard/members',
+    ACTIVE_BORROWS: '/staff/dashboard/active-borrows',
+    UNPAID_PENALTIES: '/staff/dashboard/unpaid-penalties',
+    QUEUE_RESERVATIONS: '/staff/dashboard/queue-reservations',
+};
+
 export const TRANSACTION_ROUTES = {
     INDEX: '/staff/transaction',
 

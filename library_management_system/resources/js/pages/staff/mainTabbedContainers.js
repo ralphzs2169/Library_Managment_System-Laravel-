@@ -1,21 +1,33 @@
-import { initBorrowersTableControls } from './dashboardTableControls.js';
+import { initActiveBorrowsTableControls, 
+         initBorrowersTableControls, 
+         initUnpaidPenaltiesTableControls, 
+         initQueueReservationsTableControls } from './dashboardTableControls.js';
+import { loadMembers, loadActiveBorrows, loadUnpaidPenalties, loadQueueReservations } from '../../ajax/staffDashboardHandler.js';
+import { showSkeleton, hideSkeleton } from '../../utils.js';
+
+const isLoaded = {
+    membersTable: false,
+    activeBorrowsTable: false,
+    unpaidPenaltiesTable: false,
+    queueReservationsTable: false,
+}
 
 export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-tab') {
     const tabMembersBtn = document.getElementById('tab-members-btn');
     const tabBorrowsBtn = document.getElementById('tab-active-borrows-btn');
     const tabPenaltiesBtn = document.getElementById('tab-unpaid-penalties-btn');
-    const tabReservationsBtn = document.getElementById('tab-reservations-btn');
-    console.log("HELLLOOOO");
+    const tabReservationsBtn = document.getElementById('tab-queue-reservations-btn');
+
     const tabMembersContent = document.getElementById('tab-members-content');
     const tabBorrowsContent = document.getElementById('tab-active-borrows-content');
     const tabPenaltiesContent = document.getElementById('tab-unpaid-penalties-content');
-    const tabReservationsContent = document.getElementById('tab-reservations-content');
+    const tabReservationsContent = document.getElementById('tab-queue-reservations-content');
 
     const icons = {
         members: document.getElementById('tab-members-icon'),
         borrows: document.getElementById('tab-active-borrows-icon'),
         penalties: document.getElementById('tab-unpaid-penalties-icon'),
-        reservations: document.getElementById('tab-reservations-icon'),
+        reservations: document.getElementById('tab-queue-reservations-icon'),
     };
 
     const iconSrc = {
@@ -29,7 +41,7 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
         members: document.getElementById('badge-members-count'),
         borrows: document.getElementById('badge-active-borrows-count'),
         penalties: document.getElementById('badge-unpaid-penalties-count'),
-        reservations: document.getElementById('badge-reservations-count'),
+        reservations: document.getElementById('badge-queue-reservations-count'),
     };
 
     const tabs = [
@@ -40,6 +52,27 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
     ];
 
     function activateTab(tab) {
+        if (tab.key === 'members' && !isLoaded.membersTable) {
+            isLoaded.membersTable = true;
+            initBorrowersTableControls();
+            loadMembers();
+        }else if (tab.key === 'borrows' && !isLoaded.activeBorrowsTable) {
+            const container = document.getElementById('active-borrows-table-container');
+
+            // showSkeleton(container, '#active-borrows-skeleton-body', '#active-borrows-real-table-body');
+            isLoaded.activeBorrowsTable = true;
+            initActiveBorrowsTableControls();
+            loadActiveBorrows();
+            // hideSkeleton(container, '#active-borrows-skeleton-body', '#active-borrows-real-table-body');
+        }else if (tab.key === 'penalties' && !isLoaded.unpaidPenaltiesTable) {
+            isLoaded.unpaidPenaltiesTable = true;
+            initUnpaidPenaltiesTableControls();
+            loadUnpaidPenalties();
+        }else if (tab.key === 'reservations' && !isLoaded.queueReservationsTable) {
+            isLoaded.queueReservationsTable = true;
+            initQueueReservationsTableControls();
+            loadQueueReservations();
+        }
         tab.btn.classList.add('border-accent', 'text-accent', 'bg-white');
         tab.btn.style.borderBottom = 'none';
         tab.btn.style.marginBottom = '1.5rem';
@@ -71,17 +104,16 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
         }
     }
 
-function setActiveTab(activeTab) {
+    function setActiveTab(activeTab) {
+        // Save active tab to localStorage
+        if (activeTab && activeTab.key) {
+            localStorage.setItem('staffDashboardActiveTab', activeTab.key);
+        }
         tabs.forEach(tab => {
             if (!tab.btn || !tab.content) return;
-            
             if (tab === activeTab) {
                 activateTab(tab);
                 tab.content.classList.remove('hidden');
-                
-                // REMOVED: The setTimeout initBorrowersTableControls block.
-                // The controls are initialized once on page load by the other file.
-                
             } else {
                 deactivateTab(tab);
                 tab.content.classList.add('hidden');
@@ -101,18 +133,18 @@ function setActiveTab(activeTab) {
         tabs.forEach(deactivateTab);
     }
 
-    // Default state
-    resetTabsToDefault();
-
-    if (initialActiveTab === 'members-table-tab') {
-        setActiveTab(tabs[0]);
-    } else if (initialActiveTab === 'active-borrows-tab') {
-        setActiveTab(tabs[1]);
-    } else if (initialActiveTab === 'unpaid-penalties-tab') {
-        setActiveTab(tabs[2]);
-    } else if (initialActiveTab === 'reservations-tab') {
-        setActiveTab(tabs[3]);
+    // Restore tab from localStorage if available
+    let tabToActivate = tabs[0];
+    const savedTabKey = localStorage.getItem('staffDashboardActiveTab');
+    if (savedTabKey) {
+        const foundTab = tabs.find(tab => tab.key === savedTabKey);
+        if (foundTab && foundTab.btn && foundTab.content) {
+            tabToActivate = foundTab;
+        }
     }
+
+    resetTabsToDefault();
+    setActiveTab(tabToActivate);
 
     return { resetTabsToDefault };
 }

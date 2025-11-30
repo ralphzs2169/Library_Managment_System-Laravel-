@@ -41,6 +41,7 @@ export function openPaymentModal(borrower, transaction) {
     const content = document.getElementById('confirm-payment-content');
     if (!modal || !content) return;
 
+    console.log(transaction);
     // Show modal
     modal.classList.remove('hidden');
     requestAnimationFrame(() => {

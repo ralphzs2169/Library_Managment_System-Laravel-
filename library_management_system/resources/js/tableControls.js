@@ -53,6 +53,7 @@ export function initFilter(selector, loadFunction) {
 }
 
 export function highlightSearchMatches(searchTerm, containerSelector = '#members-table-container', columnIndexes = [1, 2]) {
+  
     if (!searchTerm || searchTerm.trim().length === 0) return;
   
     const term = searchTerm.trim().toLowerCase();

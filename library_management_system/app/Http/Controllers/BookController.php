@@ -155,7 +155,7 @@ class BookController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'title' => 'required|string|max:255',
-                'isbn' => 'required|string|unique:books,isbn|max:13',
+                'isbn' => 'required|string|unique:books,isbn|max:17',
                 'description' => 'nullable|string',
                 'cover' => 'nullable|mimetypes:image/jpeg,image/png,image/webp,image/gif,image/bmp,image/svg+xml|max:2048',
 

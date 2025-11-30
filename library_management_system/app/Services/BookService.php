@@ -263,7 +263,7 @@ class BookService {
     {
         $request->validate([
             'title' => 'sometimes|required|string|max:255',
-            'isbn' => 'sometimes|required|string|unique:books,isbn,' . $book->id . '|max:13',
+            'isbn' => 'sometimes|required|string|unique:books,isbn,' . $book->id . '|max:17',
             'description' => 'sometimes|nullable|string',
             'cover' => 'sometimes|nullable|image|mimes:jpg,jpeg,png|max:2048',
             'publisher' => 'sometimes|nullable|string|max:255',

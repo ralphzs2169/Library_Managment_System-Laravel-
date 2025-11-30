@@ -63,4 +63,5 @@ class BorrowTransaction extends Model
     {
         return $this->hasMany(Penalty::class);
     }
+
 }

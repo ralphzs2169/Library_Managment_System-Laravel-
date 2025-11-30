@@ -9,6 +9,7 @@ let currentRenewer = null;
 let currentTransaction = null;
 
 export async function initializeConfirmRenewModal(modal, renewer, transaction) {
+    console.log(transaction);
     currentRenewer = renewer;
     currentTransaction = transaction;
     console.table(renewer);

@@ -15,6 +15,7 @@ use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReturnController;
+use App\Http\Controllers\StaffDashboardController;
 
 use Illuminate\Http\Request;
 use App\Models\Genre;
@@ -76,7 +77,10 @@ Route::prefix('staff')
     ->name('staff.')
     ->group(function () {
 
-        Route::get('/dashboard', [DashboardController::class, 'staffDashboard']);
+        Route::get('/dashboard/members', [StaffDashboardController::class, 'membersList']);
+        Route::get('/dashboard/active-borrows', [StaffDashboardController::class, 'activeBorrowsList']);
+        Route::get('/dashboard/unpaid-penalties', [StaffDashboardController::class, 'unpaidPenaltiesList']);
+        Route::get('/dashboard/queue-reservations', [StaffDashboardController::class, 'queueReservationsList']);
 
         Route::get('/books/selection/{transaction_type}/{member_id}', [BookController::class, 'getBooksForBorrowOrReserve']);
 
