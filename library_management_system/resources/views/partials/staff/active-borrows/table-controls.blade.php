@@ -3,7 +3,7 @@
     <div class="flex-1 max-w-lg">
         <div class="relative">
             <img src="{{ asset('build/assets/icons/search.svg') }}" alt="Search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-            <input id="active-borrows-search" type="text" placeholder="Search transaction by book title, Borrower name, or Copy#" class="w-full pl-12 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" name="search" value="{{ request('search') }}">
+            <input id="active-borrows-search" type="text" placeholder="Search by Borrower Name, Book Title, or ID number..." class="w-full pl-12 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" name="search" value="{{ request('search') }}">
         </div>
     </div>
 

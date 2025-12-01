@@ -82,7 +82,7 @@
                 <button type="button" id="tab-queue-reservations-btn" class="dashboard-tab-btn relative cursor-pointer bg-background border-y border-1 border-gray-300 px-12 py-2.5 flex items-center gap-2 text-sm font-medium rounded-t-xl hover:bg-gray-50 transition
                                               
                                                 px-3 py-2">
-                    <img id="tab-queuef-reservations-icon" src="{{ asset('build/assets/icons/reservation.svg') }}" alt="Reservations Icon" class="w-5 h-5 tab-icon">
+                    <img id="tab-queue-reservations-icon" src="{{ asset('build/assets/icons/reservation.svg') }}" alt="Reservations Icon" class="w-5 h-5 tab-icon">
                     <span class="truncate max-w-[50px] sm:max-w-none  font-medium tracking-wide text-md">Reservations</span>
                 </button>
             </div>
@@ -106,37 +106,13 @@
                             <div class="flex items-center gap-2 ml-auto">
                                 <span class="text-gray-500 text-sm">Total Members</span>
                                 <span id="header-total-members" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">
-                                    {{ $users->total() }}
+
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Members Table Controls --}}
-                    <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
-                        <div class="flex-1 max-w-md">
-                            <div class="relative">
-                                <img src="{{ asset('build/assets/icons/search.svg') }}" alt="Search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                                <input id="borrowers-search" type="text" placeholder="Search by name or ID number..." class="w-full pl-12 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" name="search" value="{{ request('search') }}">
-                            </div>
-                        </div>
-                        <div class="flex flex-wrap gap-3">
-                            <select id="borrower-role-filter" name="role" class="px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
-                                <option value="">Role: All</option>
-                                <option value="student" {{ request('role') === 'student' ? 'selected' : '' }}>Role: Students</option>
-                                <option value="teacher" {{ request('role') === 'teacher' ? 'selected' : '' }}>Role: Teachers</option>
-                            </select>
-                            <select id="borrower-status-filter" name="status" class="px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
-                                <option value="">Status: All</option>
-                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Status: Active</option>
-                                <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Status: Suspended</option>
-                                <option value="cleared" {{ request('status') === 'cleared' ? 'selected' : '' }}>Status: Cleared</option>
-                            </select>
-                            <button type="button" id="reset-borrower-filters" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition whitespace-nowrap">
-                                Reset Filters
-                            </button>
-                        </div>
-                    </div>
+                    @include ('partials.staff.members.table-controls')
 
                     <div id="members-table-container">
                         @include('partials.staff.members-table', ['users' => $users])
@@ -159,7 +135,7 @@
                             <div class="flex items-center gap-2 ml-auto">
                                 <span class="text-gray-500 text-sm">Total Active Borrows</span>
                                 <span id="header-total-active-borrows" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">
-                                    {{ $activeBorrowsCount ?? 0 }}
+
                                 </span>
                             </div>
                         </div>
@@ -185,12 +161,12 @@
                             <div class="flex items-center gap-2 ml-auto">
                                 <span class="text-gray-500 text-sm">Total Unpaid Penalties</span>
                                 <span id="header-total-unpaid-penalties" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">
-                                    {{ $unpaidPenaltiesCount ?? 0 }}
+
                                 </span>
                             </div>
                         </div>
                     </div>
-                    @include ('partials.staff.active-borrows.table-controls')
+                    @include ('partials.staff.unpaid-penalties.table-controls')
 
                     <div id="unpaid-penalties-table-container">
                         {{-- Table will be loaded via AJAX --}}
@@ -213,12 +189,12 @@
                             <div class="flex items-center gap-2 ml-auto">
                                 <span class="text-gray-500 text-sm">Total Queue Reservations</span>
                                 <span id="header-total-queue-reservations" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">
-                                    {{ $reservationsCount ?? 0 }}
+
                                 </span>
                             </div>
                         </div>
                     </div>
-                    @include ('partials.staff.active-borrows.table-controls')
+                    @include ('partials.staff.queue-reservations.table-controls')
 
                     <div id="queue-reservations-table-container">
                         {{-- Table will be loaded via AJAX --}}

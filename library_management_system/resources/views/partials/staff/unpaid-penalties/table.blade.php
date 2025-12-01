@@ -14,8 +14,8 @@
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-20">Actions</th>
             </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-100">
 
+        <tbody id="unpaid-penalties-real-table-body" class="bg-white divide-y divide-gray-100">
             @foreach($unpaidPenalties as $index => $unpaidPenalty)
             <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100">
                 <td class="py-3 px-4 whitespace-nowrap text-gray-700">{{ $index + 1 + ($unpaidPenalties->currentPage() - 1) * $unpaidPenalties->perPage() }}</td>

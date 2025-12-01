@@ -21,16 +21,20 @@ class StaffDashboardController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
+
+                // Search by Borrower Name
                 $q->where('firstname', 'like', "%{$search}%")
                   ->orWhere('lastname', 'like', "%{$search}%")
                   ->orWhere('middle_initial', 'like', "%{$search}%")
                   ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"])
+                  ->orWhereRaw("CONCAT(firstname, ' ', middle_initial, '.', ' ', lastname) LIKE ?", ["%{$search}%"])
                   ->orWhereHas('students', function ($q) use ($search) {
                       $q->where('student_number', 'like', "%{$search}%");
                   })
                   ->orWhereHas('teachers', function ($q) use ($search) {
                       $q->where('employee_number', 'like', "%{$search}%");
                   });
+
             });
         }
 
@@ -44,16 +48,40 @@ class StaffDashboardController extends Controller
             $query->where('library_status', $request->status);
         }
 
-        // Default sort: active first, then suspended, then cleared, then firstname descending
-        $query->orderByRaw("
-            FIELD(library_status, 'active', 'suspended', 'cleared')
-        ")->orderBy('firstname', 'asc');
+        // Apply sort filter
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'name_asc':
+                    $query->orderBy('firstname', 'asc')->orderBy('lastname', 'asc');
+                    break;
+                case 'name_desc':
+                    $query->orderBy('firstname', 'desc')->orderBy('lastname', 'desc');
+                    break;
+                case 'date_desc':
+                    $query->orderBy('created_at', 'desc');
+                    break;
+                case 'date_asc':
+                    $query->orderBy('created_at', 'asc');
+                    break;
+                default:
+                    $query->orderByRaw("FIELD(library_status, 'active', 'suspended', 'cleared')")
+                          ->orderBy('firstname', 'asc');
+            }
+        } else {
+            // Default sort: active first, then suspended, then cleared, then firstname ascending
+            $query->orderByRaw("FIELD(library_status, 'active', 'suspended', 'cleared')")
+                  ->orderBy('firstname', 'asc');
+        }
 
         $users = $query->paginate(20)->withQueryString();
 
         // If AJAX request, return only the table partial
         if ($request->ajax()) {
-            return view('partials.staff.members-table', compact('users'))->render();
+            $html = view('partials.staff.members.table', compact('users'))->render();
+            return response()->json([
+                'html' => $html,
+                'count' => $users->total()
+            ]);
         }
 
         return view('pages.staff.dashboard', compact('users'));
@@ -63,61 +91,36 @@ class StaffDashboardController extends Controller
     {
         $query = BorrowTransaction::with(['bookCopy.book.author', 'user.students.department', 'user.teachers.department'])
             ->whereNull('returned_at')
-            ->whereIn('status', ['borrowed', 'overdue']);
+            ->whereIn('borrow_transactions.status', ['borrowed', 'overdue']); // <-- Fix ambiguous column
 
         // Search filter
-       // In your activeBorrowsList method within the search filter block:
+        if ($request->filled('search')) {
+            $search = $request->search;
 
-    // Search filter
-    if ($request->filled('search')) {
-        $search = $request->search;
-
-        $query->where(function ($q) use ($search) {
-            
-            // --- Custom logic to handle "Copy#" prefix ---
-            $copySearch = null;
-            // Check if the search string starts with 'Copy#' (case-insensitive)
-            if (Str::startsWith(strtolower($search), 'copy#')) {
-                // Strip 'Copy#' and trim any leading/trailing spaces left by the user
-                $copySearch = trim(substr($search, 5)); 
-            }
-            
-            // A. Search by Borrower Name (Standard logic)
-            $q->whereHas('user', function ($uq) use ($search) {
-                $uq->where('firstname', 'like', "%{$search}%")
-                ->orWhere('lastname', 'like', "%{$search}%")
-                ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"]);
-            });
-            
-            // B. Search by Book Title (Standard logic)
-            $q->orWhereHas('bookCopy.book', function ($bq) use ($search) {
-                $bq->where('title', 'like', "%{$search}%");
-            });
-
-            // C. Search by Copy Number (CONDITIONAL Logic)
-            if ($copySearch) {
-                // If the user typed "Copy#", we use the stripped number
-                $q->orWhereHas('bookCopy', function ($bq) use ($copySearch) {
-                    // Search only for the stripped number
-                    $bq->where('copy_number', 'like', "%{$copySearch}%");
+            $query->where(function ($q) use ($search) {
+                // A. Search by Borrower Name 
+                $q->whereHas('user', function ($uq) use ($search) {
+                    $uq->where('firstname', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("CONCAT(firstname, ' ', middle_initial, '.', ' ', lastname) LIKE ?", ["%{$search}%"]);
                 });
-            } else {
-                // If the user DID NOT type "Copy#", they are searching for a copy number 
-                // that might also match a title/name, so we use the whole string.
-                $q->orWhereHas('bookCopy', function ($bq) use ($search) {
-                    $bq->where('copy_number', 'like', "%{$search}%");
+                
+                // B. Search by Book Title
+                $q->orWhereHas('bookCopy.book', function ($bq) use ($search) {
+                    $bq->where('title', 'like', "%{$search}%");
                 });
-            }
 
-            // D. Search by ID/Employee Number (Standard logic)
-            $q->orWhereHas('user.students', function ($uq) use ($search) {
-                $uq->where('student_number', 'like', "%{$search}%");
+                // D. Search by ID/Employee Number 
+                $q->orWhereHas('user.students', function ($uq) use ($search) {
+                    $uq->where('student_number', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('user.teachers', function ($uq) use ($search) {
+                    $uq->where('employee_number', 'like', "%{$search}%");
+                });
             });
-            $q->orWhereHas('user.teachers', function ($uq) use ($search) {
-                $uq->where('employee_number', 'like', "%{$search}%");
-            });
-        });
-    }
+        }
+
         // Role filter
         if ($request->filled('role')) {
             $query->whereHas('user', function ($uq) use ($request) {
@@ -128,13 +131,12 @@ class StaffDashboardController extends Controller
         // Status filter (support 'due_soon')
         if ($request->filled('status')) {
             if ($request->status === 'due_soon') {
-                // Filter for borrowed and due soon
                 $reminderDays = config('settings.notifications.reminder_days_before_due', 3);
-                $query->where('status', 'borrowed')
+                $query->where('borrow_transactions.status', 'borrowed')
                     ->whereRaw('DATEDIFF(due_at, NOW()) <= ?', [$reminderDays])
                     ->whereRaw('DATEDIFF(due_at, NOW()) >= 0');
             } else {
-                $query->where('status', $request->status);
+                $query->where('borrow_transactions.status', $request->status);
             }
         }
 
@@ -186,7 +188,14 @@ class StaffDashboardController extends Controller
 
         Log::info('Active Borrows Retrieved: ', ['count' => $activeBorrows]);
         if ($request->ajax()) {
-            return view('partials.staff.active-borrows.table', compact('activeBorrows'))->render();
+            $html = view('partials.staff.active-borrows.table', [
+                'activeBorrows' => $activeBorrows,
+            ])->render();
+            
+            return response()->json([
+                'html' => $html,
+                'count' => $activeBorrows->total() // Return the count separately
+            ]);
         }
 
         return view('pages.staff.active-borrows', compact('activeBorrows'));
@@ -201,12 +210,21 @@ class StaffDashboardController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
+                // A. Search by Borrower Name
                 $q->whereHas('user', function ($uq) use ($search) {
                     $uq->where('firstname', 'like', "%{$search}%")
                     ->orWhere('lastname', 'like', "%{$search}%")
                     ->orWhere('middle_initial', 'like', "%{$search}%")
-                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"]);
+                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("CONCAT(firstname, ' ', middle_initial, '.', ' ', lastname) LIKE ?", ["%{$search}%"]);
                 });
+
+                // B. Search by Book Title
+                 $q->orWhereHas('bookCopy.book', function ($bq) use ($search) {
+                    $bq->where('title', 'like', "%{$search}%");
+                });
+
+                // C. Search by ID/Employee Number
                 $q->orWhereHas('user.students', function ($uq) use ($search) {
                     $uq->where('student_number', 'like', "%{$search}%");
                 });
@@ -223,28 +241,81 @@ class StaffDashboardController extends Controller
             });
         }
 
-        // Status filter
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Sort filter
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'amount_desc':
+                    $query->orderByDesc(
+                        BorrowTransaction::selectRaw('MAX(amount)')
+                            ->from('penalties')
+                            ->whereColumn('penalties.borrow_transaction_id', 'borrow_transactions.id')
+                    );
+                    break;
+                case 'amount_asc':
+                    $query->orderBy(
+                        BorrowTransaction::selectRaw('MIN(amount)')
+                            ->from('penalties')
+                            ->whereColumn('penalties.borrow_transaction_id', 'borrow_transactions.id')
+                    );
+                    break;
+                case 'date_desc':
+                    $query->orderByDesc(
+                        BorrowTransaction::selectRaw('MAX(created_at)')
+                            ->from('penalties')
+                            ->whereColumn('penalties.borrow_transaction_id', 'borrow_transactions.id')
+                    );
+                    break;
+                case 'date_asc':
+                    $query->orderBy(
+                        BorrowTransaction::selectRaw('MIN(created_at)')
+                            ->from('penalties')
+                            ->whereColumn('penalties.borrow_transaction_id', 'borrow_transactions.id')
+                    );
+                    break;
+                default:
+                    // Default sort: amount descending
+                    $query->orderByDesc(
+                        BorrowTransaction::selectRaw('MAX(amount)')
+                            ->from('penalties')
+                            ->whereColumn('penalties.borrow_transaction_id', 'borrow_transactions.id')
+                    );
+            }
+        } else {
+            // Default sort: amount descending
+            $query->orderByDesc(
+                BorrowTransaction::selectRaw('MAX(amount)')
+                    ->from('penalties')
+                    ->whereColumn('penalties.borrow_transaction_id', 'borrow_transactions.id')
+            );
         }
 
         // Get all transactions with active penalties and flatten them
         $transactionsWithUnpaidPenalties = $query->get()
-            ->flatMap(function ($borrowTransaction) {
-                return $borrowTransaction->penalties
-                    ->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
-                    ->map(function ($singlePenalty) use ($borrowTransaction) {
-                        $transactionCopy = clone $borrowTransaction;
-                        unset($transactionCopy->penalties);
+            ->flatMap(function ($borrowTransaction) use ($request) {
+                $penalties = $borrowTransaction->penalties
+                    ->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]);
 
-                        $singlePenalty->remaining_amount = $singlePenalty->status === PenaltyStatus::PARTIALLY_PAID
-                            ? (float) $singlePenalty->amount - (float) $singlePenalty->payments->sum(fn($payment) => (float) $payment->amount)
-                            : (float) $singlePenalty->amount;
+                // Apply penalty type filter at the penalty level (not just at the transaction level)
+                if ($request->filled('type')) {
+                    $penalties = $penalties->where('type', $request->type);
+                }
+                // Apply status filter at the penalty level
+                if ($request->filled('status')) {
+                    $penalties = $penalties->where('status', $request->status);
+                }
 
-                        $transactionCopy->penalty = $singlePenalty;
+                return $penalties->map(function ($singlePenalty) use ($borrowTransaction) {
+                    $transactionCopy = clone $borrowTransaction;
+                    unset($transactionCopy->penalties);
 
-                        return $transactionCopy;
-                    });
+                    $singlePenalty->remaining_amount = $singlePenalty->status === PenaltyStatus::PARTIALLY_PAID
+                        ? (float) $singlePenalty->amount - (float) $singlePenalty->payments->sum(fn($payment) => (float) $payment->amount)
+                        : (float) $singlePenalty->amount;
+
+                    $transactionCopy->penalty = $singlePenalty;
+
+                    return $transactionCopy;
+                });
             });
 
         // Paginate the flattened collection
@@ -259,7 +330,11 @@ class StaffDashboardController extends Controller
         );
 
         if ($request->ajax()) {
-            return view('partials.staff.unpaid-penalties.table', ['unpaidPenalties' => $paginatedPenalties])->render();
+            $html = view('partials.staff.unpaid-penalties.table', ['unpaidPenalties' => $paginatedPenalties])->render();
+            return response()->json([
+                'html' => $html,
+                'count' => $paginatedPenalties->total()
+            ]);
         }
 
         return view('pages.staff.unpaid-penalties', ['unpaidPenalties' => $paginatedPenalties]);
@@ -267,14 +342,67 @@ class StaffDashboardController extends Controller
 
    public function queueReservationsList(Request $request)
 {
-    // 1. Initial Query and Filters (Your original code here, which is fine)
-    $query = \App\Models\Reservation::with(['user.students.department', 'user.teachers.department', 'book.author'])
+    $query = \App\Models\Reservation::with(['borrower.students.department', 'borrower.teachers.department', 'book.author'])
         ->whereIn('status', [\App\Enums\ReservationStatus::PENDING, \App\Enums\ReservationStatus::READY_FOR_PICKUP]);
 
+    // Apply search filter
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('borrower', function ($uq) use ($search) {
+                $uq->where('firstname', 'like', "%{$search}%")
+                   ->orWhere('lastname', 'like', "%{$search}%")
+                   ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"])
+                   ->orWhereRaw("CONCAT(firstname, ' ', middle_initial, '.', ' ', lastname) LIKE ?", ["%{$search}%"]);
 
-    $query->orderBy('created_at', 'asc');
+            });
+            $q->orWhereHas('borrower.students', function ($uq) use ($search) {
+                $uq->where('student_number', 'like', "%{$search}%");
+            });
+            $q->orWhereHas('borrower.teachers', function ($uq) use ($search) {
+                $uq->where('employee_number', 'like', "%{$search}%");
+            });
+            $q->orWhereHas('book', function ($bq) use ($search) {
+                $bq->where('title', 'like', "%{$search}%");
+            });
+        });
+    }
 
-    // 3. Get ALL sorted results for accurate queue calculation
+    // Role filter
+    if ($request->filled('role')) {
+        $query->whereHas('borrower', function ($uq) use ($request) {
+            $uq->where('role', $request->role);
+        });
+    }
+
+    // Status filter
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // Sort filter
+    if ($request->filled('sort')) {
+        switch ($request->sort) {
+            case 'position_asc':
+                $query->orderByRaw("FIELD(status, 'pending', 'ready_for_pickup'), created_at ASC");
+                break;
+            case 'date_desc':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'date_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'deadline_asc':
+                $query->orderBy('pickup_start_date', 'asc');
+                break;
+            default:
+                $query->orderBy('created_at', 'asc');
+        }
+    } else {
+        $query->orderBy('created_at', 'asc');
+    }
+
+    // Get ALL sorted results for accurate queue calculation
     $reservations = $query->get();
 
     $pendingReservations = $reservations->where('status', \App\Enums\ReservationStatus::PENDING);
@@ -288,7 +416,7 @@ class StaffDashboardController extends Controller
             if (isset($positionsByBook[$reservation->book_id][$reservation->id])) {
                 $reservation->queue_position = $positionsByBook[$reservation->book_id][$reservation->id] + 1;
             } else {
-                 $reservation->queue_position = 1; // Should not happen if query/filter is correct
+                $reservation->queue_position = 1;
             }
             $reservation->date_expired = null;
         } else { // READY_FOR_PICKUP
@@ -297,11 +425,9 @@ class StaffDashboardController extends Controller
     });
 
     Log::info('Queue Reservations Retrieved: ', ['count' => $reservations]);
-    // 5. Manual Pagination of the fully calculated collection (Your existing logic)
+    // Manual Pagination
     $page = $request->input('page', 1);
     $perPage = 20;
-    
-    // Note: The manual pagination is inefficient but works with your in-memory calculation
     $paginatedReservations = new \Illuminate\Pagination\LengthAwarePaginator(
         $reservations->forPage($page, $perPage),
         $reservations->count(),
@@ -309,9 +435,13 @@ class StaffDashboardController extends Controller
         $page,
         ['path' => $request->url(), 'query' => $request->query()]
     );
-    
+    Log::info('Paginated Queue Reservations: ', ['count' => $paginatedReservations]);
     if ($request->ajax()) {
-        return view('partials.staff.queue-reservations.table', ['queueReservations' => $paginatedReservations])->render();
+        $html = view('partials.staff.queue-reservations.table', ['queueReservations' => $paginatedReservations])->render();
+        return response()->json([
+            'html' => $html,
+            'count' => $paginatedReservations->total()
+        ]);
     }
 
     return view('pages.staff.queue-reservations', ['queueReservations' => $paginatedReservations]);
