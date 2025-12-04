@@ -5,15 +5,17 @@ import { TRANSACTION_ROUTES } from "../config.js";
 import { closeConfirmBorrowModal } from "../pages/staff/confirmBorrow.js";
 import { closeConfirmRenewModal } from "../pages/staff/confirmRenew.js";
 import { closeConfirmReturnModal } from "../pages/staff/confirmReturn.js";
-import { loadMembers ,loadActiveBorrows, loadQueueReservations, loadUnpaidPenalties } from "./staffDashboardHandler.js";
+import { reloadStaffDashboardData } from "./staffDashboardHandler.js";
+import { loadReservationRecords } from "./librarianSectionsHandler.js";
 
-export async function borrowBook(borrowData) {
+export async function borrowBook(borrowData, isStaffAction = true) {
     // Add CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     borrowData.append('_token', csrfToken);
 
+    const validateRoute = isStaffAction ? TRANSACTION_ROUTES.STAFF_VALIDATE_BORROW : TRANSACTION_ROUTES.LIBRARIAN_VALIDATE_BORROW;
     // Step 1: Validate only
-    let response = await fetch(TRANSACTION_ROUTES.VALIDATE_BORROW, {
+    let response = await fetch(validateRoute, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -49,10 +51,11 @@ export async function borrowBook(borrowData) {
         'Yes, confirm'
     );
     
-    if (!isConfirmed) return;
+    if (!isConfirmed) return false;
 
+    const performRoute = isStaffAction ? TRANSACTION_ROUTES.STAFF_PERFORM_BORROW : TRANSACTION_ROUTES.LIBRARIAN_PERFORM_BORROW;
     // Step 3: Submit borrow
-    response = await fetch(TRANSACTION_ROUTES.PERFORM_BORROW, {
+    response = await fetch(performRoute, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -65,13 +68,13 @@ export async function borrowBook(borrowData) {
 
     if (!response.ok) {
         showError('Something went wrong', data.message || 'Please try again.');
-        return;
+        return false;
     }
 
-    // Close modal first
-    reloadStaffDashboardData();
-    closeConfirmBorrowModal();
-    showToast('Book Borrowed Successfully!', 'success');
+    isStaffAction ? reloadStaffDashboardData() : loadReservationRecords(undefined, false);
+
+    showToast(`Book ${borrowData.get('is_from_reservation') === 'true' ? 'Checked out' : 'Borrowed'} Successfully!`, 'success');
+    return true;
 }
 
 export async function getAvailableCopies(bookId) {
@@ -100,7 +103,6 @@ export async function returnBook(returnData) {
     returnData.append('_token', csrfToken);
 
     // Step 1: Validate only
-    // formData.append('validate_only', 1);
     let response = await fetch(TRANSACTION_ROUTES.VALIDATE_RETURN, {
         method: 'POST',
         headers: {
@@ -111,7 +113,7 @@ export async function returnBook(returnData) {
     });
 
     let result = await response.json();
-
+      
     if (!response.ok) {
         if (response.status === BUSINESS_RULE_VIOLATION) {
             showWarning('Return Not Allowed', result.message);
@@ -146,6 +148,8 @@ export async function returnBook(returnData) {
     });
 
     const data = await response.json(); 
+      console.log(data);
+
 
     if (!response.ok) {
         showError('Something went wrong', data.message || 'Please try again.');
@@ -222,107 +226,4 @@ export async function renewBook(renewData) {
 
     showToast('Renewal Successful!', 'success');
     return true;
-}
-
-export async function addReservation(reservationData) {
-    // Add CSRF token
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    reservationData.append('_token', csrfToken);
-
-    // Step 1: Validate only
-    let response = await fetch(TRANSACTION_ROUTES.VALIDATE_RESERVATION, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        },
-        body: reservationData
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-        if (response.status === BUSINESS_RULE_VIOLATION) {
-            showWarning('Reservation Not Allowed', result.message);
-            closeConfirmBorrowModal();
-            return false;
-        } else if (response.status === NOT_FOUND) {
-            showWarning('Not Found', result.message);
-            closeConfirmBorrowModal();
-            return false;
-        }
-        showError('Something went wrong', result.message || 'Please try again Later.');
-        return false;
-    }
-
-    // Step 2: Show confirmation
-    const isConfirmed = await showConfirmation(
-        'Confirm Reservation?',
-         `You are about to reserve this book for ${result.data.reserver_fullname}. Proceed?`,
-        'Yes, confirm'
-    );
-    
-    if (!isConfirmed) return false;
-
-    // Step 3: Submit borrow
-    response = await fetch(TRANSACTION_ROUTES.PERFORM_RESERVATION, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        },
-        body: reservationData
-    });
-
-    const data = await response.json(); 
-
-    if (!response.ok) {
-        showError('Something went wrong', data.message || 'Please try again.');
-        return false;
-    }
-
-    reloadStaffDashboardData();
-
-    showToast('Reservation Successful!', 'success');
-    return true;
-}
-
-export async function cancelReservation(reservationId) {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-    const isConfirmed = await showDangerConfirmation(
-        'Cancel Reservation?',
-        'Are you sure you want to cancel this reservation?',
-        'Yes, cancel'
-    );      
-
-    if (!isConfirmed) return false;
-
-    const response = await fetch(TRANSACTION_ROUTES.CANCEL_RESERVATION(reservationId), {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        }
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-        showError('Something went wrong', result.message || 'Please try again later.');
-        return false;
-    }
-
-   reloadStaffDashboardData();
-
-    showToast('Reservation Cancelled!', 'success');
-    return true;
-}
-
-export function reloadStaffDashboardData() {
-    loadMembers(undefined, false);
-    loadActiveBorrows(undefined, false);
-    loadUnpaidPenalties(undefined, false);
-    loadQueueReservations(undefined, false);
 }

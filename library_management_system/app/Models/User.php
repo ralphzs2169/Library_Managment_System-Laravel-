@@ -117,7 +117,7 @@ class User extends Authenticatable
     public function activeReservations()
     {
         return $this->hasMany(Reservation::class, 'borrower_id')
-            ->with(['book.author', 'book.genre.category'])
+            ->with(['book.author', 'book.genre.category', 'bookCopy'])
             ->whereIn('status', [ReservationStatus::PENDING, ReservationStatus::READY_FOR_PICKUP]);
     }
     

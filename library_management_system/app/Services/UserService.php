@@ -117,10 +117,10 @@ public function getBorrowerDetails(int $userId)
         $activeReservations->each(function ($reservation) use ($positionsByBook) {
             if ($reservation->status === ReservationStatus::PENDING) {
                 $reservation->queue_position = $positionsByBook[$reservation->book_id][$reservation->id] + 1;
-                $reservation->date_expired = null;
+                $reservation->pickup_deadline_date = null;
             } else { // READY_FOR_PICKUP
                 $reservation->queue_position = 0;
-                $reservation->date_expired = $reservation->pickup_deadline;
+                $reservation->pickup_deadline_date = $reservation->pickup_deadline;
             }
         });
 
@@ -172,7 +172,7 @@ public function getBorrowerDetails(int $userId)
         return ['status' => 'valid'];
     }
 
-    public function updatePenalty(Request $request, $penaltyId)
+    public function processPenalty(Request $request, $penaltyId)
     {
         return DB::transaction(function () use ($request, $penaltyId) {
             $penalty = Penalty::with('payments', 'borrowTransaction')

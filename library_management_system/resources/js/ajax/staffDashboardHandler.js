@@ -6,6 +6,7 @@ import { initStaffDashboardPagination } from "../tableControls.js";
 import { STAFF_DASHBOARD_ROUTES } from "../config.js";
 import { showSkeleton, hideSkeleton } from "../utils.js";
 import { activeBorrowsSkeletonLoader, unpaidPenaltiesSkeletonLoader, queueReservationsSkeletonLoader } from "../pages/staff/skeleton-loader/skeletonMainTabs.js";
+import { initializeReservationRecordDetailListeners } from "../pages/librarian/reservationRecords/reservationRecordDetails.js";
 
 export async function loadMembers(page = BORROWER_FILTERS.page, scrollUp = true, isFiltered = false) {
     const container = document.getElementById('members-table-container');
@@ -275,7 +276,7 @@ export async function loadQueueReservations(page = QUEUE_RESERVATIONS_FILTERS.pa
         hideSkeleton(container, '#queue-reservations-skeleton-body', '#queue-reservations-real-table-body');
         // Re-attach pagination listeners for active borrows
         initStaffDashboardPagination(loadQueueReservations);
-
+        initializeReservationRecordDetailListeners();
         const searchTerm = searchInput?.value?.trim();
         if (searchTerm) {
             highlightSearchMatches(searchTerm, '#queue-reservations-table-container', SEARCH_COLUMN_INDEXES.QUEUE_RESERVATIONS);
@@ -283,4 +284,11 @@ export async function loadQueueReservations(page = QUEUE_RESERVATIONS_FILTERS.pa
     } catch (error) {
        showError("Something went wrong", "Failed to load queue reservations.");
     }
+}
+
+export function reloadStaffDashboardData() {
+    loadMembers(undefined, false);
+    loadActiveBorrows(undefined, false);
+    loadUnpaidPenalties(undefined, false);
+    loadQueueReservations(undefined, false);
 }

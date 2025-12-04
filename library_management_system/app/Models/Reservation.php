@@ -15,6 +15,10 @@ class Reservation extends Model
         'pickup_start_date',
         'created_by_id',
         'created_by',
+        'book_copy_id',
+        'completed_at',
+        'cancelled_at',
+        'semester_id',
     ];
 
     public function borrower()
@@ -42,6 +46,11 @@ class Reservation extends Model
         return null;
     }
 
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -52,12 +61,8 @@ class Reservation extends Model
         return $this->belongsTo(Book::class);
     }
 
-    // public function getQueuePositionAttribute()
-    // {
-    //     return Reservation::where('book_id', $this->book_id)
-    //         ->where('status', ReservationStatus::PENDING)
-    //         ->orderBy('created_at')
-    //         ->pluck('id')
-    //         ->search($this->id) + 1;
-    // }
+    public function bookCopy()
+    {
+        return $this->belongsTo(BookCopy::class, 'book_copy_id');
+    }
 }

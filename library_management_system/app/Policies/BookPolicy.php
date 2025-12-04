@@ -28,34 +28,17 @@ class BookPolicy
             ];
         }
         
-        // 2. Check available copies 
+        // 2. If there is an available copy, reservation should NOT be allowed
         $availableCopiesCount = $book->copies
             ->where('status', BookCopyStatus::AVAILABLE)
             ->count();
 
-        // If there are more than one available copy, reservation should NOT be allowed
-        if ($availableCopiesCount > 1) {
+        if ($availableCopiesCount > 0) {
             return [
                 'result' => 'business_rule_violation',
                 'message' => 'This book has multiple available copies and cannot be reserved. Please borrow a copy directly.'
             ];
         }
-
-        // If exactly one available copy, reservation should NOT be allowed unless there is a ready for pickup reservation
-        if ($availableCopiesCount === 1) {
-            $hasReadyPickupReservation = $book->reservations()
-                ->where('status', ReservationStatus::READY_FOR_PICKUP)
-                ->exists();
-
-            if (!$hasReadyPickupReservation) {
-                return [
-                    'result' => 'business_rule_violation',
-                    'message' => 'This book has an available copy and cannot be reserved. Please borrow it directly.'
-                ];
-            }
-        }
-
-        // If availableCopiesCount is 0, reservation is allowed
 
         // 3. Check if a user already has borrowed a copy of this book
         $existingBorrow = $user->borrowTransactions()

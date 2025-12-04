@@ -90,6 +90,13 @@ export function renderStatusBadge(status) {
             icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
             label: 'Pending Review'
+        },
+        on_hold_for_pickup: {
+            class: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>`,
+            label: 'On Hold For Pickup'
         }
     };
 
@@ -190,9 +197,7 @@ function renderCopiesPagination(editFormContainer) {
     });
 }
 
-/**
- * Render single copy row HTML
- */
+
 function renderCopyRow(copy) {
     const current = copy.status || 'available';
     const isNew = copy.id < 0;
@@ -209,10 +214,11 @@ function renderCopyRow(copy) {
         damaged: ['withdrawn', 'available'],
         lost: ['available'],
         withdrawn: [],
-        pending_issue_review: []
+        pending_issue_review: [],
+        on_hold_for_pickup: ['available', 'damaged', 'withdrawn', 'lost']
     };
 
-    const allowedOptions = ['available', 'borrowed', 'damaged', 'lost', 'withdrawn', 'pending_issue_review'].filter(status => {
+    const allowedOptions = ['available', 'borrowed', 'damaged', 'lost', 'withdrawn', 'pending_issue_review', 'on_hold_for_pickup'].filter(status => {
         return validTransitions[current]?.includes(status) || status === current;
     });
 
@@ -220,7 +226,8 @@ function renderCopyRow(copy) {
 
     const options = allowedOptions
         .map(status => {
-            const label = status === 'pending_issue_review' ? 'Pending Review' : status.charAt(0).toUpperCase() + status.slice(1);
+            let label = status === 'pending_issue_review' ? 'Pending Review' : status.charAt(0).toUpperCase() + status.slice(1);
+            label = status === 'on_hold_for_pickup' ? 'On Hold for Pickup' : status.charAt(0).toUpperCase() + status.slice(1);
             return `<option value="${status}" ${current === status ? 'selected' : ''}>${label}</option>`;
         })
         .join('');
@@ -289,12 +296,12 @@ function renderStatusSelectColumn(isPendingReview, isDisabled, options, tooltipM
                     ${options}
                 </select>
                 <!-- Hidden input to include disabled copies in form submission -->
-                <input type="hidden" name="copies[${copyId}]" value="${current}">
-               <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
-                    ${tooltipMessage}
-                    <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
+                <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
+                ${tooltipMessage}
+                <div class="absolute top-full right-6 border-4 border-transparent border-t-gray-900"></div>
                 </div>
-            </div>
+                </div>
+                <input type="hidden" name="copies[${copyId}]" value="${current}">
         `;
     }
     
@@ -387,9 +394,8 @@ function renderReviewBadge(reviewAction) {
     return '';
 }
 
-/**
- * Attach event listeners to copy rows
- */
+
+// Attach event listeners to copy rows
 function attachCopyEventListeners(tbody, editFormContainer) {
     // Status change
     tbody.querySelectorAll('.copy-status-select').forEach(select => {

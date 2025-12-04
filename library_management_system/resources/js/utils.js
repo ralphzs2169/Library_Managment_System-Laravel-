@@ -210,5 +210,16 @@ tooltip.innerHTML = `
 wrapper.appendChild(tooltip);
 }
 
+export function replaceNodeWithClone(selector) {
+    const el = document.querySelector(selector);
+    if (el) {
+        const clone = el.cloneNode(true);
+        el.parentNode.replaceChild(clone, el);
+        return clone;
+    }
+    return null;
+}
+
+
 
 

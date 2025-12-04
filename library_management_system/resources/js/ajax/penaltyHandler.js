@@ -1,19 +1,22 @@
 import { INVALID_INPUT, TRANSACTION_ROUTES } from "../config";
-import { reloadStaffDashboardData } from "./staffTransactionHandler";
+import { reloadStaffDashboardData } from "./staffDashboardHandler";
 import { showWarning, showToast, showError, showConfirmation, showDangerConfirmation } from "../utils/alerts";
 import { displayInputErrors } from "../helpers";
+import { loadPenaltyRecords } from "./librarianSectionsHandler";
 
-export async function updatePenalty(paymentDetails, form) {
+
+export async function processPenalty(paymentDetails, form, isStaff = true) {
     // Make sure validate_only is set after all other fields
     paymentDetails.set('validate_only', 1);
     const penaltyId = paymentDetails.get('penalty_id');
     
+    const route = isStaff ? TRANSACTION_ROUTES.STAFF_PROCESS_PENALTY(penaltyId) : TRANSACTION_ROUTES.LIBRARIAN_PROCESS_PENALTY(penaltyId);
     // Add CSRF token and method spoofing for PUT request
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     paymentDetails.append('_token', csrfToken);
     paymentDetails.append('_method', 'PUT');
 
-    let response = await fetch(TRANSACTION_ROUTES.UPDATE_PENALTY(penaltyId), {
+    let response = await fetch(route, {
         method: 'POST', 
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -46,7 +49,7 @@ export async function updatePenalty(paymentDetails, form) {
     paymentDetails.delete('validate_only');
 
     // Step 3: Submit update
-    response = await fetch(TRANSACTION_ROUTES.UPDATE_PENALTY(penaltyId), {
+    response = await fetch(route, {
         method: 'POST', 
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -67,23 +70,26 @@ export async function updatePenalty(paymentDetails, form) {
     }
     
     showToast('Payment Successful!', 'success');
-    reloadStaffDashboardData();
+
+    isStaff ? reloadStaffDashboardData() : loadPenaltyRecords(undefined, false);
+
     return true;
-        // showSuccessWithRedirect('Success', 'Book updated successfully!', window.location.href);
 }
 
-export async function cancelPenalty(penaltyId, borrowerId) {
+export async function cancelPenalty(penaltyId, borrowerId, isStaff = true) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
+    const route = isStaff ? TRANSACTION_ROUTES.STAFF_CANCEL_PENALTY(penaltyId, borrowerId) : TRANSACTION_ROUTES.LIBRARIAN_CANCEL_PENALTY(penaltyId, borrowerId);
+    
     const isConfirmed = await showDangerConfirmation(
-        'Cancel Reservation?',
+        'Cancel Penalty?',
         'Are you sure you want to cancel this penalty?',
         'Yes, cancel'
     );      
 
     if (!isConfirmed) return false;
 
-    const response = await fetch(TRANSACTION_ROUTES.CANCEL_PENALTY(penaltyId, borrowerId), {
+    const response = await fetch(route, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -99,7 +105,8 @@ export async function cancelPenalty(penaltyId, borrowerId) {
         return false;
     }
 
-    reloadStaffDashboardData();
+    isStaff ? reloadStaffDashboardData() : loadPenaltyRecords(undefined, false);
+
     showToast('Penalty Cancelled!', 'success');
     return true;
 }

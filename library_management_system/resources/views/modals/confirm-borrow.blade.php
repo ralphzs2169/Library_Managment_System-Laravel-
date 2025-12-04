@@ -6,7 +6,7 @@
                 <button id="back-to-borrow-book-button" class="cursor-pointer text-gray-600 hover:text-gray-800 transition">
                     <img src="{{ asset('build/assets/icons/back-gray.svg') }}" alt="Back" class="w-6 h-6">
                 </button>
-                <h2 class="text-xl font-semibold text-black flex items-center gap-2">
+                <h2 id="confirm-borrow-title" class="text-xl font-semibold text-black flex items-center gap-2">
 
                     Finalize Borrowing Details
                 </h2>

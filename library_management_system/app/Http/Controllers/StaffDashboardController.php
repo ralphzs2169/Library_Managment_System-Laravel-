@@ -418,9 +418,9 @@ class StaffDashboardController extends Controller
             } else {
                 $reservation->queue_position = 1;
             }
-            $reservation->date_expired = null;
+            $reservation->pickup_deadline_date = null;
         } else { // READY_FOR_PICKUP
-            $reservation->date_expired = $reservation->pickup_deadline;
+            $reservation->pickup_deadline_date = $reservation->pickup_deadline;
         }
     });
 

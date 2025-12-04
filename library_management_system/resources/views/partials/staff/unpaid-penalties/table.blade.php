@@ -63,21 +63,21 @@
                 <td class="py-3 px-4 whitespace-nowrap text-gray-700">
                     {{-- Reason badge --}}
                     @if($unpaidPenalty->penalty->type === 'late_return')
-                    <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                    <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold text-red-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                         Late Return
                     </span>
                     @elseif($unpaidPenalty->penalty->type === 'lost_book')
-                    <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                    <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold text-purple-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                         Lost
                     </span>
                     @elseif($unpaidPenalty->penalty->type === 'damaged_book')
-                    <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
+                    <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold text-orange-700">
                         <img src="/build/assets/icons/damaged-badge.svg" alt="Damaged Icon" class="w-3.5 h-3.5">
                         Damaged
                     </span>
@@ -179,30 +179,30 @@
     </table>
 </div>
 
-{{-- @if($penalties->isNotEmpty())
+@if($unpaidPenalties->isNotEmpty())
 <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
     <p class="text-sm text-black">
-        Showing <span class="font-semibold text-gray-800">{{ $penalties->firstItem() }}-{{ $penalties->lastItem() }}</span>
-of <span class="font-semibold text-gray-800">{{ $penalties->total() }}</span> borrowers
-</p>
+        Showing <span class="font-semibold text-gray-800">{{ $unpaidPenalties->firstItem() }}-{{ $unpaidPenalties->lastItem() }}</span>
+        of <span class="font-semibold text-gray-800">{{ $unpaidPenalties->total() }}</span> borrowers
+    </p>
 
-<div class="flex items-center gap-2">
-    <!-- Previous -->
-    <button class="pagination-btn px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed" data-page="{{ $penalties->currentPage() - 1 }}" {{ $penalties->onFirstPage() ? 'disabled' : '' }}>
-        Previous
-    </button>
+    <div class="flex items-center gap-2">
+        <!-- Previous -->
+        <button class="pagination-btn px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed" data-page="{{ $unpaidPenalties->currentPage() - 1 }}" {{ $unpaidPenalties->onFirstPage() ? 'disabled' : '' }}>
+            Previous
+        </button>
 
-    <!-- Page Numbers -->
-    @foreach ($penalties->getUrlRange(max(1, $penalties->currentPage() - 2), min($penalties->lastPage(), $penalties->currentPage() + 2)) as $page => $url)
-    <button class="pagination-btn px-4 py-2 text-sm font-medium rounded-lg border transition {{ $penalties->currentPage() == $page ? 'bg-accent text-white border-accent shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}" data-page="{{ $page }}">
-        {{ $page }}
-    </button>
-    @endforeach
+        <!-- Page Numbers -->
+        @foreach ($unpaidPenalties->getUrlRange(max(1, $unpaidPenalties->currentPage() - 2), min($unpaidPenalties->lastPage(), $unpaidPenalties->currentPage() + 2)) as $page => $url)
+        <button class="pagination-btn px-4 py-2 text-sm font-medium rounded-lg border transition {{ $unpaidPenalties->currentPage() == $page ? 'bg-accent text-white border-accent shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}" data-page="{{ $page }}">
+            {{ $page }}
+        </button>
+        @endforeach
 
-    <!-- Next -->
-    <button class="pagination-btn px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed" data-page="{{ $penalties->currentPage() + 1 }}" {{ $penalties->currentPage() == $penalties->lastPage() ? 'disabled' : '' }}>
-        Next
-    </button>
+        <!-- Next -->
+        <button class="pagination-btn px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed" data-page="{{ $unpaidPenalties->currentPage() + 1 }}" {{ $unpaidPenalties->currentPage() == $unpaidPenalties->lastPage() ? 'disabled' : '' }}>
+            Next
+        </button>
+    </div>
 </div>
-</div>
-@endif --}}
+@endif

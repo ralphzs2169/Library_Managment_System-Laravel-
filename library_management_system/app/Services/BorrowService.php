@@ -22,7 +22,7 @@ class BorrowService
          return DB::transaction(function () use ($request, $bookCopy, $isFromReservation) {
             $bookCopy->refresh(); // reload latest status
 
-            if ($bookCopy->status !== 'available' || $bookCopy->pendingIssueReport()->exists()) {
+            if ($bookCopy->status !== BookCopyStatus::AVAILABLE && $bookCopy->status !== BookCopyStatus::ON_HOLD_FOR_PICKUP || $bookCopy->pendingIssueReport()->exists()) {
                 throw new \Exception('Book is no longer available.');
             }
 
@@ -32,6 +32,9 @@ class BorrowService
 
             $activeSemester = Semester::where('status', 'active')->first();
             
+            if (!$activeSemester && $borrower->role === 'student') {
+                throw new \Exception('No active semester found. Cannot proceed with borrowing.');
+            }
             // Create the borrow transaction
             $transaction = BorrowTransaction::create([
                 'user_id' => $borrower->id,
@@ -61,11 +64,12 @@ class BorrowService
                     ->latest()
                     ->first();
 
+                
                 if (!$reservation) {
                     throw new \Exception('No active reservation found for this book.');
                 }
           
-                $reservation->update(['status' => ReservationStatus::COMPLETED]);
+                $reservation->update(['status' => ReservationStatus::COMPLETED, 'completed_at' => now()]);
                 
             }
 

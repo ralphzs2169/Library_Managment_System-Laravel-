@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
             $table->unsignedInteger('copy_number');
-            $table->enum('status', ['available', 'borrowed', 'withdrawn', 'lost', 'damaged', 'pending_issue_review'])->default('available');
+            $table->enum('status', ['available', 'borrowed', 'withdrawn', 'lost', 'damaged', 'pending_issue_review', 'on_hold_for_pickup'])->default('available');
             $table->boolean('is_archived')->default(false);
             $table->timestamps();
             $table->unique(['book_id', 'copy_number']);

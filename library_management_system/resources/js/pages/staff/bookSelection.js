@@ -297,12 +297,13 @@ let isRestoringProfile = false;
 let restoreTimer = null;
 
 export function restoreProfileContent(modal, borrower, reloadProfileTabs = true) {
-    // const { force = false } = options;
-
-    // If already on profile view and not forced, skip restore
     if (modal?.dataset?.view === 'profile') {
         return;
     }
+
+    console.log('Proceeding with restore...');
+    console.log('Modal dataset view:', modal?.dataset?.view);
+    console.log('Borrower data:', borrower);
 
     // Global single-flight guard across modules
     if (window.__restoreProfileInProgress) return;

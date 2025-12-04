@@ -5,11 +5,11 @@
             <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">No.</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Cover</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Title & ISBN</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-80">Title & ISBN</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Author</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Category</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Copies</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-42 min-w-42 max-w-42 whitespace-nowrap">Status</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-46 whitespace-nowrap">Status</th>
                 <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
             </tr>
         </thead>
@@ -41,8 +41,8 @@
                 <td class="px-4 py-3">
                     <img src="{{ $book->cover_image ? asset('storage/' . $book->cover_image) : asset('images/no-cover.png') }}" alt="{{ $book->title }}" class="w-12 h-16 rounded-md object-cover shadow-sm border border-gray-200">
                 </td>
-                <td class="px-4 py-3">
-                    <p class="font-semibold text-gray-800 truncate max-w-xs">{{ $book->title }}</p>
+                <td class="px-4 py-3" title="{{ $book->title }}">
+                    <p class="font-semibold line-clamp-2 text-gray-800 max-w-xs">{{ $book->title }}</p>
                     <p class="text-xs text-gray-500 font-mono mt-1">ISBN: {{ $book->isbn ?? 'N/A' }}</p>
                 </td>
                 <td class="px-4 py-3 text-gray-600">
@@ -63,9 +63,9 @@
                     @endphp
                     <span class="text-gray-800 text-sm">
                         @if($filteredStatus && $filteredStatus !== 'all')
-                        <span class="font-semibold">{{ $filteredCopies }}</span>/{{ $totalCopies }} {{ $totalCopies === 1 ? 'copy' : 'copies' }}
+                        <span class="font-semibold">{{ $filteredCopies }}</span>/{{ $totalCopies }}
                         @else
-                        {{ $totalCopies }} {{ $totalCopies === 1 ? 'copy' : 'copies' }}
+                        {{ $totalCopies }}
                         @endif
                     </span>
                 </td>
@@ -146,13 +146,23 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>'],
                         'pending_issue_review' => ['class'=>'bg-amber-300 text-amber-800','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'],
+                        'on_hold_for_pickup' => [
+                        'class' => 'bg-yellow-100 text-yellow-800', // The new lighter yellow class
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>'
+                        ],
                         default => ['class'=>'bg-gray-200 text-gray-700','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'],
                         };
                         @endphp
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {{ $badgeConfig['class'] }}">
                             {!! $badgeConfig['icon'] !!}
-                            {{ $count }} {{ $status === 'pending_issue_review' ? 'Pending Review' : ucfirst($status) }}
+                            {{ $count }}
+                            {{
+                                $status === 'pending_issue_review' ? 'Pending Review' : 
+                                ($status === 'on_hold_for_pickup' ? 'On Hold For Pickup' : ucfirst($status)) 
+                            }}
                         </span>
                         @endforeach
                     </div>

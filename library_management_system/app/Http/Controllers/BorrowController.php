@@ -43,7 +43,7 @@ class BorrowController extends Controller
             return $this->jsonResponse('error', 'The borrower or book copy could not be found.', 404);
         } catch (\Exception $e) {
             Log::error($e);
-            return $this->jsonResponse('error', 'Something went wrong while borrowing the book. Please try again later.', 500);
+            return $this->jsonResponse('error', $e .'Something went wrong while borrowing the book. Please try again later.', 500);
         }
     }
 

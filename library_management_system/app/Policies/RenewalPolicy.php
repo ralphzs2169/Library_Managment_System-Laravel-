@@ -68,7 +68,19 @@ class RenewalPolicy
             return ['result' => 'business_rule_violation', 'message' => 'Renewal suspended due to an outstanding penalty.'];
         }
 
-        // 6. Minimum days before due date
+        // 6.  Check for any pending reservations under this book title
+        $hasPendingReservations = $transaction->bookCopy->book->reservations()
+                ->where('status', ReservationStatus::PENDING)
+                ->exists();
+
+        if ($hasPendingReservations){
+            return [
+                'result' => 'business_rule_violation',
+                'message' => "This title has a pending reservation by another member."
+            ];
+        }
+
+        // 7. Minimum days before due date
         $minDaysBeforeRenewal = $renewer->role === 'student'
             ? (int) config('settings.renewing.student_min_days_before_renewal')
             : (int) config('settings.renewing.teacher_min_days_before_renewal');
@@ -87,19 +99,8 @@ class RenewalPolicy
             ];
         }
 
-        // 7.  Check for any pending reservations under this book title
-        $hasPendingReservations = $transaction->bookCopy->book->reservations()
-                ->where('status', ReservationStatus::PENDING)
-                ->exists();
 
-        if ($hasPendingReservations){
-            return [
-                'result' => 'business_rule_violation',
-                'message' => "This title has a pending reservation by another member."
-            ];
-        }
-
-        // 7. Validate new due date
+        // 8. Validate new due date
         if ($includeInputValidation) {
             $renewDuration = $renewer->role === 'student'
                 ? (int) config('settings.renewing.student_duration', 7)

@@ -220,4 +220,4 @@
 @vite('resources/js/pages/staff/transactions/confirmReservation.js')
 @vite('resources/js/pages/staff/dashboardTableControls.js')
 @vite('resources/js/pages/staff/mainTabbedContainers.js')
-@vite('resources/js/pages/staff/kebabDropdown.js')
+{{-- @vite('resources/js/pages/staff/kebabDropdown.js') --}}

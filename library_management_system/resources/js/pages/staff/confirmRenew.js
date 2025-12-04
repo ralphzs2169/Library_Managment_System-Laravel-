@@ -7,6 +7,7 @@ import { showWarning } from '../../utils/alerts.js';
 
 let currentRenewer = null;
 let currentTransaction = null;
+let confirmRenewModalListenersInitialized = false;
 
 export async function initializeConfirmRenewModal(modal, renewer, transaction) {
     console.log(transaction);
@@ -88,30 +89,35 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
         };
     }
 
-    // Cancel button
-    const cancelBtn = modal.querySelector('#renew-cancel-button');
-    if (cancelBtn) {
-        cancelBtn.onclick = closeConfirmRenewModal;
-    }
+    // Attach close/cancel/back listeners only once
+    if (!confirmRenewModalListenersInitialized) {
+        confirmRenewModalListenersInitialized = true;
 
-    // Back button
-    const backBtn = modal.querySelector('#renew-back-to-borrower-profile');
-    if (backBtn) {
-        backBtn.onclick = returnToBorrowerProfileModal;
-    }
-
-    // Close button
-    const closeBtn = modal.querySelector('#renew-close-confirm-modal');
-    if (closeBtn) {
-        closeBtn.onclick = closeConfirmRenewModal;
-    }
-
-    // Click outside modal to close
-    document.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closeConfirmRenewModal();
+        // Cancel button
+        const cancelBtn = modal.querySelector('#renew-cancel-button');
+        if (cancelBtn) {
+            cancelBtn.onclick = closeConfirmRenewModal;
         }
-    });
+
+        // Back button
+        const backBtn = modal.querySelector('#renew-back-to-borrower-profile');
+        if (backBtn) {
+            backBtn.onclick = returnToBorrowerProfileModal;
+        }
+
+        // Close button (X icon)
+        const closeBtn = modal.querySelector('#renew-close-confirm-modal');
+        if (closeBtn) {
+            closeBtn.onclick = closeConfirmRenewModal;
+        }
+
+        // Click outside modal to close
+        document.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeConfirmRenewModal();
+            }
+        });
+    }
 
     // Status badge logic (consistent with borrowed books status: due_soon, on_time, overdue)
     const statusBadge = modal.querySelector('#confirm-renew-status-badge');
@@ -119,6 +125,16 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
         let badgeHTML = '';
         const daysUntilDue = transaction.days_until_due;
         const daysOverdue = transaction.days_overdue;
+
+         let dueSoonText = '';
+        if (daysUntilDue > 1) {
+            dueSoonText = `Due in ${daysUntilDue} days`;
+        } else if (daysUntilDue === 1) {
+            dueSoonText = `Due in 1 day`;
+        } else if (daysUntilDue === 0) {
+            dueSoonText = `Due today`;
+        }
+
         if (transaction.status === 'overdue') {
             badgeHTML = `
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-200 text-red-700">
@@ -134,7 +150,7 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}
+                    ${dueSoonText}
                 </span>
             `;
         } else if (transaction.status === 'borrowed') {
@@ -161,6 +177,8 @@ export function openConfirmRenewModal(renewer, transaction) {
     const modal = document.getElementById('confirm-renew-modal');
     const modalContent = document.getElementById('confirm-renew-content');
     modal.classList.remove('hidden');
+    // Always scroll to top before showing
+    modalContent.scrollTo({ top: 0, behavior: 'auto' });
     requestAnimationFrame(() => {
         modal.classList.remove('bg-opacity-0');
         modal.classList.add('bg-opacity-50');

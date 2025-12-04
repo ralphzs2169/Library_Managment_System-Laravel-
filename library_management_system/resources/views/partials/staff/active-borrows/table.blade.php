@@ -81,14 +81,12 @@
                     @php
                     $isDueSoon = $transaction->days_until_due <= config('settings.notifications.reminder_days_before_due'); $badgeBg=$isDueSoon ? 'bg-orange-200 text-orange-700 border border-orange-100' : 'bg-green-200 text-green-700 border border-green-100' ; $svg=$isDueSoon ? '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' ; @endphp <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold {!! $badgeBg !!}">
                         {!! $svg !!}
-                        Due in {{ $transaction->days_until_due }} day{{ $transaction->days_until_due == 1 ? '' : 's' }}
-                        </span>
+
+                        @if ((int) $transaction->days_until_due === 0)
+                        Due Today
                         @else
-                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
-                            </svg>
-                            {{ ucfirst($transaction->status) }}
+                        Due in {{ $transaction->days_until_due }} day{{ $transaction->days_until_due == 1 ? '' : 's' }}
+                        @endif
                         </span>
                         @endif
                 </td>

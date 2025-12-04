@@ -4,10 +4,10 @@ import { clearInputError } from '../../helpers.js';
 import { fetchSettings } from '../../ajax/settingsHandler.js';
 import { closeConfirmReservationModal } from './transactions/confirmReservation.js';
 import { closeBorrowerModal, openBorrowerProfileModal } from './borrower/borrowerProfileModal.js';
-import { fetchCopiesForReservation } from '../../ajax/bookHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js'; 
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { closeConfirmReturnModal } from './confirmReturn.js';
+
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
 // Store borrower data for navigation
@@ -17,7 +17,7 @@ let currentBook = null;
 const copySelect = document.getElementById('book_copy_id');
 const dueDateInput = document.getElementById('due_date');
 
-export async function initializeConfirmBorrowModal(modal, borrower, book, isFromReservation = false) {
+export async function initializeConfirmBorrowModal(modal, borrower, book, isFromReservation = false, isStaffAction = true) {
     currentBorrower = borrower;
     currentBook = book;
     
@@ -35,15 +35,15 @@ export async function initializeConfirmBorrowModal(modal, borrower, book, isFrom
         }
     }
 
-    // const book = currentBook;
+
     // attach a flag to the back button to indicate if coming from reservation
     const backButton = document.getElementById('back-to-borrow-book-button');
-    let copiesForReservation = [];
+    let assignedCopy = null;
+    
     if (isFromReservation) {
         backButton.dataset.fromReservation = 'true';
         backButton.dataset.borrowerId = borrower.id;
-        console.log('Fetching copies for reservation for borrower ID:', currentBorrower.id, 'and book ID:', currentBook.id);
-        copiesForReservation = await fetchCopiesForReservation(currentBorrower.id, currentBook.id);
+        assignedCopy = book.book_copy;
 
     } else {
         backButton.dataset.fromReservation = 'false';
@@ -74,7 +74,7 @@ export async function initializeConfirmBorrowModal(modal, borrower, book, isFrom
         if (bookGenre) bookGenre.textContent = book.genre?.name || 'N/A';
         
         // Populate copy number dropdown
-        populateCopyNumbers(modal, book, isFromReservation, copiesForReservation);
+        populateCopyNumbers(modal, book, isFromReservation, assignedCopy);
     }
 
    const settings = await fetchSettings();
@@ -130,7 +130,7 @@ export async function initializeConfirmBorrowModal(modal, borrower, book, isFrom
         
         newBtn.addEventListener('click', async function(e) {
             e.preventDefault();
-            const result = await handleConfirmBorrow(isFromReservation);
+            const result = await handleConfirmBorrow(isFromReservation, isStaffAction);
              if (result) {
                 // returnToBorrowerProfile();
                 const modal = document.getElementById('borrower-profile-modal');
@@ -142,7 +142,7 @@ export async function initializeConfirmBorrowModal(modal, borrower, book, isFrom
     }
 }
 
-function populateCopyNumbers(modal, book ,isFromReservation = false, copiesForReservation) {
+function populateCopyNumbers(modal, book ,isFromReservation = false, assignedCopy = null) {
     const copySelect = modal.querySelector('#book_copy_id');
     const copiesAvailableText = modal.querySelector('#copies-available-text');
     if (!copySelect) return;
@@ -152,26 +152,34 @@ function populateCopyNumbers(modal, book ,isFromReservation = false, copiesForRe
     let availableCopies = [];
     let infoMessage = '';
 
-    if (isFromReservation) {
-        availableCopies = copiesForReservation;
-    } else {
-        availableCopies = (book.copies || []).filter(copy => copy.status === 'available');
-    }
-
-    availableCopies.forEach(copy => {
-        const option = document.createElement('option');
-        option.value = copy.id;
-        option.textContent = `Copy No. ${copy.copy_number}`;
-        option.dataset.copyNumber = copy.copy_number;
-        option.dataset.status = copy.status;
-        copySelect.appendChild(option);
-    });
- 
-
     copySelect.disabled = false;
 
+    if (isFromReservation) {
+        const option = document.createElement('option');
+        option.value = assignedCopy.id;
+        option.textContent = `Copy No. ${assignedCopy.copy_number}`;
+        option.dataset.copyNumber = assignedCopy.copy_number;
+        option.dataset.status = assignedCopy.status;
+        copySelect.appendChild(option);
+        copySelect.disabled = true;
+
+        availableCopies.push(assignedCopy);
+        infoMessage = 'Assigned copy for this reservation';
+    } else {
+        availableCopies = (book.copies || []).filter(copy => copy.status === 'available');
+        
+        availableCopies.forEach(copy => {
+            const option = document.createElement('option');
+            option.value = copy.id;
+            option.textContent = `Copy No. ${copy.copy_number}`;
+            option.dataset.copyNumber = copy.copy_number;
+            option.dataset.status = copy.status;
+            copySelect.appendChild(option);
+        });
+    }
+
     if (copiesAvailableText) {
-        copiesAvailableText.textContent = `${availableCopies.length} ${availableCopies.length === 1 ? 'copy' : 'copies'} available`;
+        copiesAvailableText.textContent = isFromReservation ? '' : `${availableCopies.length} ${availableCopies.length === 1 ? 'copy' : 'copies'} available`;
         copiesAvailableText.classList.remove('text-red-600');
         copiesAvailableText.classList.add('text-green-600', 'font-semibold');
         if (infoMessage) {
@@ -219,14 +227,25 @@ document.addEventListener('click', function(event) {
     }
 });
 
-export function openConfirmBorrowModal(borrower, book, isFromReservation = false ) {
+export function openConfirmBorrowModal(borrower, book, isFromReservation = false, isStaffAction = true) {
     currentBorrower = borrower;
     currentBook = book;
     
     const modal = document.getElementById('confirm-borrow-modal');
     const modalContent = document.getElementById('confirm-borrow-content');
     
+    const titleElement = modal.querySelector('#confirm-borrow-title');
+    const confirmButton = modal.querySelector('#confirm-borrow-button');
+
     if (isFromReservation) {
+        confirmButton.textContent = 'Confirm Checkout';
+        titleElement.textContent = 'Finalize Checkout Details';
+    } else {    
+        confirmButton.textContent = 'Confirm Borrow';
+        titleElement.textContent = 'Finalize Borrowing Details';
+    }
+
+    if (isFromReservation && isStaffAction) {
         closeBorrowerModal(false);
     }
     // Show modal immediately but invisible
@@ -241,10 +260,10 @@ export function openConfirmBorrowModal(borrower, book, isFromReservation = false
     });
     
     // Initialize modal with data
-    initializeConfirmBorrowModal(modal, borrower, book, isFromReservation);
+    initializeConfirmBorrowModal(modal, borrower, book, isFromReservation, isStaffAction);
 }
 
-export function closeConfirmBorrowModal() {
+export function closeConfirmBorrowModal(isStaffAction = true) {
     const modalContent = document.getElementById('confirm-borrow-content');
     const modal = document.getElementById('confirm-borrow-modal');
 
@@ -256,17 +275,21 @@ export function closeConfirmBorrowModal() {
     modal.classList.add('bg-opacity-0');
     modalContent.classList.remove('scale-100', 'opacity-100');
     modalContent.classList.add('scale-95', 'opacity-0');
-    
-    // Hide modal after animation completes
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        // Pass the active borrower so profile buttons re-bind correctly
-        const profileModal = document.getElementById('borrower-profile-modal');
 
-        if (profileModal && currentBorrower) {
-            restoreProfileContent(profileModal, currentBorrower, false);
-        }
-    }, 150);
+    if (isStaffAction) {
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            // Pass the active borrower so profile buttons re-bind correctly
+            const profileModal = document.getElementById('borrower-profile-modal');
+            // Always restore profile content after borrowing
+            if (profileModal && currentBorrower) {
+                restoreProfileContent(profileModal, currentBorrower, true);
+            }
+        }, 150);
+    } else {
+        modal.classList.add('hidden');
+    }
+
 }
 
 export function returnToBookSelection(transactionType, member) {
@@ -304,14 +327,12 @@ export function returnToBookSelection(transactionType, member) {
     }, 150); // Wait for close animation to complete
 }
 
-async function handleConfirmBorrow(isFromReservation = false) {
+async function handleConfirmBorrow(isFromReservation = false, isStaffAction = true) {
     const copySelect = document.getElementById('book_copy_id');
     const dueDateInput = document.getElementById('due_date');
 
-    console.log('Handling confirm borrow. isFromReservation:', isFromReservation);
     const selectedCopyId = copySelect?.value;
     const dueDate = dueDateInput?.value;
-    
     // Prepare form data
     const formData = new FormData();
     formData.append('book_copy_id', selectedCopyId);
@@ -325,7 +346,11 @@ async function handleConfirmBorrow(isFromReservation = false) {
     }
     
     // Call the borrow handler
-    await borrowBook(formData);
+    const result = await borrowBook(formData, isStaffAction);
+    if (result) {
+        // BUG HERE
+        closeConfirmBorrowModal(isStaffAction);
+    }
 }
 
 //Add listener to clear input errors

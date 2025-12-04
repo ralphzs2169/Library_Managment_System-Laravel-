@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\BookCopyStatus;
 use App\Enums\IssueReportStatus;
+use App\Models\Reservation;
+use App\Enums\ReservationStatus;
 
 class BookCopy extends Model
 {
@@ -42,6 +44,17 @@ class BookCopy extends Model
         $bookPrice = $this->book()->first()->price;
         
         return $bookPrice * config('settings.penalty.damaged_fee_multiplier'); // 50% of book price
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'book_copy_id');
+    }
+
+    public function assignedReservation()
+    {
+        return $this->hasOne(Reservation::class, 'book_copy_id')
+            ->where('status', ReservationStatus::READY_FOR_PICKUP);
     }
 
     use HasFactory;

@@ -4,6 +4,7 @@ import { openConfirmReturnModal } from '../confirmReturn.js';
 import { openConfirmRenewModal } from '../confirmRenew.js';
 import { closeBorrowerModal } from './borrowerProfileModal.js';
 import { formatDate } from '../../../utils.js';
+import { getBorrowingStatusBadge } from '../../../utils/statusBadge.js';
 
 export async function populateCurrentlyBorrowedBooks(modal, borrower) {
     const tbody = modal.querySelector('#currently-borrowed-tbody');
@@ -18,7 +19,7 @@ export async function populateCurrentlyBorrowedBooks(modal, borrower) {
     }
     
     const dueReminderThreshold = parseInt(settings['notifications.reminder_days_before_due']);
-    if (!dueReminderThreshold || isNaN(dueReminderThreshold)) {
+    if (!dueReminderThreshold) {
         showWarning('Configuration Issue', 'Due reminder threshold is not properly configured. Please check application settings.');
         closeBorrowerModal();
         return;
@@ -64,46 +65,16 @@ export async function populateCurrentlyBorrowedBooks(modal, borrower) {
 
         const status = transaction.status;
         const daysUntilDue = transaction.days_until_due;
-        const daysOverdue = transaction.days_overdue;
         const isReturned = transaction.returned_at !== null;
-        
-        // Badge configuration matching Blade table style
-        const badgeConfig = {
-            overdue: {
-                class: 'bg-red-200 text-red-700',
-                icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>`,
-                text: `${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} overdue`
-            },
-            due_soon: {
-                class: 'bg-orange-200 text-orange-700',
-                icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>`,
-                text: `Due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}`
-            },
-            on_time: {
-                class: 'bg-green-200 text-green-700',
-                icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>`,
-                text: `Due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}`
-            }
-        };
 
-        let currentBadge;
         let borderClass = '';
 
         if (status === 'overdue') {
-            currentBadge = badgeConfig.overdue;
             borderClass = 'border-l-4 border-l-red-500';
         } else if (status === 'borrowed' && daysUntilDue <= dueReminderThreshold) {
-            currentBadge = badgeConfig.due_soon;
             borderClass = 'border-l-4 border-l-yellow-400';
         } else if (status === 'borrowed') {
-            currentBadge = badgeConfig.on_time;
-            borderClass = 'border-l-4 border-l-green-500';
+            borderClass = 'border-l-4 border-l-blue-500';
         }
 
         const coverImage = book?.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
@@ -131,8 +102,8 @@ export async function populateCurrentlyBorrowedBooks(modal, borrower) {
                     </div>
                 </td>
                 <td class="py-3 px-4">
-                    <span class="inline-flex items-center w-full gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${currentBadge.class}">
-                        ${currentBadge.icon}${currentBadge.text}
+                    <span class="inline-flex items-center w-full gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold">
+                        ${getBorrowingStatusBadge(transaction)}
                     </span>
                 </td>
                 <td class="py-3 px-4">

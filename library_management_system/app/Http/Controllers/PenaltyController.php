@@ -20,7 +20,7 @@ class PenaltyController extends Controller
         $this->userService = $userService;
     }
 
-     public function updatePenalty(Request $request, $penaltyId)
+     public function processPenalty(Request $request, $penaltyId)
     {
         if ($request->validate_only) {
             $result = $this->userService->validatePenaltyUpdate($request);
@@ -36,7 +36,7 @@ class PenaltyController extends Controller
         }
 
         try {
-            $penalty = $this->userService->updatePenalty($request, $penaltyId);
+            $penalty = $this->userService->processPenalty($request, $penaltyId);
             return $this->jsonResponse('success', 'Penalty updated successfully', 200, ['penalty' => $penalty]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);
@@ -53,6 +53,7 @@ class PenaltyController extends Controller
             $penalty = Penalty::findOrFail($penaltyId);
 
             $penalty->status = PenaltyStatus::CANCELLED;
+            $penalty->cancelled_at = now();
             $penalty->save();
 
             $borrower = User::findOrFail($borrowerId);

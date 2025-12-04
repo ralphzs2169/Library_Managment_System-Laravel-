@@ -9,9 +9,19 @@ use App\Enums\ReservationStatus;
 use App\Models\ActivityLog;
 use App\Enums\ActivityLogActions;
 use Illuminate\Support\Facades\DB;
+use App\Models\BookCopy;
+use App\Services\ReservationService;        
 
 class checkExpiredReservations extends Command
 {
+    protected $reservationService;
+
+    public function __construct(ReservationService $reservationService)
+    {
+        $this->reservationService = $reservationService;
+        parent::__construct();
+    }
+
     protected $signature = 'reservations:check-expired';
     protected $description = 'Check for expired reservations and update their status';
 
@@ -39,6 +49,14 @@ class checkExpiredReservations extends Command
                         'details' => "Reservation for {$fullname} marked as expired on {$now->toDateString()}.",
                         'user_id' => null, // system action
                     ]);
+
+                    // Promote next pending reservation for the same book copy
+                    if ($reservation->book_copy_id) {
+                        $bookCopy = BookCopy::find($reservation->book_copy_id);
+                        if ($bookCopy) {
+                            $this->reservationService->promoteNextPendingReservation($bookCopy);
+                        }
+                    }
                     $count++;
                 }
             }

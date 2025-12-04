@@ -11,6 +11,7 @@ use App\Policies\ReservationPolicy;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Reservation;
 use App\Enums\ReservationStatus;
+use App\Models\BookCopy;
 
 class ReservationController extends Controller
 {
@@ -64,22 +65,24 @@ class ReservationController extends Controller
     {
         try {
             $reservation = Reservation::findOrFail($reservationId);
-
+            $oldReservationStatus = $reservation->status;
             $check = ReservationPolicy::canBeCancelled($reservation);
 
             if ($check['result'] !== 'success') {
                 return $this->jsonResponse('business_rule_violation', $check['message'], 400);
             }
-            $oldStatus = $reservation->status;
-
-           $this->reservationService->updateReservationStatus($reservation, ReservationStatus::CANCELLED);
             
-           if ($oldStatus === ReservationStatus::READY_FOR_PICKUP) {
-               $bookCopy = $reservation->book->copies()->where('status', 'available')->first();
-               Log::info('Promoting next pending reservation for book copy ID: ' . $bookCopy->id);
-               $this->reservationService->promoteNextPendingReservation($bookCopy);
-           }
-           
+            $bookCopy = ($reservation->status === ReservationStatus::READY_FOR_PICKUP) ? BookCopy::find($reservation->book_copy_id) : null;
+
+            $this->reservationService->updateReservationStatus($reservation, ReservationStatus::CANCELLED, $bookCopy);
+            
+            if ($oldReservationStatus === ReservationStatus::READY_FOR_PICKUP && $reservation->book_copy_id) {
+                if ($bookCopy) {
+                    $this->reservationService->promoteNextPendingReservation($bookCopy);
+                }
+            }
+
+
             return $this->jsonResponse('success', 'Reservation cancelled successfully', 200, ['reservation' => $reservation]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);

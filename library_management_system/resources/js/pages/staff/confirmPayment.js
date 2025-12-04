@@ -1,4 +1,4 @@
-import { updatePenalty } from '../../ajax/penaltyHandler.js';
+import { processPenalty } from '../../ajax/penaltyHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { clearInputError } from '../../helpers.js';
@@ -36,12 +36,11 @@ function renderPenaltyReasonBadge(type) {
     }
 }
 
-export function openPaymentModal(borrower, transaction) {
+export function openPaymentModal(borrower, transaction, isStaff = true) {
     const modal = document.getElementById('confirm-payment-modal');
     const content = document.getElementById('confirm-payment-content');
     if (!modal || !content) return;
 
-    console.log(transaction);
     // Show modal
     modal.classList.remove('hidden');
     requestAnimationFrame(() => {
@@ -101,7 +100,10 @@ export function openPaymentModal(borrower, transaction) {
         e.preventDefault();
         amountInput.blur();
         newPaymentForm.querySelector('#amount').blur();
-        await processPenaltyPayment(transaction.penalty.id, borrower);
+        const result = await processPenaltyPayment(transaction.penalty.id, borrower, isStaff);
+        if (result) {
+            closePaymentModal();
+        }
     });
 
     // Remove previous button onclick to avoid duplicate calls
@@ -150,18 +152,19 @@ export function closePaymentModal() {
     }, 150);
 }
 
-async function processPenaltyPayment(penaltyId, currentBorrower) {
+async function processPenaltyPayment(penaltyId, currentBorrower, isStaff) {
     const form = document.getElementById('confirm-payment-form');
     const formData = new FormData(form);
 
     formData.set('penalty_id', penaltyId);
     formData.set('amount', formData.get('amount') || '');
     
-    const result = await updatePenalty(formData, form.id);
-    if (result) {
+    const result = await processPenalty(formData, form.id, isStaff);
+
+    if (result && isStaff) {
             const modal = document.getElementById('borrower-profile-modal');
             const freshBorrower = await fetchBorrowerDetails(currentBorrower.id);
             await initializeBorrowerProfileUI(modal, freshBorrower, true, 'penalties-tab');
-            closePaymentModal(freshBorrower);
         }
+        closePaymentModal();
 }

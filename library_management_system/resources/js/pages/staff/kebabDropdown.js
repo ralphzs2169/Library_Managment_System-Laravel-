@@ -3,7 +3,7 @@ import { openConfirmRenewModal } from './confirmRenew.js';
 import { openPaymentModal } from './confirmPayment.js';
 import { cancelPenalty } from '../../ajax/penaltyHandler.js';
 import { openConfirmBorrowModal } from './confirmBorrow.js';
-import { cancelReservation } from '../../ajax/staffTransactionHandler.js';
+import { cancelReservation } from '../../ajax/reservationHandler.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', function (e) {
@@ -93,7 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const memberId = actionBtn.dataset.memberId;
                 cancelPenalty(penaltyId, memberId);
             } else if (action === 'fulfill') {
+                const bookCopy = JSON.parse(actionBtn.dataset.bookCopy);
                 const book = JSON.parse(actionBtn.dataset.book);
+                book.book_copy = { ...bookCopy };
+                
                 openConfirmBorrowModal(member, book, true);
             } else if (action === 'cancelReservation') {
                 const reservationId = actionBtn.dataset.reservationId;

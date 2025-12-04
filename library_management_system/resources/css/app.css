@@ -20,7 +20,7 @@
 
 }
 /* HTML: <div class="loader"></div> */
-.loader {
+/* .loader {
   width: 50px;
   padding: 8px;
   aspect-ratio: 1;
@@ -34,6 +34,14 @@
   -webkit-mask-composite: source-out;
           mask-composite: subtract;
   animation: l3 1s infinite linear;
+} */
+
+
+.line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
 }
 
 @keyframes l3 {to{transform: rotate(1turn)}}

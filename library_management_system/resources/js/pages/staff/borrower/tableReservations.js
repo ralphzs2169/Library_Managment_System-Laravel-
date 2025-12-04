@@ -1,9 +1,10 @@
 import { openConfirmBorrowModal } from "../confirmBorrow";
 import { formatDate } from '../../../utils.js';
-import { cancelReservation } from '../../../ajax/staffTransactionHandler.js';
+import { cancelReservation } from "../../../ajax/reservationHandler.js";
 import { fetchBorrowerDetails } from '../../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrowerProfilePopulators.js';
 import { closeConfirmReturnModal } from '../confirmReturn.js';
+import { getReservationStatusBadge } from '../../../utils/statusBadge.js';
 
 export function populateReservationsTable(modal, borrower) {
     const tbody = modal.querySelector('#active-reservations-tbody');
@@ -48,7 +49,7 @@ export function populateReservationsTable(modal, borrower) {
         authorName = book.author ? `${book.author.firstname} ${book.author.lastname}` : 'Unknown Author';
         coverImage = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
         
-        const dateExpired = reservation.date_expired ? formatDate(reservation.date_expired) : '—';
+        const dateExpired = reservation.pickup_deadline_date ? formatDate(reservation.pickup_deadline_date) : '—';
 
         // Reservation queue position (if available)
         let queuePosition = '';
@@ -58,29 +59,6 @@ export function populateReservationsTable(modal, borrower) {
              queuePosition = '#' + (reservation.queue_position || 'N/A');
         } else {
             queuePosition = '—';
-        }
-        // Status badge
-        let statusBadge = '';
-        if (reservation.status === 'pending') {
-            statusBadge = `
-                <span class="inline-flex items-center gap-1 w-full px-2 py-1 rounded-full text-xs font-semibold bg-yellow-200 text-yellow-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Pending
-                </span>
-            `;
-        } else if (reservation.status === 'ready_for_pickup') {
-              statusBadge = `
-                <span class="inline-flex items-center gap-1 w-full px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    Ready for Pickup
-                </span>
-            `;
-        } else {
-            statusBadge = `<span class="text-gray-500 text-xs">${reservation.status}</span>`;
         }
 
         // Actions: Pickup and Cancel buttons
@@ -100,7 +78,9 @@ export function populateReservationsTable(modal, borrower) {
                             genre_name: reservation.book.genre.name,
                             category_name: reservation.book.genre.category.name,
                             isbn: reservation.book.isbn,
-                            publication_year: reservation.book.publication_year
+                            publication_year: reservation.book.publication_year,
+                            book_copy_id: reservation.book_copy_id,
+                            book_copy_number: reservation.book_copy.copy_number
                         }).replace(/'/g, "&#39;")}'>
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -166,7 +146,7 @@ export function populateReservationsTable(modal, borrower) {
                     </div>
                 </td>
                 <td class="py-3 px-4 text-gray-700  text-sm">${queuePosition}</td>
-                <td class="py-3 px-4">${statusBadge}</td>
+                <td class="py-3 px-4">${getReservationStatusBadge(reservation.status)}</td>
                 <td class="py-3 px-4">${formatDate(reservation.created_at) }</td>
                 <td class="py-3 px-4">${dateExpired}</td>
            
@@ -205,9 +185,13 @@ export function attachReservationActions(tbody, borrower) {
                     category: {
                         name: reservationData.category_name
                     }
+                },
+                book_copy: {
+                    id: reservationData.book_copy_id,
+                    copy_number: reservationData.book_copy_number
                 }
             };
-         
+      
             openConfirmBorrowModal(borrower, bookData, true);
         });
     });

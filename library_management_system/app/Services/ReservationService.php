@@ -15,7 +15,7 @@ use App\Policies\BookPolicy;
 use App\Policies\ReservationPolicy;
 use App\Enums\BookCopyStatus;
 use App\Policies\BorrowPolicy;
-
+use App\Models\Semester;
 
 class ReservationService
 {
@@ -27,12 +27,19 @@ class ReservationService
 
             $book = Book::findOrFail($request->input('book_id'));
 
+            $activeSemester = Semester::where('status', 'active')->first();
+            
+            if (!$activeSemester && $reserver->role === 'student') {
+                throw new \Exception('No active semester found. Cannot proceed with borrowing.');
+            }
+
             $reservation = Reservation::create([
                 'borrower_id' => $reserver->id,
                 'book_id' => $book->id,
                 'status' => ReservationStatus::PENDING,
                 'created_by_id' => $request->user()->id,
                 'created_by' => $request->user()->role,
+                'semester_id' => $activeSemester ? $activeSemester->id : null
             ]);
 
             // Log activity
@@ -58,11 +65,27 @@ class ReservationService
         });
     }
 
-    public function updateReservationStatus(Reservation $reservation, $newStatus)
+    public function updateReservationStatus(Reservation $reservation, $newStatus, $bookCopy = null)
     {
-        return DB::transaction(function () use ($reservation, $newStatus) {
+        return DB::transaction(function () use ($reservation, $newStatus, $bookCopy) {
+            $oldStatus = $reservation->status;
             $reservation->update(['status' => $newStatus]);
-            $reservation->pickup_start_date = now();
+            $reservation->save();
+
+            if ($newStatus === ReservationStatus::READY_FOR_PICKUP) {
+                $reservation->pickup_start_date = now();
+                $reservation->book_copy_id = $bookCopy->id;
+                $bookCopy->update(['status' => BookCopyStatus::ON_HOLD_FOR_PICKUP]);
+                $bookCopy->save();
+            } else if ($newStatus === ReservationStatus::CANCELLED) {
+                $reservation->cancelled_at = now();
+                
+                if ($oldStatus === ReservationStatus::READY_FOR_PICKUP && $bookCopy) {
+                    $bookCopy->update(['status' => BookCopyStatus::AVAILABLE]);
+                    $bookCopy->save();
+                }
+            }
+
             $reservation->save();
 
             $actionType = match ($newStatus) {
@@ -96,8 +119,9 @@ class ReservationService
         $pendingIssueReport = $bookCopy->pendingIssueReport()->exists();
         
         if ($pendingReservation && !$pendingIssueReport) {
-            $this->updateReservationStatus($pendingReservation, ReservationStatus::READY_FOR_PICKUP);
-            return true; // indicates a reservation was updated
+            $this->updateReservationStatus($pendingReservation, ReservationStatus::READY_FOR_PICKUP, $bookCopy);
+
+            return true; 
         }
 
         return false; // no pending reservation

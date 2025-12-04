@@ -16,10 +16,13 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\StaffDashboardController;
+use App\Http\Controllers\LibrarianController;
 
 use Illuminate\Http\Request;
 use App\Models\Genre;
+use App\Models\Librarian;
 use App\Models\Settings;
+use App\Models\User;
 
 Route::get('/', function () {
     return view('pages.welcome');
@@ -56,6 +59,11 @@ Route::prefix('librarian')
         Route::put('/category-management/genres/{genre}', [GenreController::class, 'update'])->name('category-management.genres.update');
         Route::delete('/category-management/genres/{genre}', [GenreController::class, 'destroy'])->name('category-management.genres.destroy');
 
+        Route::get('/section/borrowing-records', [LibrarianController::class, 'borrowingRecords'])->name('section.borrowing-records');
+        Route::get('/section/reservation-records', [LibrarianController::class, 'reservationRecords'])->name('section.reservation-records');
+        Route::get('/section/penalty-records', [LibrarianController::class, 'penaltyRecords'])->name('section.penalty-records');
+
+
         Route::get('/semester-management', [SemesterController::class, 'index'])->name('semester-management');
         Route::post('/semester-management', [SemesterController::class, 'store'])->name('semester-management.store');
         Route::get('/semester-management/create', [SemesterController::class, 'create'])->name('semester-management.create');
@@ -70,6 +78,12 @@ Route::prefix('librarian')
         Route::get('/settings', [SettingsController::class, 'index'])->name('librarian.settings');
         Route::put('/settings', [SettingsController::class, 'update'])->name('librarian.settings.update');
 
+        Route::post('/transaction/borrow/validate', [BorrowController::class, 'validateBorrow']);
+        Route::post('/transaction/borrow/perform', [BorrowController::class, 'performBorrow']);
+        
+        Route::put('/transaction/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
+        Route::post('/transaction/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
+        Route::post('/transaction/reservation/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
     });
 
 Route::prefix('staff')
@@ -101,7 +115,7 @@ Route::prefix('staff')
         Route::get('/transaction/reservation/{user}/book/{book}/available-copies', [ReservationController::class, 'availableCopiesForReservation']);
         Route::post('/transaction/reservation/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
         
-        Route::put('/transaction/penalty/{penalty}', [PenaltyController::class, 'updatePenalty']);
+        Route::put('/transaction/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
         Route::post('/transaction/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
     });
 

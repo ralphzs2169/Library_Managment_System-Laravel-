@@ -1,16 +1,11 @@
 // import { showBookSelectionContent, restoreProfileContent } from '../bookSelection.js';
 import { clearInputError } from '../../../helpers.js';
 import { returnToBookSelection } from '../confirmBorrow.js';
-import { fetchBorrowerDetails } from '../../../ajax/borrowerHandler.js';
-// import { fetchSettings } from '../../../api/settingsHandler.js';
-import { addReservation } from '../../../ajax/staffTransactionHandler.js';
+import { addReservation } from '../../../ajax/reservationHandler.js';
 import { openBorrowerProfileModal } from '../borrower/borrowerProfileModal.js';
-import { showWarning } from '../../../utils/alerts.js';
 
 let currentReserver = null;
 let currentBook = null;
-
-
 
 export async function initializeConfirmReservationModal(modal, reserver, book) {
     console.log('Initializing Confirm Reservation Modal with:', reserver, book, modal);

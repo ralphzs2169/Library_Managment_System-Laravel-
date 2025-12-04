@@ -48,12 +48,21 @@ export const STAFF_DASHBOARD_ROUTES = {
     QUEUE_RESERVATIONS: '/staff/dashboard/queue-reservations',
 };
 
+export const LIBRARIAN_SECTION_ROUTES = {
+    BORROW_RECORDS: '/librarian/section/borrowing-records',
+    RESERVATION_RECORDS: '/librarian/section/reservation-records',
+    PENALTY_RECORDS: '/librarian/section/penalty-records'
+};
+
 export const TRANSACTION_ROUTES = {
     INDEX: '/staff/transaction',
 
-    VALIDATE_BORROW: '/staff/transaction/borrow/validate',
-    PERFORM_BORROW: '/staff/transaction/borrow/perform',
+    STAFF_VALIDATE_BORROW: '/staff/transaction/borrow/validate',
+    STAFF_PERFORM_BORROW: '/staff/transaction/borrow/perform',
 
+    LIBRARIAN_VALIDATE_BORROW: '/librarian/transaction/borrow/validate',
+    LIBRARIAN_PERFORM_BORROW: '/librarian/transaction/borrow/perform',
+    
     VALIDATE_RETURN: '/staff/transaction/return/validate',
     PERFORM_RETURN: '/staff/transaction/return/perform',
 
@@ -62,11 +71,16 @@ export const TRANSACTION_ROUTES = {
 
     VALIDATE_RESERVATION: '/staff/transaction/reservation/validate',
     PERFORM_RESERVATION: '/staff/transaction/reservation/perform',
-    AVAILABLE_COPIES_FOR_RESERVATION: (userId, bookId) => `/staff/transaction/reservation/${userId}/book/${bookId}/available-copies`,
-    CANCEL_RESERVATION: (reservationId) => `/staff/transaction/reservation/${reservationId}/cancel`,
+   
+    // AVAILABLE_COPIES_FOR_RESERVATION: (memberId, bookId) => `/staff/transaction/${memberId}/book/${bookId}/available-copies`,
+    STAFF_CANCEL_RESERVATION: (reservationId) => `/staff/transaction/reservation/${reservationId}/cancel`,
+    LIBRARIAN_CANCEL_RESERVATION: (reservationId) => `/librarian/transaction/reservation/${reservationId}/cancel`,
 
-    UPDATE_PENALTY: (id) => `/staff/transaction/penalty/${id}`,
-    CANCEL_PENALTY: (penaltyId, borrowerId) =>  `/staff/transaction/${borrowerId}/penalty/${penaltyId}/cancel`,
+    STAFF_PROCESS_PENALTY: (id) => `/staff/transaction/penalty/${id}`,
+    LIBRARIAN_PROCESS_PENALTY: (id) => `/librarian/transaction/penalty/${id}`,
+
+    STAFF_CANCEL_PENALTY: (penaltyId, borrowerId) =>  `/staff/transaction/${borrowerId}/penalty/${penaltyId}/cancel`,
+    LIBRARIAN_CANCEL_PENALTY: (penaltyId, borrowerId) =>  `/librarian/transaction/${borrowerId}/penalty/${penaltyId}/cancel`,
 }
 
 

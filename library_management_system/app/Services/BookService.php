@@ -41,14 +41,17 @@ class BookService {
             // For borrowing, check for available copies
             $statusToCheck  = BookCopyStatus::AVAILABLE;
         else if ($transactionType === self::TRANSACTION_TYPES[1]) 
-            // For reservation, check for borrowed copies
-            $statusToCheck  = BookCopyStatus::BORROWED;
+            // For reservation, check for borrowed or on hold for pickup copies
+            $statusToCheck  = [BookCopyStatus::BORROWED, BookCopyStatus::ON_HOLD_FOR_PICKUP];
 
-
-        // Query books with copies matching the status and doesnt have a pending issue report
+        // Query books with copies matching the status and doesn't have a pending issue report
         $query = Book::with('reservations')->whereHas('copies', function ($q) use ($statusToCheck ) {
-            $q->where('status', $statusToCheck )
-            ->whereDoesntHave('pendingIssueReport');
+            if (is_array($statusToCheck)) {
+                $q->whereIn('status', $statusToCheck);
+            } else {
+                $q->where('status', $statusToCheck);
+            }
+            $q->whereDoesntHave('pendingIssueReport');
         });
 
         // Apply search filter if provided
@@ -107,7 +110,11 @@ class BookService {
 
         $query->with(['author', 'genre.category', 
             'copies' => function ($q) use ($statusToCheck) {
-                $q->where('status', $statusToCheck);
+                if (is_array($statusToCheck)) {
+                    $q->whereIn('status', $statusToCheck);
+                } else {
+                    $q->where('status', $statusToCheck);
+                }
             }
         ]);
 
@@ -135,7 +142,7 @@ class BookService {
         // 3. Filter the collection based on the policy result
         $filteredCollection = $allBooks->filter(function ($book) use ($member, $policyMethod) {
             $result = call_user_func($policyMethod, $book, $member);
-            Log::info('Policy check for book: ' . $book->title . ': ' . json_encode($result));
+
             // Exclude the book if policy fails or no eligible copies are loaded
             if ($result['result'] !== 'success' || $book->copies->isEmpty()) {
                 Log::info('Excluding book: ' . $book->title . ' due to policy failure or no eligible copies.');
@@ -461,13 +468,13 @@ class BookService {
                 // Handle new copies (negative IDs)
                 if ($copyId < 0) {
                     $nextCopyNumber = BookCopy::where('book_id', $book->id)->max('copy_number') + 1;
-                    BookCopy::create([
+                    $newBookCopy = BookCopy::create([
                         'book_id' => $book->id,
                         'copy_number' => $nextCopyNumber,
                         'status' => $newStatus
                     ]);
                     
-                    $this->reservationService->promoteNextPendingReservation($book->copies()->where('status', 'available')->first());
+                    $this->reservationService->promoteNextPendingReservation($newBookCopy);
                     continue;
                 }
 
@@ -489,6 +496,29 @@ class BookService {
                         }
 
                         continue; // Skip normal update since handled
+                    }
+
+                    // If the copy is on hold for pickup, release the reservation
+                    if ($currentStatus === BookCopyStatus::ON_HOLD_FOR_PICKUP){
+                        $reservation = $copy->assignedReservation()->latest()->first();
+                        if ($reservation) {
+                            $reservation->status = ReservationStatus::PENDING;
+                            $reservation->book_copy_id = null;
+                            $reservation->save();
+                        }
+                    }
+
+
+                    if ($newStatus === BookCopyStatus::AVAILABLE) {
+                        
+                        $hasPendingReservation = $copy->book->reservations()
+                            ->where('status', ReservationStatus::PENDING)
+                            ->exists();
+
+                        if ($hasPendingReservation) {
+                            $this->reservationService->promoteNextPendingReservation($copy);
+                            continue; // Skip setting to available directly
+                        }
                     }
 
                     if ($newStatus === BookCopyStatus::BORROWED) {
