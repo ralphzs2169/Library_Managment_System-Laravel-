@@ -11,7 +11,6 @@ export function getBorrowingStatusBadge(transaction) {
     let label = '';
 
     // Helper to format labels (e.g., 'borrowed' -> 'Borrowed')
-    const formatLabel = (s) => s ? s.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Unknown';
 
     // --- 1. Returned Statuses (Final States) ---
     if (transaction.returned_at) {
@@ -91,9 +90,9 @@ export function getReservationStatusBadge(status) {
     let badgeHtml = '';
     let badgeIcon = '';
     let badgeClass = '';
-    let label = status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    let label = formatLabel(status);
     
-    switch (status.toLowerCase()) {
+    switch (label) {
         case 'pending':
             badgeClass = 'bg-yellow-200 text-yellow-800';
             badgeIcon = `
@@ -141,4 +140,114 @@ export function getReservationStatusBadge(status) {
     `;
 
     return badgeHtml;
+}
+
+export function getPenaltyStatusBadge(status) {
+    const formattedStatus = formatLabel(status);
+    let badgeBg = '';
+    let svgOrImg = '';
+    let label = '';
+
+    switch (formattedStatus) {
+        case 'unpaid':
+            badgeBg = 'bg-red-100 text-red-700';
+            // Alert/Warning Icon SVG for Unpaid
+            svgOrImg = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+            </svg>`;
+            label = 'Unpaid';
+            break;
+
+        case 'partially paid':
+            badgeBg = 'bg-orange-200 text-orange-700';
+            // Placeholder for the partially-paid SVG/Image
+            svgOrImg = `<img src="/build/assets/icons/partially-paid.svg" alt="Partially Paid Icon" class="w-3.5 h-3.5">`;
+            label = 'Partially Paid';
+            break;
+
+        case 'paid':
+            badgeBg = 'bg-green-200 text-green-700';
+            // Checkmark Icon SVG for Paid
+            svgOrImg = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>`;
+            label = 'Paid';
+            break;
+
+        case 'cancelled':
+            badgeBg = 'bg-gray-200 text-gray-700';
+            // X / Cancel Icon SVG
+            svgOrImg = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>`;
+            label = 'Cancelled'; // Override default formatting to match original Blade logic
+            break;
+            
+        default:
+            // Fallback for UNKNOWN status
+            badgeBg = 'bg-gray-100 text-gray-500';
+            svgOrImg = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" /></svg>`;
+            label = 'Unknown';
+            break;
+    }
+
+    // Construct the final HTML badge
+    return `<span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${badgeBg} whitespace-nowrap">
+        ${svgOrImg}
+        ${label}
+    </span>`;
+}
+
+export function getPenaltyTypeBadge(type) {
+    
+    // Standardize key for comparison
+    const formattedType = formatLabel(type);
+    console.log(formattedType);
+    let badgeClass = '';
+    let iconHtml = '';
+    let label = '';
+
+    switch (formattedType) {
+        case 'late return':
+            badgeClass = 'text-red-700';
+            label = 'Late Return';
+            iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>`;
+            break;
+
+        case 'lost book':
+            badgeClass = 'text-purple-700';
+            label = 'Lost';
+            iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>`;
+            break;
+
+        case 'damaged book':
+            badgeClass = 'text-orange-700';
+            label = 'Damaged';
+            iconHtml = `<img src="/build/assets/icons/damaged-badge.svg" alt="Damaged Icon" class="w-3.5 h-3.5">`;
+            break;
+
+        default:
+            // Fallback for unknown type
+            return `<span class="text-gray-500">${formatLabel(type)}</span>`;
+    }
+
+    return `<span class="w-full inline-flex items-center gap-1 rounded-full text-xs font-semibold ${badgeClass}">
+        ${iconHtml}
+        ${label}
+    </span>`;
+}
+
+function formatLabel(s) {
+    if (!s) {
+        return 'Unknown';
+    }
+    // Convert to lowercase, split by underscores, , and rejoin
+    return s.toLowerCase()
+        .split('_')
+        .map(word => word.charAt(0).toLowerCase() + word.slice(1))
+        .join(' ');
 }

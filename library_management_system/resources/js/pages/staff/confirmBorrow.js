@@ -64,13 +64,14 @@ export async function initializeConfirmBorrowModal(modal, borrower, book, isFrom
         const bookCategory = modal.querySelector('#confirm-book-category');
         const bookGenre = modal.querySelector('#confirm-book-genre');
         
-        if (bookCover) bookCover.src = `/storage/${book.cover_image}`;
-        if (bookTitle) bookTitle.textContent = book.title || 'Untitled';
-        if (bookAuthor) bookAuthor.textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
-        if (bookIsbn) bookIsbn.textContent = book.isbn || 'N/A';
-        if (bookYear) bookYear.textContent = book.publication_year || 'N/A';
-        if (bookCategory) bookCategory.textContent = book.genre?.category?.name || 'N/A';
-        if (bookGenre) bookGenre.textContent = book.genre?.name || 'N/A';
+        bookCover.src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
+        bookTitle.textContent = book.title || 'Untitled';
+        bookTitle.title = book.title || 'Untitled';
+        bookAuthor.textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
+        bookIsbn.textContent = book.isbn || 'N/A';
+        bookYear.textContent = book.publication_year || 'N/A';
+        bookCategory.textContent = book.genre?.category?.name || 'N/A';
+        bookGenre.textContent = book.genre?.name || 'N/A';
         
         // Populate copy number dropdown
         populateCopyNumbers(modal, book, isFromReservation, assignedCopy);
@@ -357,14 +358,14 @@ async function handleConfirmBorrow(isFromReservation = false) {
     }
     
     // Call the borrow handler
-    const performerRole = await borrowBook(formData);
+    const performedBy = await borrowBook(formData);
 
-    if (performerRole === 'staff') {
+    if (performedBy === 'staff') {
         closeConfirmBorrowModal();
         setTimeout(() => {
             openBorrowerProfileModal(currentBorrower.id, true);
         }, 160);
-    } else {
+    } else if (performedBy === 'librarian') {
         // For librarians, just close the modal
         closeConfirmBorrowModal();
     }

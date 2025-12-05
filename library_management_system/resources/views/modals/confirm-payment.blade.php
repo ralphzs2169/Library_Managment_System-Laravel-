@@ -43,7 +43,7 @@
                     <!-- Book Info & Penalty -->
                     <div class="flex-1 space-y-2">
                         <div>
-                            <h4 id="confirm-payment-book-title" class="text-lg font-bold text-gray-900"></h4>
+                            <h4 id="confirm-payment-book-title" class="w-[80%] line-clamp-2 text-lg font-bold text-gray-900"></h4>
                             <p id="confirm-payment-book-author" class="text-xs text-gray-600"></p>
                         </div>
                         <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">

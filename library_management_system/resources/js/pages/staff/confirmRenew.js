@@ -4,16 +4,17 @@ import { renewBook } from '../../ajax/transactions/borrowingHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { showWarning } from '../../utils/alerts.js';
+import { getBorrowingStatusBadge } from '../../utils/statusBadge.js';
 
 let currentRenewer = null;
 let currentTransaction = null;
 let confirmRenewModalListenersInitialized = false;
 
 export async function initializeConfirmRenewModal(modal, renewer, transaction) {
-    console.log(transaction);
+
     currentRenewer = renewer;
     currentTransaction = transaction;
-    console.table(renewer);
+
     // renewer info
     const renewerName = modal.querySelector('#renewer-name');
     const renewerId = modal.querySelector('#renewer-id');
@@ -34,6 +35,7 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
     const book = transaction.book_copy.book;
     modal.querySelector('#renew-book-cover').src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
     modal.querySelector('#renew-book-title').textContent = book.title || 'Untitled';
+    modal.querySelector('#renew-book-title').title = book.title || 'Untitled';
     modal.querySelector('#renew-book-author').textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
     modal.querySelector('#renew-book-isbn').textContent = book.isbn || 'N/A';
     modal.querySelector('#renew-copy-number').textContent = transaction.book_copy.copy_number || 'N/A';
@@ -121,56 +123,7 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
 
     // Status badge logic (consistent with borrowed books status: due_soon, on_time, overdue)
     const statusBadge = modal.querySelector('#confirm-renew-status-badge');
-    if (statusBadge) {
-        let badgeHTML = '';
-        const daysUntilDue = transaction.days_until_due;
-        const daysOverdue = transaction.days_overdue;
-
-         let dueSoonText = '';
-        if (daysUntilDue > 1) {
-            dueSoonText = `Due in ${daysUntilDue} days`;
-        } else if (daysUntilDue === 1) {
-            dueSoonText = `Due in 1 day`;
-        } else if (daysUntilDue === 0) {
-            dueSoonText = `Due today`;
-        }
-
-        if (transaction.status === 'overdue') {
-            badgeHTML = `
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-200 text-red-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} overdue
-                </span>
-            `;
-        } else if (transaction.status === 'borrowed' && daysUntilDue <= (renewer.due_reminder_threshold ?? 3)) {
-            badgeHTML = `
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    ${dueSoonText}
-                </span>
-            `;
-        } else if (transaction.status === 'borrowed') {
-            badgeHTML = `
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    On time
-                </span>
-            `;
-        } else {
-            badgeHTML = `
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
-                    Unknown
-                </span>
-            `;
-        }
-        statusBadge.innerHTML = badgeHTML;
-    }
+   statusBadge.innerHTML = getBorrowingStatusBadge(transaction);
 }
 
 export function openConfirmRenewModal(renewer, transaction) {

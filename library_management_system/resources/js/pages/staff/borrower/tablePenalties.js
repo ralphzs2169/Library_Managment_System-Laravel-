@@ -2,6 +2,7 @@ import { openPaymentModal, closePaymentModal } from "../confirmPayment";
 import { cancelPenalty } from "../../../ajax/penaltyHandler";
 import { fetchBorrowerDetails } from "../../../ajax/borrowerHandler";
 import { initializeBorrowerProfileUI } from "./borrowerProfilePopulators";
+import { getPenaltyStatusBadge, getPenaltyTypeBadge } from "../../../utils/statusBadge.js";
 
 export function populateActivePenalties(modal, borrower) {
     const tbody = modal.querySelector('#active-penalties-tbody');
@@ -48,33 +49,6 @@ export function populateActivePenalties(modal, borrower) {
         const penaltyType = transaction.penalty.type;
         const status = transaction.penalty.status;
 
-        if (penaltyType === 'late_return') {
-            reasonBadge = `
-                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    Late Return
-                </span>
-            `;
-        } else if (penaltyType === 'lost_book') {
-            reasonBadge = `
-                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Lost
-                </span>
-            `;
-        } else if (penaltyType === 'damaged_book') {
-            reasonBadge = `
-                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
-                    <img src="/build/assets/icons/damaged-badge.svg" alt="Damaged Icon" class="w-3.5 h-3.5">
-                    Damaged
-                </span>
-            `;
-        }
-
         // Border color based on penalty status
         let borderClass = '';
         switch (status) {
@@ -97,7 +71,9 @@ export function populateActivePenalties(modal, borrower) {
         const coverImage = book?.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
         const authorName = author ? `${author.firstname} ${author.lastname}` : 'Unknown Author';
         const returnedDateText = returnedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const statusBadge = renderPenaltyStatusBadge(status);
+
+        const typeBadge = getPenaltyTypeBadge(penaltyType);
+        const statusBadge = getPenaltyStatusBadge(status);
 
         let amount = 0;
         if (status === 'unpaid') {
@@ -119,7 +95,7 @@ export function populateActivePenalties(modal, borrower) {
                     </div>
                 </td>
                 <td class="py-3 px-4 text-gray-700 text-sm">${returnedDateText}</td>
-                <td class="py-3 px-4">${reasonBadge}</td>
+                <td class="py-3 px-4">${typeBadge}</td>
                 <td class="py-3 px-4">
                     <span class="text-red-700 font-bold text-sm">₱${Number(amount).toFixed(2)}</span>
                 </td>

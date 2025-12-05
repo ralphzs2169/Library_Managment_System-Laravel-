@@ -3,6 +3,7 @@ import { restoreProfileContent } from './bookSelection.js';
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { fetchSettings } from '../../ajax/settingsHandler.js';
+import { getBorrowingStatusBadge } from '../../utils/statusBadge.js';
 
 const confirmReturnModal = document.getElementById('confirm-return-modal');
 
@@ -55,11 +56,12 @@ export async function initializeConfirmReturnModal(modal, borrower, transaction)
         const dueDate = modal.querySelector('#confirm-return-due-date');
         const statusBadge = modal.querySelector('#confirm-return-status-badge');
         
-        if (bookCover && book) bookCover.src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
-        if (bookTitle && book) bookTitle.textContent = book.title || 'Untitled';
-        if (bookAuthor && book) bookAuthor.textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
-        if (bookIsbn && book) bookIsbn.textContent = book.isbn || 'N/A';
-        if (copyNumber && bookCopy) copyNumber.textContent = `#${bookCopy.copy_number || 'N/A'}`;
+        bookCover.src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
+        bookTitle.textContent = book.title || 'Untitled';
+        bookTitle.title = book.title || 'Untitled';
+        bookAuthor.textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
+        bookIsbn.textContent = book.isbn || 'N/A';
+        copyNumber.textContent = `#${bookCopy.copy_number || 'N/A'}`;
         
         if (borrowedDate) {
             const date = transaction.borrowed_at ? new Date(transaction.borrowed_at) : null;
@@ -70,39 +72,8 @@ export async function initializeConfirmReturnModal(modal, borrower, transaction)
             const date = transaction.due_at ? new Date(transaction.due_at) : null;
             dueDate.textContent = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
         }
-        console.log(transaction);
-        const daysUntilDue = transaction.days_until_due;
-        // Populate status badge (overdue or on-time)
-        if (statusBadge) {
-            if (transaction.status === 'overdue') {
-                statusBadge.innerHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-200 text-red-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Overdue
-                    </span>
-                `;
-            } else if(transaction.status === 'borrowed' && daysUntilDue <= dueReminderThreshold) {
-                 statusBadge.innerHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}
-                    </span>
-                `;
-            } else {
-                statusBadge.innerHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        On Time
-                    </span>
-                `;
-            }
-        }
+
+        statusBadge.innerHTML = getBorrowingStatusBadge(transaction);
     }
 
     // Attach confirm button listener

@@ -40,7 +40,7 @@
                     <!-- Book Info -->
                     <div class="flex-1 space-y-2">
                         <div>
-                            <h4 id="confirm-return-book-title" class="text-lg font-bold text-gray-900"></h4>
+                            <h4 id="confirm-return-book-title" class="w-[80%] line-clamp-2 text-lg font-bold text-gray-900"></h4>
                             <p id="confirm-return-book-author" class="text-xs text-gray-600"></p>
                         </div>
 

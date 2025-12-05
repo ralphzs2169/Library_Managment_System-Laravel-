@@ -2,41 +2,9 @@ import { processPenalty } from '../../ajax/penaltyHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { clearInputError } from '../../helpers.js';
-import { renderPenaltyStatusBadge } from './borrower/tablePenalties.js';
+import { getPenaltyStatusBadge, getPenaltyTypeBadge } from '../../utils/statusBadge.js';
 
-function renderPenaltyReasonBadge(type) {
-    switch (type) {
-        case 'late_return':
-            return `
-                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    Late Return
-                </span>
-            `;
-        case 'lost_book':
-            return `
-                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Lost
-                </span>
-            `;
-        case 'damaged_book':
-            return `
-                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
-                    <img src="/build/assets/icons/damaged-badge.svg" alt="Damaged Icon" class="w-3.5 h-3.5">
-                    Damaged
-                </span>
-            `;
-        default:
-            return '';
-    }
-}
-
-export function openPaymentModal(borrower, transaction, isStaff = true) {
+export function openPaymentModal(borrower, transaction) {
     const modal = document.getElementById('confirm-payment-modal');
     const content = document.getElementById('confirm-payment-content');
     if (!modal || !content) return;
@@ -70,6 +38,7 @@ export function openPaymentModal(borrower, transaction, isStaff = true) {
     console.log('Opening payment modal for penalty amount:', transaction.penalty);
     content.querySelector('#confirm-payment-book-cover').src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
     content.querySelector('#confirm-payment-book-title').textContent = book.title || '';
+    content.querySelector('#confirm-payment-book-title').title = book.title || '';
     content.querySelector('#confirm-payment-book-author').textContent = book.author ? `${book.author.firstname} ${book.author.lastname}` : '';
     content.querySelector('#confirm-payment-book-isbn').textContent = book.isbn || '';
     content.querySelector('#confirm-payment-copy-number').textContent = `#${bookCopy.copy_number}` || '';
@@ -83,10 +52,10 @@ export function openPaymentModal(borrower, transaction, isStaff = true) {
         amountLabel.textContent = 'AMOUNT';
     }
     // Reason badge
-    content.querySelector('#confirm-payment-penalty-type').innerHTML = renderPenaltyReasonBadge(penalty.type);
+    content.querySelector('#confirm-payment-penalty-type').innerHTML = getPenaltyTypeBadge(penalty.type);
 
     // Status badge
-    document.getElementById('confirm-payment-penalty-status').innerHTML = renderPenaltyStatusBadge(penalty.status);
+    document.getElementById('confirm-payment-penalty-status').innerHTML = getPenaltyStatusBadge(penalty.status);
 
     const amountInput = content.querySelector('#amount');
     const paymentForm = content.querySelector('#confirm-payment-form');
@@ -100,10 +69,7 @@ export function openPaymentModal(borrower, transaction, isStaff = true) {
         e.preventDefault();
         amountInput.blur();
         newPaymentForm.querySelector('#amount').blur();
-        const result = await processPenaltyPayment(transaction.penalty.id, borrower, isStaff);
-        if (result) {
-            closePaymentModal();
-        }
+        processPenaltyPayment(transaction.penalty.id, borrower);
     });
 
     // Remove previous button onclick to avoid duplicate calls
@@ -152,19 +118,21 @@ export function closePaymentModal() {
     }, 150);
 }
 
-async function processPenaltyPayment(penaltyId, currentBorrower, isStaff) {
+async function processPenaltyPayment(penaltyId, currentBorrower) {
     const form = document.getElementById('confirm-payment-form');
     const formData = new FormData(form);
 
     formData.set('penalty_id', penaltyId);
     formData.set('amount', formData.get('amount') || '');
     
-    const result = await processPenalty(formData, form.id, isStaff);
+    const performedBy = await processPenalty(formData, form.id);
 
-    if (result && isStaff) {
-            const modal = document.getElementById('borrower-profile-modal');
-            const freshBorrower = await fetchBorrowerDetails(currentBorrower.id);
-            await initializeBorrowerProfileUI(modal, freshBorrower, true, 'penalties-tab');
-        }
+    if (performedBy === 'staff') {
+        const modal = document.getElementById('borrower-profile-modal');
+        const freshBorrower = await fetchBorrowerDetails(currentBorrower.id);
+        await initializeBorrowerProfileUI(modal, freshBorrower, true, 'penalties-tab');
         closePaymentModal();
+    } else if (performedBy === 'librarian') {
+        closePaymentModal();
+    }
 }

@@ -36,6 +36,7 @@ export async function initializeConfirmReservationModal(modal, reserver, book) {
     if (book) {
         modal.querySelector('#confirm-reserve-book-cover').src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
         modal.querySelector('#confirm-reserve-book-title').textContent = book.title || 'Untitled';
+        modal.querySelector('#confirm-reserve-book-title').title = book.title || 'Untitled';
         modal.querySelector('#confirm-reserve-book-author').textContent = `by ${(book.author?.firstname || '') + ' ' + (book.author?.lastname || '')}`;
         modal.querySelector('#confirm-reserve-book-isbn').textContent = book.isbn || 'N/A';
         modal.querySelector('#confirm-reserve-book-year').textContent = book.publication_year || 'N/A';

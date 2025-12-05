@@ -6,17 +6,15 @@ import { loadPenaltyRecords } from "./librarianSectionsHandler";
 
 
 export async function processPenalty(paymentDetails, form, isStaff = true) {
-    // Make sure validate_only is set after all other fields
     paymentDetails.set('validate_only', 1);
     const penaltyId = paymentDetails.get('penalty_id');
     
-    const route = isStaff ? TRANSACTION_ROUTES.STAFF_PROCESS_PENALTY(penaltyId) : TRANSACTION_ROUTES.LIBRARIAN_PROCESS_PENALTY(penaltyId);
     // Add CSRF token and method spoofing for PUT request
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     paymentDetails.append('_token', csrfToken);
     paymentDetails.append('_method', 'PUT');
 
-    let response = await fetch(route, {
+    let response = await fetch(TRANSACTION_ROUTES.PROCESS_PENALTY(penaltyId), {
         method: 'POST', 
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -26,6 +24,7 @@ export async function processPenalty(paymentDetails, form, isStaff = true) {
     });
 
     let result = await response.json();
+
 
     if (!response.ok) {
         if (response.status === INVALID_INPUT) {
@@ -49,7 +48,7 @@ export async function processPenalty(paymentDetails, form, isStaff = true) {
     paymentDetails.delete('validate_only');
 
     // Step 3: Submit update
-    response = await fetch(route, {
+    response = await fetch(TRANSACTION_ROUTES.PROCESS_PENALTY(penaltyId), {
         method: 'POST', 
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -57,7 +56,9 @@ export async function processPenalty(paymentDetails, form, isStaff = true) {
         },
         body: paymentDetails
     });
+
     result = await response.json();
+
 
     if (!response.ok) {
         showWarning('Something went wrong', 'Failed to update book. Please try again later.');
@@ -71,9 +72,15 @@ export async function processPenalty(paymentDetails, form, isStaff = true) {
     
     showToast('Payment Successful!', 'success');
 
-    isStaff ? reloadStaffDashboardData() : loadPenaltyRecords(undefined, false);
+    const performedBy = result.data.action_performer_role;
+ 
+    if (performedBy === 'staff'){
+        reloadStaffDashboardData();
+    } else {
+        loadPenaltyRecords(undefined, false);
+    }
 
-    return true;
+    return performedBy;
 }
 
 export async function cancelPenalty(penaltyId, borrowerId, isStaff = true) {

@@ -37,7 +37,7 @@ class PenaltyController extends Controller
 
         try {
             $penalty = $this->userService->processPenalty($request, $penaltyId);
-            return $this->jsonResponse('success', 'Penalty updated successfully', 200, ['penalty' => $penalty]);
+            return $this->jsonResponse('success', 'Penalty updated successfully', 200, ['penalty' => $penalty, 'action_performer_role' => $request->user()->role]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);
             return $this->jsonResponse('error', 'The penalty could not be found.', 404);

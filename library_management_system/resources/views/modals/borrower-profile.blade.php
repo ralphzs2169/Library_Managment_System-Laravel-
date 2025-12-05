@@ -244,7 +244,7 @@
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-12 ">No.</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs truncate w-1/4">Book</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-30">Returned On</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  w-38 min-w-38 max-w-38 whitespace-nowrap">Reason</th>
+                                                    <th class="py-3 px-2 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  w-38 min-w-38 max-w-38 whitespace-nowrap">Reason</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-24">Amount</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  whitespace-nowrap w-40">Status</th>
                                                     <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase truncate tracking-wider text-xs  w-46 min-w-46 max-w-46 whitespace-nowrap">Actions</th>
