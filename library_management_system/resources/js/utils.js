@@ -142,7 +142,6 @@ export function debounce(fn, delay) {
 
 export function resetButton(button, defaultIcon) {
     // Remove disabled state
-    console.log('Resetting button:', button);
     button.classList.add('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow');
     button.classList.remove(
         'cursor-not-allowed',

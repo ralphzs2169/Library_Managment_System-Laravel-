@@ -1,21 +1,20 @@
-import { showError, showConfirmation, showWarning, showToast, showDangerConfirmation} from "../utils/alerts.js";
-import {  INVALID_INPUT, BUSINESS_RULE_VIOLATION, NOT_FOUND } from "../config.js";
-import { displayInputErrors, scrollToFirstErrorInModal } from "../helpers.js";
-import { TRANSACTION_ROUTES } from "../config.js";
-import { closeConfirmBorrowModal } from "../pages/staff/confirmBorrow.js";
-import { closeConfirmRenewModal } from "../pages/staff/confirmRenew.js";
-import { closeConfirmReturnModal } from "../pages/staff/confirmReturn.js";
-import { reloadStaffDashboardData } from "./staffDashboardHandler.js";
-import { loadReservationRecords } from "./librarianSectionsHandler.js";
+import { showError, showConfirmation, showWarning, showToast, showDangerConfirmation} from "../../utils/alerts.js";
+import {  INVALID_INPUT, BUSINESS_RULE_VIOLATION, NOT_FOUND } from "../../config.js";
+import { displayInputErrors, scrollToFirstErrorInModal } from "../../helpers.js";
+import { TRANSACTION_ROUTES } from "../../config.js";
+import { closeConfirmBorrowModal } from "../../pages/staff/confirmBorrow.js";
+import { closeConfirmRenewModal } from "../../pages/staff/confirmRenew.js";
+import { closeConfirmReturnModal } from "../../pages/staff/confirmReturn.js";
+import { reloadStaffDashboardData } from "../staffDashboardHandler.js";
+import { loadReservationRecords } from "../librarianSectionsHandler.js";
 
-export async function borrowBook(borrowData, isStaffAction = true) {
+export async function borrowBook(borrowData) {
     // Add CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     borrowData.append('_token', csrfToken);
 
-    const validateRoute = isStaffAction ? TRANSACTION_ROUTES.STAFF_VALIDATE_BORROW : TRANSACTION_ROUTES.LIBRARIAN_VALIDATE_BORROW;
     // Step 1: Validate only
-    let response = await fetch(validateRoute, {
+    let response = await fetch(TRANSACTION_ROUTES.VALIDATE_BORROW, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -24,7 +23,7 @@ export async function borrowBook(borrowData, isStaffAction = true) {
         body: borrowData
     });
 
-    const result = await response.json();
+    let result = await response.json();
 
     if (!response.ok) {
         if (response.status === INVALID_INPUT) {
@@ -53,9 +52,8 @@ export async function borrowBook(borrowData, isStaffAction = true) {
     
     if (!isConfirmed) return false;
 
-    const performRoute = isStaffAction ? TRANSACTION_ROUTES.STAFF_PERFORM_BORROW : TRANSACTION_ROUTES.LIBRARIAN_PERFORM_BORROW;
     // Step 3: Submit borrow
-    response = await fetch(performRoute, {
+    response = await fetch(TRANSACTION_ROUTES.PERFORM_BORROW, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -64,17 +62,23 @@ export async function borrowBook(borrowData, isStaffAction = true) {
         body: borrowData
     });
 
-    const data = await response.json(); 
-
+    result = await response.json(); 
+    
     if (!response.ok) {
-        showError('Something went wrong', data.message || 'Please try again.');
+        showError('Something went wrong', result.message || 'Please try again.');
         return false;
     }
+    
+    const performerRole = result.data.action_performer_role;
 
-    isStaffAction ? reloadStaffDashboardData() : loadReservationRecords(undefined, false);
+    if (performerRole === 'staff') {
+        reloadStaffDashboardData();
+    } else if (performerRole === 'librarian') {
+        loadReservationRecords();
+    }
 
     showToast(`Book ${borrowData.get('is_from_reservation') === 'true' ? 'Checked out' : 'Borrowed'} Successfully!`, 'success');
-    return true;
+    return performerRole;
 }
 
 export async function getAvailableCopies(bookId) {

@@ -245,7 +245,7 @@ tbody.innerHTML = books
                     }
                     
                     if (transactionType === 'borrow'){
-                        openConfirmBorrowModal(member, book);
+                        openConfirmBorrowModal(member, book,  false);
                     } else if (transactionType === 'reservation') {
                         openConfirmReservationModal(member, book);
                     }
@@ -300,10 +300,6 @@ export function restoreProfileContent(modal, borrower, reloadProfileTabs = true)
     if (modal?.dataset?.view === 'profile') {
         return;
     }
-
-    console.log('Proceeding with restore...');
-    console.log('Modal dataset view:', modal?.dataset?.view);
-    console.log('Borrower data:', borrower);
 
     // Global single-flight guard across modules
     if (window.__restoreProfileInProgress) return;

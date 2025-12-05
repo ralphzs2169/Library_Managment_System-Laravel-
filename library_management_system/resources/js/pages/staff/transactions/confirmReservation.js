@@ -65,9 +65,9 @@ export async function initializeConfirmReservationModal(modal, reserver, book) {
         const newBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
 
-        newBtn.addEventListener('click', async function(e) {
+        newBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            await handleConfirmReservation();
+            handleConfirmReservation();
         });
     }
 
@@ -131,7 +131,6 @@ export function closeConfirmReservationModal() {
 }
 
 async function handleConfirmReservation() {
-
     // Prepare form data
     const formData = new FormData();
     formData.append('book_id', currentBook.id);
@@ -144,6 +143,6 @@ async function handleConfirmReservation() {
         closeConfirmReservationModal();
         setTimeout(() => {
             openBorrowerProfileModal(currentReserver.id, true, 'reservations-tab');
-        }, 160); // Wait for modal close animation
+        }, 160); 
     } 
 }

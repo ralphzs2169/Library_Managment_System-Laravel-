@@ -1,4 +1,4 @@
-import { returnBook } from '../../ajax/staffTransactionHandler.js';
+import { returnBook } from '../../ajax/transactions/borrowingHandler.js';
 import { restoreProfileContent } from './bookSelection.js';
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';

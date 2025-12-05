@@ -1,12 +1,11 @@
 import { showBookSelectionContent, restoreProfileContent} from './bookSelection.js';
-import { borrowBook } from '../../ajax/staffTransactionHandler.js';
+import { borrowBook } from '../../ajax/transactions/borrowingHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { fetchSettings } from '../../ajax/settingsHandler.js';
 import { closeConfirmReservationModal } from './transactions/confirmReservation.js';
-import { closeBorrowerModal, openBorrowerProfileModal } from './borrower/borrowerProfileModal.js';
+import { openBorrowerProfileModal } from './borrower/borrowerProfileModal.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js'; 
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
-import { closeConfirmReturnModal } from './confirmReturn.js';
 
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
@@ -17,7 +16,7 @@ let currentBook = null;
 const copySelect = document.getElementById('book_copy_id');
 const dueDateInput = document.getElementById('due_date');
 
-export async function initializeConfirmBorrowModal(modal, borrower, book, isFromReservation = false, isStaffAction = true) {
+export async function initializeConfirmBorrowModal(modal, borrower, book, isFromReservation = false) {
     currentBorrower = borrower;
     currentBook = book;
     
@@ -128,16 +127,9 @@ export async function initializeConfirmBorrowModal(modal, borrower, book, isFrom
         const newBtn = confirmBorrowBtn.cloneNode(true);
         confirmBorrowBtn.parentNode.replaceChild(newBtn, confirmBorrowBtn);
         
-        newBtn.addEventListener('click', async function(e) {
+        newBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const result = await handleConfirmBorrow(isFromReservation, isStaffAction);
-             if (result) {
-                // returnToBorrowerProfile();
-                const modal = document.getElementById('borrower-profile-modal');
-                const freshBorrowerDetails = await fetchBorrowerDetails(borrower.id);
-                await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true);    
-                closeConfirmReturnModal();
-            }
+            handleConfirmBorrow(isFromReservation);
         });
     }
 }
@@ -227,7 +219,7 @@ document.addEventListener('click', function(event) {
     }
 });
 
-export function openConfirmBorrowModal(borrower, book, isFromReservation = false, isStaffAction = true) {
+export function openConfirmBorrowModal(borrower, book, isFromReservation = false) {
     currentBorrower = borrower;
     currentBook = book;
     
@@ -245,9 +237,6 @@ export function openConfirmBorrowModal(borrower, book, isFromReservation = false
         titleElement.textContent = 'Finalize Borrowing Details';
     }
 
-    if (isFromReservation && isStaffAction) {
-        closeBorrowerModal(false);
-    }
     // Show modal immediately but invisible
     modal.classList.remove('hidden');
     
@@ -260,10 +249,10 @@ export function openConfirmBorrowModal(borrower, book, isFromReservation = false
     });
     
     // Initialize modal with data
-    initializeConfirmBorrowModal(modal, borrower, book, isFromReservation, isStaffAction);
+    initializeConfirmBorrowModal(modal, borrower, book, isFromReservation);
 }
 
-export function closeConfirmBorrowModal(isStaffAction = true) {
+export function closeConfirmBorrowModal() {
     const modalContent = document.getElementById('confirm-borrow-content');
     const modal = document.getElementById('confirm-borrow-modal');
 
@@ -276,19 +265,16 @@ export function closeConfirmBorrowModal(isStaffAction = true) {
     modalContent.classList.remove('scale-100', 'opacity-100');
     modalContent.classList.add('scale-95', 'opacity-0');
 
-    if (isStaffAction) {
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            // Pass the active borrower so profile buttons re-bind correctly
-            const profileModal = document.getElementById('borrower-profile-modal');
-            // Always restore profile content after borrowing
-            if (profileModal && currentBorrower) {
-                restoreProfileContent(profileModal, currentBorrower, true);
-            }
-        }, 150);
-    } else {
+    setTimeout(async () => {
         modal.classList.add('hidden');
-    }
+        // Pass the active borrower so profile buttons re-bind correctly
+        const profileModal = document.getElementById('borrower-profile-modal');
+        if (profileModal && currentBorrower) {
+            // Fetch fresh borrower details before restoring profile
+            const freshBorrowerDetails = await fetchBorrowerDetails(currentBorrower.id);
+            await initializeBorrowerProfileUI(profileModal, freshBorrowerDetails, true);
+        }
+    }, 150);
 
 }
 
@@ -327,7 +313,7 @@ export function returnToBookSelection(transactionType, member) {
     }, 150); // Wait for close animation to complete
 }
 
-async function handleConfirmBorrow(isFromReservation = false, isStaffAction = true) {
+async function handleConfirmBorrow(isFromReservation = false) {
     const copySelect = document.getElementById('book_copy_id');
     const dueDateInput = document.getElementById('due_date');
 
@@ -346,10 +332,16 @@ async function handleConfirmBorrow(isFromReservation = false, isStaffAction = tr
     }
     
     // Call the borrow handler
-    const result = await borrowBook(formData, isStaffAction);
-    if (result) {
-        // BUG HERE
-        closeConfirmBorrowModal(isStaffAction);
+    const performerRole = await borrowBook(formData);
+
+    if (performerRole === 'staff') {
+        closeConfirmBorrowModal();
+        setTimeout(() => {
+            openBorrowerProfileModal(currentBorrower.id, true);
+        }, 160);
+    } else {
+        // For librarians, just close the modal
+        closeConfirmBorrowModal();
     }
 }
 

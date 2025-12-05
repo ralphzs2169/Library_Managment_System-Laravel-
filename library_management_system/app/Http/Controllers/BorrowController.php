@@ -36,8 +36,8 @@ class BorrowController extends Controller
     {
         try {
             $bookCopy = BookCopy::findOrFail($request->input('book_copy_id'));
-            $transaction = $this->borrowService->borrowBook($request, $bookCopy, $request->boolean('is_from_reservation', false));
-            return $this->jsonResponse('success', 'Book borrowed successfully', 201, ['transaction' => $transaction]);
+            $result = $this->borrowService->borrowBook($request, $bookCopy, $request->boolean('is_from_reservation', false));
+            return $this->jsonResponse('success', 'Book borrowed successfully', 201, ['transaction' => $result['transaction'], 'action_performer_role' => $result['action_performer_role']]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);
             return $this->jsonResponse('error', 'The borrower or book copy could not be found.', 404);

@@ -57,11 +57,8 @@ export const LIBRARIAN_SECTION_ROUTES = {
 export const TRANSACTION_ROUTES = {
     INDEX: '/staff/transaction',
 
-    STAFF_VALIDATE_BORROW: '/staff/transaction/borrow/validate',
-    STAFF_PERFORM_BORROW: '/staff/transaction/borrow/perform',
-
-    LIBRARIAN_VALIDATE_BORROW: '/librarian/transaction/borrow/validate',
-    LIBRARIAN_PERFORM_BORROW: '/librarian/transaction/borrow/perform',
+    VALIDATE_BORROW: '/transaction/borrow/validate',
+    PERFORM_BORROW: '/transaction/borrow/perform',
     
     VALIDATE_RETURN: '/staff/transaction/return/validate',
     PERFORM_RETURN: '/staff/transaction/return/perform',

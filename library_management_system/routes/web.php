@@ -77,9 +77,6 @@ Route::prefix('librarian')
 
         Route::get('/settings', [SettingsController::class, 'index'])->name('librarian.settings');
         Route::put('/settings', [SettingsController::class, 'update'])->name('librarian.settings.update');
-
-        Route::post('/transaction/borrow/validate', [BorrowController::class, 'validateBorrow']);
-        Route::post('/transaction/borrow/perform', [BorrowController::class, 'performBorrow']);
         
         Route::put('/transaction/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
         Route::post('/transaction/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
@@ -101,12 +98,6 @@ Route::prefix('staff')
         Route::get('borrower/{user}', [UserController::class, 'borrowerDetails']);
         Route::get('/check-active-semester', [SemesterController::class, 'checkActiveSemester']);
 
-        Route::post('/transaction/borrow/validate', [BorrowController::class, 'validateBorrow']);
-        Route::post('/transaction/borrow/perform', [BorrowController::class, 'performBorrow']);
-
-        Route::post('/transaction/return/validate', [ReturnController::class, 'validateReturn']);
-        Route::post('/transaction/return/perform', [ReturnController::class, 'performReturn']);
-
         Route::post('/transaction/renewal/validate', [RenewalController::class, 'validateRenewal']);
         Route::post('/transaction/renewal/perform', [RenewalController::class, 'performRenewal']);
 
@@ -119,6 +110,19 @@ Route::prefix('staff')
         Route::post('/transaction/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
     });
 
+
+Route::prefix('transaction')
+    ->middleware(['auth'])
+    ->group(function () {
+
+
+        Route::post('/borrow/validate', [BorrowController::class, 'validateBorrow']);
+        Route::post('/borrow/perform', [BorrowController::class, 'performBorrow']);
+
+    });
+
+
 Route::middleware('auth')->get('/settings', [SettingsController::class, 'allSettings']);
+
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

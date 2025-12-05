@@ -6,6 +6,7 @@ import { populateActivePenalties } from './tablePenalties.js';
 import { populateReservationsTable } from './tableReservations.js';
 
 export async function initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs = true, initialActiveTab = 'currently-borrowed-tab') {
+    console.log('Initializing borrower profile UI for');
     console.log('Initializing borrower profile UI for:', borrower);
     if (!borrower) return;
     // Show skeleton

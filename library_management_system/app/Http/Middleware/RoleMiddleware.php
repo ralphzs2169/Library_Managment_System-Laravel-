@@ -13,12 +13,14 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role)
+    public function handle(Request $request, Closure $next, string $roles)
     {
-
         $user = $request->user();
 
-        if (!$user || $user->role !== $role) {
+        // Support multiple roles: 'role:librarian,staff'
+        $roleList = explode(',', $roles);
+
+        if (!$user || !in_array($user->role, $roleList)) {
             abort(403, 'Unauthorized action.');
         }
 

@@ -73,7 +73,7 @@ class BorrowService
                 
             }
 
-            return $transaction;
+            return ['transaction' => $transaction, 'action_performer_role' => $request->user()->role];
         });
     }
 }

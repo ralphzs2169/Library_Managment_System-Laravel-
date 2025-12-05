@@ -1,6 +1,6 @@
 import { clearInputError } from '../../helpers.js';
 import { fetchSettings } from '../../ajax/settingsHandler.js';
-import { renewBook } from '../../ajax/staffTransactionHandler.js';
+import { renewBook } from '../../ajax/transactions/borrowingHandler.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js';
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { showWarning } from '../../utils/alerts.js';
@@ -177,8 +177,6 @@ export function openConfirmRenewModal(renewer, transaction) {
     const modal = document.getElementById('confirm-renew-modal');
     const modalContent = document.getElementById('confirm-renew-content');
     modal.classList.remove('hidden');
-    // Always scroll to top before showing
-    modalContent.scrollTo({ top: 0, behavior: 'auto' });
     requestAnimationFrame(() => {
         modal.classList.remove('bg-opacity-0');
         modal.classList.add('bg-opacity-50');
