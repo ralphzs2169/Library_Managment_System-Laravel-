@@ -1,6 +1,4 @@
-export async function openDetailsModal(modal, modalContent, data, initializer, isStaffAction = false) {
-    console.log('Fetching details with data:', data);    
-    // Show modal immediately but invisible
+export async function openDetailsModal(modal, modalContent, data, initializer) {
     modal.classList.remove('hidden');
     
     // Trigger animation on next frame
@@ -11,7 +9,7 @@ export async function openDetailsModal(modal, modalContent, data, initializer, i
         modalContent.classList.add('scale-100', 'opacity-100');
     });
     
-    await initializer(modal, data , isStaffAction);
+    await initializer(modal, data);
 }
 
 // Role badge logic

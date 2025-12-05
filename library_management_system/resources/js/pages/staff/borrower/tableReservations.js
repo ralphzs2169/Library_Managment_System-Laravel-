@@ -1,6 +1,6 @@
 import { openConfirmBorrowModal } from "../confirmBorrow";
 import { formatDate } from '../../../utils.js';
-import { cancelReservation } from "../../../ajax/reservationHandler.js";
+import { cancelReservation } from "../../../ajax/transactions/reservationHandler.js";
 import { fetchBorrowerDetails } from '../../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrowerProfilePopulators.js';
 import { closeConfirmReturnModal } from '../confirmReturn.js';
@@ -63,25 +63,12 @@ export function populateReservationsTable(modal, borrower) {
 
         // Actions: Pickup and Cancel buttons
         let pickupButton = '';
-
+   
         if (reservation.status === 'ready_for_pickup') {
             if (borrower.can_borrow.result === 'success'){
                 pickupButton = `
                     <button class="pickup-reservation-button cursor-pointer tracking-wider inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-xs font-medium transition-all shadow-sm" 
-                        data-reservation='${JSON.stringify({
-                            reservation_id: reservation.id,
-                            book_id: reservation.book.id,
-                            book_title: reservation.book.title,
-                            cover_image: reservation.book.cover_image,
-                            author_firstname: reservation.book.author.firstname,
-                            author_lastname: reservation.book.author.lastname,
-                            genre_name: reservation.book.genre.name,
-                            category_name: reservation.book.genre.category.name,
-                            isbn: reservation.book.isbn,
-                            publication_year: reservation.book.publication_year,
-                            book_copy_id: reservation.book_copy_id,
-                            book_copy_number: reservation.book_copy.copy_number
-                        }).replace(/'/g, "&#39;")}'>
+                        data-reservation='${JSON.stringify(reservation).replace(/'/g, "&#39;")}'>
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
@@ -171,27 +158,8 @@ export function attachReservationActions(tbody, borrower) {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             const reservationData = JSON.parse(this.dataset.reservation);
-            
-            const bookData = {
-                id: reservationData.book_id,
-                title: reservationData.book_title,
-                cover_image: reservationData.cover_image,
-                author_firstname: reservationData.author_firstname,
-                author_lastname: reservationData.author_lastname,
-                isbn: reservationData.isbn,
-                publication_year: reservationData.publication_year,
-                genre : {
-                    name: reservationData.genre_name,
-                    category: {
-                        name: reservationData.category_name
-                    }
-                },
-                book_copy: {
-                    id: reservationData.book_copy_id,
-                    copy_number: reservationData.book_copy_number
-                }
-            };
-      
+            const bookData = {...reservationData.book, book_copy: reservationData.book_copy};   
+    
             openConfirmBorrowModal(borrower, bookData, true);
         });
     });

@@ -1,7 +1,7 @@
 // import { showBookSelectionContent, restoreProfileContent } from '../bookSelection.js';
 import { clearInputError } from '../../../helpers.js';
 import { returnToBookSelection } from '../confirmBorrow.js';
-import { addReservation } from '../../../ajax/reservationHandler.js';
+import { addReservation } from '../../../ajax/transactions/reservationHandler.js';
 import { openBorrowerProfileModal } from '../borrower/borrowerProfileModal.js';
 
 let currentReserver = null;

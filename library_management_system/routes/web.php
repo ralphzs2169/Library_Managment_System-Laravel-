@@ -80,7 +80,6 @@ Route::prefix('librarian')
         
         Route::put('/transaction/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
         Route::post('/transaction/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
-        Route::post('/transaction/reservation/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
     });
 
 Route::prefix('staff')
@@ -98,27 +97,29 @@ Route::prefix('staff')
         Route::get('borrower/{user}', [UserController::class, 'borrowerDetails']);
         Route::get('/check-active-semester', [SemesterController::class, 'checkActiveSemester']);
 
-        Route::post('/transaction/renewal/validate', [RenewalController::class, 'validateRenewal']);
-        Route::post('/transaction/renewal/perform', [RenewalController::class, 'performRenewal']);
-
-        Route::post('/transaction/reservation/validate', [ReservationController::class, 'validateReservation']);
-        Route::post('/transaction/reservation/perform', [ReservationController::class, 'performReservation']);
-        Route::get('/transaction/reservation/{user}/book/{book}/available-copies', [ReservationController::class, 'availableCopiesForReservation']);
-        Route::post('/transaction/reservation/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
-        
-        Route::put('/transaction/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
-        Route::post('/transaction/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
     });
 
 
 Route::prefix('transaction')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'role:librarian,staff'])
     ->group(function () {
-
 
         Route::post('/borrow/validate', [BorrowController::class, 'validateBorrow']);
         Route::post('/borrow/perform', [BorrowController::class, 'performBorrow']);
 
+        Route::post('/return/validate', [ReturnController::class, 'validateReturn']);
+        Route::post('/return/perform', [ReturnController::class, 'performReturn']);
+
+        Route::post('/renewal/validate', [RenewalController::class, 'validateRenewal']);
+        Route::post('/renewal/perform', [RenewalController::class, 'performRenewal']);
+
+        Route::post('/reservation/validate', [ReservationController::class, 'validateReservation']);
+        Route::post('/reservation/perform', [ReservationController::class, 'performReservation']);
+        Route::get('/reservation/{user}/book/{book}/available-copies', [ReservationController::class, 'availableCopiesForReservation']);
+        Route::post('/reservation/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
+
+        Route::put('/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
+        Route::post('/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
     });
 
 

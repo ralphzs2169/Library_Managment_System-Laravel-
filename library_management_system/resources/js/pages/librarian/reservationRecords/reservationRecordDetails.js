@@ -1,10 +1,11 @@
 import { openDetailsModal } from "../utils/popupDetailsModal";
 import { showError } from "../../../utils/alerts";
 import { populateRoleBadge } from "../utils/popupDetailsModal";
-import { cancelReservation } from "../../../ajax/reservationHandler";
+import { cancelReservation } from "../../../ajax/transactions/reservationHandler";
 import { closeConfirmBorrowModal, openConfirmBorrowModal } from "../../staff/confirmBorrow";
 import { getReservationStatusBadge } from "../../../utils/statusBadge";
 import { formatDate } from "../../../utils";
+
 
 export function initializeReservationRecordDetailListeners() {
     // Always re-attach listeners after table updates (AJAX)
@@ -18,8 +19,6 @@ export function initializeReservationRecordDetailListeners() {
             e.preventDefault();
        
             const reservationRecord = JSON.parse(button.getAttribute('data-reservation-record'));
-            const actionBy = button.getAttribute('data-action-by');
-            const isStaffAction = actionBy === 'staff';
             
             if (!reservationRecord) {
                 showError('Data Error', 'Reservation record data is missing or invalid.');
@@ -36,7 +35,10 @@ export function initializeReservationRecordDetailListeners() {
             if (scrollableContainer) {
                 scrollableContainer.scrollTop = 0;
             }
-            await openDetailsModal(modal, modalContent, { reservationRecord }, initializeReservationRecordDetailsModal, isStaffAction);
+            await openDetailsModal(modal, 
+                                   modalContent, 
+                                   { reservationRecord }, 
+                                   initializeReservationRecordDetailsModal);
         });
     });
 }
@@ -46,7 +48,7 @@ export function initializeReservationRecordDetailListeners() {
 
 let reservationRecordModalListenersInitialized = false;
 
-function initializeReservationRecordDetailsModal(modal, data, isStaffAction) {
+function initializeReservationRecordDetailsModal(modal, data) {
     const reservation = data.reservationRecord;
     const borrower = reservation.borrower;
     const book = reservation.book ?? {};
@@ -159,13 +161,19 @@ function initializeReservationRecordDetailsModal(modal, data, isStaffAction) {
         });
 
         checkoutBtn && (checkoutBtn.onclick = () => {
-
+            const modal = document.getElementById('reservation-record-details-modal');
+            modal.classList.add('hidden');
             book.book_copy = reservation.book_copy;
-            closeReservationRecordModal(false);
-            const result = openConfirmBorrowModal(borrower, book, true, isStaffAction);
+            // closeReservationRecordModal(false);
+
+            //This context indicates where the borrow action is initiated from
+            const context = 'main_table_view';
+            const result = openConfirmBorrowModal(borrower, book, true, context);
+
             if (result) {
                 closeConfirmBorrowModal(false);
             }
+
         });
 
         // Close button

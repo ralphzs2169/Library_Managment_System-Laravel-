@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
+use App\Models\Reservation;
 
 class StaffDashboardController extends Controller
 {
@@ -342,7 +342,7 @@ class StaffDashboardController extends Controller
 
    public function queueReservationsList(Request $request)
 {
-    $query = \App\Models\Reservation::with(['borrower.students.department', 'borrower.teachers.department', 'book.author'])
+    $query = Reservation::with(['borrower.students.department', 'borrower.teachers.department', 'book.author', 'bookCopy'])
         ->whereIn('status', [\App\Enums\ReservationStatus::PENDING, \App\Enums\ReservationStatus::READY_FOR_PICKUP]);
 
     // Apply search filter

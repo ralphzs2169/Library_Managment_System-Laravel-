@@ -1,9 +1,9 @@
-import { BUSINESS_RULE_VIOLATION, NOT_FOUND } from "../config";
-import { reloadStaffDashboardData } from "./staffDashboardHandler";
-import { showError, showConfirmation, showWarning, showToast, showDangerConfirmation} from "../utils/alerts.js";
-import { loadReservationRecords } from "./librarianSectionsHandler";
-import { closeConfirmBorrowModal } from "../pages/staff/confirmBorrow";
-import { TRANSACTION_ROUTES } from "../config";
+import { BUSINESS_RULE_VIOLATION, NOT_FOUND } from "../../config.js";
+import { reloadStaffDashboardData } from "../staffDashboardHandler.js";
+import { showError, showConfirmation, showWarning, showToast, showDangerConfirmation} from "../../utils/alerts.js";
+import { loadReservationRecords } from "../librarianSectionsHandler.js";
+import { closeConfirmBorrowModal } from "../../pages/staff/confirmBorrow.js";
+import { TRANSACTION_ROUTES } from "../../config.js";
 
 export async function addReservation(reservationData) {
     // Add CSRF token
@@ -68,7 +68,7 @@ export async function addReservation(reservationData) {
     return true;
 }
 
-export async function cancelReservation(reservationId, isStaffAction = true) {
+export async function cancelReservation(reservationId) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     const isConfirmed = await showDangerConfirmation(
@@ -78,10 +78,8 @@ export async function cancelReservation(reservationId, isStaffAction = true) {
     );      
 
     if (!isConfirmed) return false;
-
-    const route = isStaffAction ? TRANSACTION_ROUTES.STAFF_CANCEL_RESERVATION(reservationId) : TRANSACTION_ROUTES.LIBRARIAN_CANCEL_RESERVATION(reservationId);
     
-    const response = await fetch(route, {
+    const response = await fetch(TRANSACTION_ROUTES.CANCEL_RESERVATION(reservationId), {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -97,7 +95,9 @@ export async function cancelReservation(reservationId, isStaffAction = true) {
         return false;
     }
 
-    if (isStaffAction) {
+    const performedBy = result.data.action_performer_role;
+    
+    if (performedBy === 'staff') {
         reloadStaffDashboardData();
     } else {
         loadReservationRecords(undefined, false);

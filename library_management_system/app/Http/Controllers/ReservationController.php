@@ -83,7 +83,7 @@ class ReservationController extends Controller
             }
 
 
-            return $this->jsonResponse('success', 'Reservation cancelled successfully', 200, ['reservation' => $reservation]);
+            return $this->jsonResponse('success', 'Reservation cancelled successfully', 200, ['action_performer_role' => $request->user()->role]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);
             return $this->jsonResponse('error', 'The reservation could not be found.', 404);

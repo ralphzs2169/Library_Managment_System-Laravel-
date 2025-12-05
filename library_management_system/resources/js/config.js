@@ -60,24 +60,20 @@ export const TRANSACTION_ROUTES = {
     VALIDATE_BORROW: '/transaction/borrow/validate',
     PERFORM_BORROW: '/transaction/borrow/perform',
     
-    VALIDATE_RETURN: '/staff/transaction/return/validate',
-    PERFORM_RETURN: '/staff/transaction/return/perform',
+    VALIDATE_RETURN: '/transaction/return/validate',
+    PERFORM_RETURN: '/transaction/return/perform',
 
-    VALIDATE_RENEWAL: '/staff/transaction/renewal/validate',
-    PERFORM_RENEWAL: '/staff/transaction/renewal/perform',
+    VALIDATE_RENEWAL: '/transaction/renewal/validate',
+    PERFORM_RENEWAL: '/transaction/renewal/perform',
 
-    VALIDATE_RESERVATION: '/staff/transaction/reservation/validate',
-    PERFORM_RESERVATION: '/staff/transaction/reservation/perform',
+    VALIDATE_RESERVATION: '/transaction/reservation/validate',
+    PERFORM_RESERVATION: '/transaction/reservation/perform',
    
     // AVAILABLE_COPIES_FOR_RESERVATION: (memberId, bookId) => `/staff/transaction/${memberId}/book/${bookId}/available-copies`,
-    STAFF_CANCEL_RESERVATION: (reservationId) => `/staff/transaction/reservation/${reservationId}/cancel`,
-    LIBRARIAN_CANCEL_RESERVATION: (reservationId) => `/librarian/transaction/reservation/${reservationId}/cancel`,
+    CANCEL_RESERVATION: (reservationId) => `/transaction/reservation/${reservationId}/cancel`,
 
-    STAFF_PROCESS_PENALTY: (id) => `/staff/transaction/penalty/${id}`,
-    LIBRARIAN_PROCESS_PENALTY: (id) => `/librarian/transaction/penalty/${id}`,
-
-    STAFF_CANCEL_PENALTY: (penaltyId, borrowerId) =>  `/staff/transaction/${borrowerId}/penalty/${penaltyId}/cancel`,
-    LIBRARIAN_CANCEL_PENALTY: (penaltyId, borrowerId) =>  `/librarian/transaction/${borrowerId}/penalty/${penaltyId}/cancel`,
+    PROCESS_PENALTY: (id) => `/transaction/penalty/${id}`,
+    CANCEL_PENALTY: (penaltyId, borrowerId) =>  `/transaction/${borrowerId}/penalty/${penaltyId}/cancel`,
 }
 
 
