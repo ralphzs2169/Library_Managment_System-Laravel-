@@ -23,4 +23,9 @@ class Clearance extends Model
     {
         return $this->belongsTo(User::class, 'requested_by_id');
     }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by_id');
+    }
 }

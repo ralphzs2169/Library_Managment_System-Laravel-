@@ -5,6 +5,8 @@ import { populateCurrentlyBorrowedBooks } from './tableBorrowedBooks.js';
 import { populateActivePenalties } from './tablePenalties.js';
 import { populateReservationsTable } from './tableReservations.js';
 import { requestClearance } from '../../../ajax/clearanceHandler.js';
+
+
 export async function initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs = true, initialActiveTab = 'currently-borrowed-tab', actionPerformer = null) {
 
     if (!borrower) return;
@@ -24,9 +26,46 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
         populateTotalFines(modal, borrower);
         // populateReservationCountBadge(modal, borrower);
 
-        setupProfileButton(modal, borrower, 'borrow');
-        setupProfileButton(modal, borrower, 'reservation');
-        setupProfileButton(modal, borrower, 'clearance', actionPerformer);
+        // Handle Cleared Status Logic
+        const borrowBtn = modal.querySelector("#borrow-book-btn");
+        const reserveBtn = modal.querySelector("#add-reservation-btn");
+        const clearanceBtn = modal.querySelector("#clearance-btn");
+        const buttonsContainer = borrowBtn?.parentElement;
+
+        // Remove existing message if any (to avoid duplicates on re-render)
+        const existingMsg = modal.querySelector('#cleared-status-message');
+        if (existingMsg) existingMsg.remove();
+
+        if (borrower.library_status === 'cleared') {
+            // Hide buttons
+            if(borrowBtn) borrowBtn.classList.replace('inline-flex', 'hidden');
+            if(reserveBtn) reserveBtn.classList.replace('inline-flex', 'hidden');
+            if(clearanceBtn) clearanceBtn.classList.replace('inline-flex', 'hidden');
+
+            // Show message
+            if (buttonsContainer) {
+                const msgDiv = document.createElement('div');
+                msgDiv.id = 'cleared-status-message';
+                msgDiv.className = 'w-full p-4 bg-blue-50 border border-blue-100 text-blue-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2';
+                msgDiv.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Clearance granted. User account is currently inactive for borrowing and reservations.
+                `;
+                buttonsContainer.appendChild(msgDiv);
+            }
+        } else {
+            // Ensure buttons are visible (if they exist)
+            if(borrowBtn) borrowBtn.classList.remove('hidden');
+            if(reserveBtn) reserveBtn.classList.remove('hidden');
+            if(clearanceBtn) clearanceBtn.classList.remove('hidden');
+
+            setupProfileButton(modal, borrower, 'borrow');
+            setupProfileButton(modal, borrower, 'reservation');
+            setupProfileButton(modal, borrower, 'clearance', actionPerformer);
+        }
+
         // Borrower Section Tabs/Tables
         populateCurrentlyBorrowedBooks(modal, borrower);
         populateActivePenalties(modal, borrower);
@@ -98,7 +137,7 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
             disableMessage = borrower.can_reserve.message;
             break;
         case 'clearance':
-            console.log('Action performer for clearance:', actionPerformer);
+            
             if (actionPerformer?.role === 'staff') {
                 // Change button text for staff
                 button.innerHTML = `<img src="${defaultIcon}" class="w-5 h-5"> Request Clearance`;
@@ -202,6 +241,14 @@ function populateStatusBadge(modal, borrower) {
         statusBadge.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            ${statusText}
+        `;
+    } else if (status === 'cleared') {
+        statusBadge.classList.add('bg-blue-100', 'text-blue-700');
+        statusBadge.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             ${statusText}
         `;

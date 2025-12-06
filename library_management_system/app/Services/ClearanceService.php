@@ -29,7 +29,11 @@ class ClearanceService
 
             $clearance->update([
                 'status' => ClearanceStatus::APPROVED,
-                'cleared_by_id' => $librarianId,
+                'approved_by_id' => $librarianId, // Fixed column name
+            ]);
+
+            $clearance->user->update([
+                'library_status' => 'cleared',
             ]);
 
             ActivityLog::create([
@@ -55,7 +59,7 @@ class ClearanceService
 
             $clearance->update([
                 'status' => ClearanceStatus::REJECTED,
-                'cleared_by_id' => $librarianId,
+                'approved_by_id' => $librarianId, // Fixed column name (using approved_by_id for the processor)
                 'remarks' => $remarks,
             ]);
 

@@ -12,6 +12,7 @@ use App\Policies\BorrowPolicy;
 use App\Policies\ClearancePolicy;
 use App\Services\ClearanceService;
 use App\Models\Clearance; // Add this import
+use App\Models\Semester;
 
 class ClearanceController extends Controller
 {
@@ -20,6 +21,19 @@ class ClearanceController extends Controller
     public function __construct(ClearanceService $clearanceService)
     {
         $this->clearanceService = $clearanceService;
+    }
+
+    public function index(Request $request)
+    {
+        $semesters = Semester::orderBy('start_date', 'desc')->get();
+        $activeSemesterId = Semester::where('status', 'active')?->value('id');
+
+        // Eager load 'approvedBy' along with user and requestedBy
+        return view('pages.librarian.clearance-management', [
+            'clearances' => Clearance::with(['user', 'requestedBy', 'approvedBy'])->get(), 
+            'semesters' => $semesters,
+            'activeSemesterId' => $activeSemesterId,
+        ]);
     }
 
     public function validateClearanceRequest(Request $request)
@@ -84,7 +98,7 @@ class ClearanceController extends Controller
             $clearanceRequest = Clearance::with('user')->findOrFail($clearanceId);
 
             // Check if the STUDENT can be cleared (not the librarian)
-            $result = ClearancePolicy::canBeCleared($clearanceRequest->user);
+            $result = ClearancePolicy::canBeCleared($clearanceRequest->user, 'approval');
             if ($result['result'] !== 'success') {
                 return $this->jsonResponse('business_rule_violation', $result['message'], 400);
             }
@@ -99,6 +113,26 @@ class ClearanceController extends Controller
         } catch (\Exception $e) {
             Log::error($e);
             return $this->jsonResponse('error', 'Something went wrong while approving clearance. Please try again later.', 500);
+        }
+    }
+
+    public function rejectClearance(Request $request, $clearanceId)
+    {
+        try {
+            $result = ClearancePolicy::canPerformClearance($request->user());
+            if ($result['result'] !== 'success') {
+                return $this->jsonResponse('error', 'Unauthorized to reject clearance', 403);
+            }
+
+            $clearance = $this->clearanceService->rejectClearance($clearanceId, $request->user()->id);
+
+            return $this->jsonResponse('success', 'Clearance rejected successfully', 200, ['clearance' => $clearance]);
+        } catch (ModelNotFoundException $e) {
+            Log::error($e);
+            return $this->jsonResponse('error', 'The clearance request could not be found.', 404);
+        } catch (\Exception $e) {
+            Log::error($e);
+            return $this->jsonResponse('error', 'Something went wrong while rejecting clearance. Please try again later.', 500);
         }
     }
 

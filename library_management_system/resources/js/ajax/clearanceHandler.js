@@ -1,17 +1,18 @@
 import { showError, showConfirmation, showWarning, showToast } from "../utils/alerts.js";
-import { BUSINESS_RULE_VIOLATION, CLEARANCE_ROUTES, NOT_FOUND } from "../config.js";
-import { reloadStaffDashboardData } from "./staffDashboardHandler.js";
+import { BUSINESS_RULE_VIOLATION, NOT_FOUND, TRANSACTION_ROUTES } from "../config.js";
+import { reloadStaffDashboardData } from "../ajax/staffDashboardHandler.js";
+// import { loadClearanceRecords } from "../ajax/librarianSectionsHandler.js";
 
 
-export async function requestClearance(targetUserId, requestorId) {
+export async function requestClearance(userId, requestorId) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     const formData = new FormData();
-    formData.append('user_id', targetUserId);
+    formData.append('user_id', userId);
     formData.append('requestor_id', requestorId);
     formData.append('_token', csrfToken);
 
     // Step 1: Validate
-    let response = await fetch(CLEARANCE_ROUTES.VALIDATE_CLEARANCE_REQUEST(targetUserId, requestorId), {
+    let response = await fetch(TRANSACTION_ROUTES.VALIDATE_CLEARANCE_REQUEST(userId, requestorId), {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -44,7 +45,7 @@ export async function requestClearance(targetUserId, requestorId) {
     if (!isConfirmed) return false;
 
     // Step 3: Perform
-    response = await fetch(CLEARANCE_ROUTES.PERFORM_CLEARANCE_REQUEST(targetUserId, requestorId), {
+    response = await fetch(TRANSACTION_ROUTES.PERFORM_CLEARANCE_REQUEST(userId, requestorId), {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -63,7 +64,9 @@ export async function requestClearance(targetUserId, requestorId) {
     showToast('Clearance Requested Successfully', 'success');
     
     // Reload data (assuming this is primarily a staff action)
-    reloadStaffDashboardData();
+    if (typeof reloadStaffDashboardData === 'function') {
+        reloadStaffDashboardData();
+    }
 
     return true;
 }
@@ -79,7 +82,7 @@ export async function approveClearance(clearanceId) {
 
     if (!isConfirmed) return false;
 
-    const response = await fetch(CLEARANCE_ROUTES.APPROVE_CLEARANCE(clearanceId), {
+    const response = await fetch(`/transaction/clearance/${clearanceId}/approve`, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -102,6 +105,42 @@ export async function approveClearance(clearanceId) {
     showToast('Clearance Approved', 'success');
 
     // Reload librarian table
+    if (typeof loadClearanceRecords === 'function') {
+        loadClearanceRecords(undefined, false);
+    }
+
+    return true;
+}
+
+export async function rejectClearance(clearanceId) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    const isConfirmed = await showConfirmation(
+        'Reject Clearance?',
+        'Are you sure you want to reject this clearance request?',
+        'Yes, Reject'
+    );
+
+    if (!isConfirmed) return false;
+
+    const response = await fetch(`/transaction/clearance/${clearanceId}/reject`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        showError('Error', result.message || 'Failed to reject clearance.');
+        return false;
+    }
+
+    showToast('Clearance Rejected', 'success');
+
     if (typeof loadClearanceRecords === 'function') {
         loadClearanceRecords(undefined, false);
     }

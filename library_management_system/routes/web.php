@@ -19,11 +19,6 @@ use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\LibrarianSectionsController;
 
-use Illuminate\Http\Request;
-use App\Models\Genre;
-use App\Models\Librarian;
-use App\Models\Settings;
-use App\Models\User;
 
 Route::get('/', function () {
     return view('pages.welcome');
@@ -65,20 +60,26 @@ Route::prefix('librarian')
         Route::get('/section/penalty-records', [LibrarianSectionsController::class, 'penaltyRecords'])->name('section.penalty-records');
         Route::get('/section/borrowers', [LibrarianSectionsController::class, 'borrowers'])->name('section.borrowers');
         Route::get('/section/personnel-accounts', [LibrarianSectionsController::class, 'personnelAccounts'])->name('section.personnel-accounts');
+        Route::get('/section/clearance-management', [ClearanceController::class, 'index'])->name('section.clearance-management');
+        
+        // Fixed: Removed double naming and incorrect prefixing
+        Route::get('/section/semester-management', [SemesterController::class, 'index'])->name('section.semester-management');
+        Route::get('/section/activity-logs', [ActivityLogController::class, 'index'])->name('section.activity-logs');
 
-        Route::get('/semester-management', [SemesterController::class, 'index'])->name('semester-management');
+        
         Route::post('/semester-management', [SemesterController::class, 'store'])->name('semester-management.store');
         Route::get('/semester-management/create', [SemesterController::class, 'create'])->name('semester-management.create');
         Route::get('/semester-management/{id}/edit', [SemesterController::class, 'edit'])->name('semester-management.edit');
         Route::put('/semester-management/{id}', [SemesterController::class, 'update'])->name('semester-management.update');
         Route::post('/semester-management/{id}/activate', [SemesterController::class, 'activate'])->name('semester-management.activate');
         Route::post('/semester-management/{id}/deactivate', [SemesterController::class, 'deactivate'])->name('semester-management.deactivate');
-
-        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs');
+        
+        
         Route::get('/genres/by-category', [CategoryController::class, 'genresByCategory'])->name('genres.by-category');
-
-        Route::get('/settings', [SettingsController::class, 'index'])->name('librarian.settings');
-        Route::put('/settings', [SettingsController::class, 'update'])->name('librarian.settings.update');
+        
+        // Fixed: Removed 'librarian.' prefix from name to avoid double prefixing
+        Route::get('/settings', [SettingsController::class, 'index'])->name('section.settings');
+        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 
     });
 
@@ -128,7 +129,10 @@ Route::prefix('transaction/clearance')
 
         Route::post('/{targetUserId}/validate-request/{requestorId}', [ClearanceController::class, 'validateClearanceRequest']);
         Route::post('/{targetUserId}/perform-request/{requestorId}', [ClearanceController::class, 'performClearanceRequest']);
-        Route::post('/{userId}/mark-as-cleared', [ClearanceController::class, 'markAsCleared']);
+        
+        // Updated routes for approval/rejection
+        Route::post('/{clearanceId}/approve', [ClearanceController::class, 'approveClearance']);
+        Route::post('/{clearanceId}/reject', [ClearanceController::class, 'rejectClearance']);
 
     });
 

@@ -10,7 +10,7 @@ use App\Enums\ReservationStatus;
 
 class ClearancePolicy
 {
-    public static function canBeCleared(User $user)
+    public static function canBeCleared(User $user, $context = 'request')
     {
         // 1. Check for unreturned books
         $hasUnreturnedBooks = $user->borrowTransactions()->whereNull('returned_at')->exists();
@@ -42,13 +42,16 @@ class ClearancePolicy
             return ['result' => 'business_rule_violation', 'message' => 'Borrower\'s library privileges are suspended.'];
         }
 
-        // 6. Check if user has a pending clearance request
-        $hasPendingClearance = $user->clearances()->where('status', ClearanceStatus::PENDING)->exists();
-        if ($hasPendingClearance) {
-            return ['result' => 'business_rule_violation', 'message' => 'Borrower already has a pending clearance request.'];
+
+        // 6. if request context, check for existing pending clearance requests
+        if ($context === 'request') {
+            $hasPendingClearance = $user->clearances()->where('status', ClearanceStatus::PENDING)->exists();
+            if ($hasPendingClearance) {
+                return ['result' => 'business_rule_violation', 'message' => 'Borrower already has a pending clearance request.'];
+            }
         }
 
-        return ['result' => 'success', 'borrower_fullname' => $user->full_name];
+        return ['result' => 'success', 'borrower_fullname' => $user->fullname];
     }
 
     public static function canPerformClearance(User $user)

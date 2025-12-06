@@ -67,25 +67,25 @@
             {{-- Clearance Management --}}
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3">
                 <img src="{{ asset('build/assets/icons/semester.svg') }}" alt="Clearance Management Icon" class="inline-block w-5 h-5 mr-3">
-                <a href="{{ asset('librarian/clearance-management') }}" class="sidebar-link">Clearance Management</a>
+                <a href="{{ route('librarian.section.clearance-management') }}" class="sidebar-link">Clearance Management</a>
             </li>
 
             {{-- Semester Management --}}
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3">
                 <img src="{{ asset('build/assets/icons/semester.svg') }}" alt="Semester Management Icon" class="inline-block w-5 h-5 mr-3">
-                <a href="{{ asset('librarian/semester-management') }}" class="sidebar-link">Semester Management</a>
+                <a href="{{ route('librarian.section.semester-management') }}" class="sidebar-link">Semester Management</a>
             </li>
 
             {{-- Activity Log --}}
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3">
                 <img src="{{ asset('build/assets/icons/activity-log.svg') }}" alt="Activity Log Icon" class="inline-block w-5 h-5 mr-3">
-                <a href="{{ asset('librarian/activity-logs') }}" class="sidebar-link">Activity Log</a>
+                <a href="{{ route('librarian.section.activity-logs') }}" class="sidebar-link">Activity Log</a>
             </li>
 
             {{-- Settings --}}
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3">
                 <img src="{{ asset('build/assets/icons/settings.svg') }}" alt="Settings Icon" class="inline-block w-5 h-5 mr-3">
-                <a href="{{ asset('librarian/settings') }}" class="sidebar-link">Settings</a>
+                <a href="{{ route('librarian.section.settings') }}" class="sidebar-link">Settings</a>
             </li>
         </ul>
     </nav>

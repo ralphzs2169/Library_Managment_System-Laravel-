@@ -21,6 +21,10 @@ class BorrowPolicy
             return ['result' => 'not_found', 'message' => 'Borrower not found.'];
         }   
 
+        if ($borrower->library_status === 'cleared') {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrower has been  cleared and cannot borrow books.'];
+        }
+
         // 2. For students, check active semester first (Highest specificity)
         if ($borrower->role === 'student') {
             $hasActive = Semester::where('status', 'active')->exists();
