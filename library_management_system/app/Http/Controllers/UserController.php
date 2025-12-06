@@ -33,13 +33,16 @@ class UserController extends Controller
 
     public function borrowerDetails(Request $request, $userId)
     {
-        $data = $this->userService->getBorrowerDetails($userId);
+        // Explicitly differentiate the requestor (Staff/Librarian) from the user being viewed (Student)
+        $requestorId = $request->user()->id;
+        $targetUserId = $userId;
+
+        // Service methods typically expect the Target ID first, then the Actor ID
+        $data = $this->userService->getBorrowerDetails($targetUserId, $requestorId);
 
         // Return both the user model (for server rendering) and explicit collections for API clients
-        return response()->json(['borrower' => $data['borrower']]);
+        return response()->json(['borrower' => $data['borrower'], 'action_performer' => $request->user()]);
     }
 
-
-   
 
 }

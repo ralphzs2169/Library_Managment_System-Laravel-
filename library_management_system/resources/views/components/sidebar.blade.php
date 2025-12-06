@@ -56,12 +56,18 @@
 
                 <ul class="mt-0.5 space-y-0">
                     <li class="hover:bg-secondary-light hover:text-white rounded py-1.5 px-3 pl-11 transition-colors duration-100 text-[#8593A6]">
-                        {{-- <a href="{{ route('librarian.section.borrowers') }}" class="sidebar-link block">Borrowers</a> --}}
+                        <a href="{{ route('librarian.section.borrowers') }}" class="sidebar-link block">Borrowers</a>
                     </li>
                     <li class="hover:bg-secondary-light hover:text-white rounded py-1.5 px-3 pl-11 transition-colors duration-100 text-[#8593A6]">
-                        {{-- <a href="{{ route('librarian.section.personnel-accounts') }}" class="sidebar-link block">Personnel Acounts</a> --}}
+                        <a href="{{ route('librarian.section.personnel-accounts') }}" class="sidebar-link block">Personnel Accounts</a>
                     </li>
                 </ul>
+            </li>
+
+            {{-- Clearance Management --}}
+            <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3">
+                <img src="{{ asset('build/assets/icons/semester.svg') }}" alt="Clearance Management Icon" class="inline-block w-5 h-5 mr-3">
+                <a href="{{ asset('librarian/clearance-management') }}" class="sidebar-link">Clearance Management</a>
             </li>
 
             {{-- Semester Management --}}

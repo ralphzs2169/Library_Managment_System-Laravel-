@@ -8,6 +8,7 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowController;
+use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\PenaltyController;
 use App\Http\Controllers\RenewalController;
 use App\Http\Controllers\UserController;
@@ -16,7 +17,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\StaffDashboardController;
-use App\Http\Controllers\LibrarianController;
+use App\Http\Controllers\LibrarianSectionsController;
 
 use Illuminate\Http\Request;
 use App\Models\Genre;
@@ -59,10 +60,11 @@ Route::prefix('librarian')
         Route::put('/category-management/genres/{genre}', [GenreController::class, 'update'])->name('category-management.genres.update');
         Route::delete('/category-management/genres/{genre}', [GenreController::class, 'destroy'])->name('category-management.genres.destroy');
 
-        Route::get('/section/borrowing-records', [LibrarianController::class, 'borrowingRecords'])->name('section.borrowing-records');
-        Route::get('/section/reservation-records', [LibrarianController::class, 'reservationRecords'])->name('section.reservation-records');
-        Route::get('/section/penalty-records', [LibrarianController::class, 'penaltyRecords'])->name('section.penalty-records');
-
+        Route::get('/section/borrowing-records', [LibrarianSectionsController::class, 'borrowingRecords'])->name('section.borrowing-records');
+        Route::get('/section/reservation-records', [LibrarianSectionsController::class, 'reservationRecords'])->name('section.reservation-records');
+        Route::get('/section/penalty-records', [LibrarianSectionsController::class, 'penaltyRecords'])->name('section.penalty-records');
+        Route::get('/section/borrowers', [LibrarianSectionsController::class, 'borrowers'])->name('section.borrowers');
+        Route::get('/section/personnel-accounts', [LibrarianSectionsController::class, 'personnelAccounts'])->name('section.personnel-accounts');
 
         Route::get('/semester-management', [SemesterController::class, 'index'])->name('semester-management');
         Route::post('/semester-management', [SemesterController::class, 'store'])->name('semester-management.store');
@@ -77,9 +79,7 @@ Route::prefix('librarian')
 
         Route::get('/settings', [SettingsController::class, 'index'])->name('librarian.settings');
         Route::put('/settings', [SettingsController::class, 'update'])->name('librarian.settings.update');
-        
-        Route::put('/transaction/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
-        Route::post('/transaction/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
+
     });
 
 Route::prefix('staff')
@@ -91,11 +91,6 @@ Route::prefix('staff')
         Route::get('/dashboard/active-borrows', [StaffDashboardController::class, 'activeBorrowsList']);
         Route::get('/dashboard/unpaid-penalties', [StaffDashboardController::class, 'unpaidPenaltiesList']);
         Route::get('/dashboard/queue-reservations', [StaffDashboardController::class, 'queueReservationsList']);
-
-        Route::get('/books/selection/{transaction_type}/{member_id}', [BookController::class, 'getBooksForBorrowOrReserve']);
-
-        Route::get('borrower/{user}', [UserController::class, 'borrowerDetails']);
-        Route::get('/check-active-semester', [SemesterController::class, 'checkActiveSemester']);
 
     });
 
@@ -120,6 +115,21 @@ Route::prefix('transaction')
 
         Route::put('/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
         Route::post('/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
+
+        // Additional routes for transaction-related functionalities
+        Route::get('/books/selection/{transaction_type}/{member_id}', [BookController::class, 'getBooksForBorrowOrReserve'])->name('books.selection');
+        Route::get('/borrower/{user}', [UserController::class, 'borrowerDetails']);
+        Route::get('/check-active-semester', [SemesterController::class, 'checkActiveSemester']);
+    });
+
+Route::prefix('transaction/clearance')
+    ->middleware(['auth', 'role:librarian,staff,student,teacher'])
+    ->group(function () {
+
+        Route::post('/{targetUserId}/validate-request/{requestorId}', [ClearanceController::class, 'validateClearanceRequest']);
+        Route::post('/{targetUserId}/perform-request/{requestorId}', [ClearanceController::class, 'performClearanceRequest']);
+        Route::post('/{userId}/mark-as-cleared', [ClearanceController::class, 'markAsCleared']);
+
     });
 
 

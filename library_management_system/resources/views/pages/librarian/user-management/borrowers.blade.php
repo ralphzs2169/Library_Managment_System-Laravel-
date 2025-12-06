@@ -1,4 +1,3 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\librarian\books-list.blade.php --}}
 <x-layout>
     <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
@@ -15,7 +14,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-gray-500 text-sm">Total Records (Filtered)</span>
-                    <span id="header-total-borrow-records" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">{{ $totalBorrowRecords }}</span>
+                    <span id="header-total-borrow-records" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm"></span>
                 </div>
             </div>
         </div>
@@ -60,33 +59,18 @@
                         <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Status: Returned (On Time)</option>
                     </select>
                     {{-- Semester Filter --}}
-                    <select id="borrow-records-semester-filter" name="semester" class="cursor-pointer px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
-                        <option value="">Semester: All</option>
-                        @foreach($semesters as $semester)
-                        <option value="{{ $semester->id }}" {{ request('semester') == $semester->id ? 'selected' : '' }} {{ $semester->id == $activeSemesterId ? 'selected' : '' }}>
-                            {{ $semester->name }}{{ $semester->id == $activeSemesterId ? ' (active)' : '' }}
-                        </option>
-                        @endforeach
-                    </select>
+
                     {{-- Reset Button --}}
                     <button type="button" id="reset-borrow-records-filters" class="ml-auto cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition whitespace-nowrap">
                         Reset Filters
                     </button>
                 </div>
             </div>
-            <div id="borrow-records-container">
-                @include('partials.librarian.circulation-records.borrowing-records-table', ['borrowTransactions' => $borrowTransactions])
+            <div id="borrowers-container">
+                @include('partials.librarian.user-management.borrowers-table', ['borrowers' => $borrowers])
             </div>
 
         </div>
     </section>
 
-    @include('modals.librarian.borrow-record-details')
-    @include('modals.confirm-renew')
-    @include('modals.confirm-return')
 </x-layout>
-
-@vite('resources/js/pages/librarian/utils/popupDetailsModal.js')
-@vite('resources/js/pages/manage-record-details/borrowRecordDetails.js')
-@vite('resources/js/ajax/librarianSectionsHandler.js')
-@vite('resources/js/pages/librarian/borrowingRecords/borrowRecordsTableControls.js')

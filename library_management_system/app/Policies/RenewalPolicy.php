@@ -8,6 +8,7 @@ use App\Models\Semester;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use App\Enums\ReservationStatus;
+use App\Enums\PenaltyStatus;
 
 class RenewalPolicy
 {
@@ -63,12 +64,20 @@ class RenewalPolicy
             }
         }
 
-        // 5. Check penalties
+        // 5. Check for outstanding penalties
+        $hasOutstandingPenalties = $renewer->penalties()
+            ->whereIn('penalties.status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
+            ->exists();
+        if ($hasOutstandingPenalties) {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrowing suspended due to an outstanding penalty.'];
+        }
+
+        // 6. Check penalties
         if ($renewer->library_status === 'suspended') {
             return ['result' => 'business_rule_violation', 'message' => 'Renewal suspended due to an outstanding penalty.'];
         }
 
-        // 6.  Check for any pending reservations under this book title
+        // 7.  Check for any pending reservations under this book title
         $hasPendingReservations = $transaction->bookCopy->book->reservations()
                 ->where('status', ReservationStatus::PENDING)
                 ->exists();

@@ -3,6 +3,7 @@ import { BORROWER_FILTERS } from "../utils/tableFilters.js";
 import { highlightSearchMatches } from "../tableControls.js";
 import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters.js";
 import { initStaffDashboardPagination } from "../tableControls.js";
+import { TRANSACTION_ROUTES } from "../config.js";
 
 export async function loadBorrowers(page = BORROWER_FILTERS.page, scrollUp = true) {
     try {
@@ -56,22 +57,23 @@ export async function loadBorrowers(page = BORROWER_FILTERS.page, scrollUp = tru
 
 export async function fetchBorrowerDetails(userId) {
      try {
-            const response = await fetch(`/staff/borrower/${userId}`, {
+
+            const response = await fetch(TRANSACTION_ROUTES.FETCH_BORROWER(userId), {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 }
             });
-            const data = await response.json();
-            
+            const result = await response.json();
+           
             if (!response.ok) {
                 showError('Something went wrong', 'Failed to load borrower details.');
                 return;
            }
            
-            return data.borrower;
+            return { borrower: result.borrower, actionPerformer: result.action_performer };
         } catch (error) {
-            showError('Network Error', 'Unable to load borrower details. Please try again later.');
+            showError('Network Error', error + 'Unable to load borrower details. Please try again later.');
         }
 }
 

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PenaltyStatus;
 use App\Models\User;
 use App\Models\Book;
 use App\Models\BorrowTransaction;
@@ -18,20 +19,32 @@ class BorrowPolicy
 
         if (!$borrower) {
             return ['result' => 'not_found', 'message' => 'Borrower not found.'];
-        }
+        }   
 
-        // 2. Check for outstanding penalties
-        if ($borrower->library_status === 'suspended') {
-            return ['result' => 'business_rule_violation', 'message' => 'Borrowing suspended due to an outstanding penalty.'];
-        }
-
-        // 2. For students, check active semester and borrow limit
+        // 2. For students, check active semester first (Highest specificity)
         if ($borrower->role === 'student') {
             $hasActive = Semester::where('status', 'active')->exists();
             if (!$hasActive) {
                 return ['result' => 'business_rule_violation', 'message' => 'No active semester found. Students can only borrow during an active semester.'];
             }
+        }
 
+        // 3. Check for outstanding penalties
+        $hasOutstandingPenalties = $borrower->penalties()
+            ->whereIn('penalties.status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
+            ->exists();
+        if ($hasOutstandingPenalties) {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrowing suspended due to an outstanding penalty.'];
+        }
+        
+        // 4. Check borrower's library status
+        if ($borrower->library_status === 'suspended') {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrower\'s library privileges are suspended.'];
+        }
+
+
+        // 4. Check borrow limits
+        if ($borrower->role === 'student') {
             $borrowCount = BorrowTransaction::where('user_id', $borrower->id)
                 ->where('status', 'borrowed')
                 ->count();
@@ -51,7 +64,7 @@ class BorrowPolicy
             }
         }
 
-        // 4. Field validation
+        // 5. Field validation
         if ($includeInputValidation) {
             $duration = $borrower->role === 'student'
                 ? (int) config('settings.borrowing.student_duration', 7)

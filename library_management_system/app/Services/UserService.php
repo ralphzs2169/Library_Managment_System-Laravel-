@@ -21,20 +21,20 @@ use App\Enums\ReservationStatus;
 use App\Policies\BorrowPolicy;
 use App\Policies\RenewalPolicy;
 use App\Policies\ReservationPolicy;
+use App\Policies\ClearancePolicy;
 
 
 class UserService
 {
 
-public function getBorrowerDetails(int $userId)
+public function getBorrowerDetails($targetUserId, $requestorId)
 {
     // Load user with student/teacher relationships
     $borrower = User::with(['students.department', 'teachers.department'])
-        ->findOrFail($userId);
-
+        ->findOrFail($targetUserId);
     // Get active borrow transactions (not yet returned, status borrowed/overdue)
     $activeBorrows = BorrowTransaction::with(['bookCopy.book.author'])
-        ->where('user_id', $userId)
+        ->where('user_id', $targetUserId)
         ->whereNull('returned_at')
         ->whereIn('status', ['borrowed', 'overdue'])
         ->get();
@@ -45,7 +45,7 @@ public function getBorrowerDetails(int $userId)
 
     // Get all transactions that have unpaid or partially paid penalties
     $transactionsWithActivePenalties = BorrowTransaction::with(['bookCopy.book.author', 'penalties.payments'])
-        ->where('user_id', $userId)
+        ->where('user_id', $targetUserId)
         ->whereHas('penalties', fn($query) => $query->whereIn('status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID]))
         ->get()
         ->flatMap(function ($borrowTransaction) {
@@ -128,8 +128,9 @@ public function getBorrowerDetails(int $userId)
         $borrower->total_unpaid_fines;
         $borrower->full_name;
         $borrower->active_borrows = $activeBorrows->values();
-        $borrower->can_borrow = BorrowPolicy::canBorrow(false, ['borrower_id' => $userId]);
+        $borrower->can_borrow = BorrowPolicy::canBorrow(false, ['borrower_id' => $targetUserId]);
         $borrower->can_reserve = ReservationPolicy::canReserve($borrower, null, false );
+        $borrower->can_request_clearance = ClearancePolicy::canRequestClearance($requestorId, $targetUserId);
         $borrower->transactions_with_penalties = $transactionsWithActivePenalties->values();
         $borrower->active_reservations = $activeReservations;
 

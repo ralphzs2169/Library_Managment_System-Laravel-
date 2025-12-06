@@ -24,8 +24,6 @@ export const BOOK_ROUTES = {
     STORE: '/librarian/books/store',
     EDIT: (id) => `/librarian/books/${id}/edit`,
     UPDATE: (id) => `/librarian/books/${id}`,
-    AVAILABLE_BOOKS: (params) => `/staff/books/available?${params}`,
-    BOOK_SELECTION: (transaction_type, member_id, params) => `/staff/books/selection/${transaction_type}/${member_id}?${params}`,
 };
 
 
@@ -37,8 +35,7 @@ export const SEMESTER_ROUTES = {
     UPDATE: (id) => `/librarian/semester-management/${id}`,
     ACTIVATE: (id) => `/librarian/semester-management/${id}/activate`,
     DEACTIVATE: (id) => `/librarian/semester-management/${id}/deactivate`,
-    
-    CHECK_ACTIVE: '/staff/check-active-semester',
+
 };
 
 export const STAFF_DASHBOARD_ROUTES = {
@@ -74,7 +71,20 @@ export const TRANSACTION_ROUTES = {
 
     PROCESS_PENALTY: (id) => `/transaction/penalty/${id}`,
     CANCEL_PENALTY: (penaltyId, borrowerId) =>  `/transaction/${borrowerId}/penalty/${penaltyId}/cancel`,
+
+    // Helpers for fetching books
+    FETCH_BORROWER: (borrowerId) => `/transaction/borrower/${borrowerId}`,
+    AVAILABLE_BOOKS: (params) => `/transaction/books/available?${params}`,
+    BOOK_SELECTION: (transaction_type, member_id, params) => `/transaction/books/selection/${transaction_type}/${member_id}?${params}`,
+    CHECK_ACTIVE: '/transaction/check-active-semester',
 }
+
+export const CLEARANCE_ROUTES = {
+    VALIDATE_CLEARANCE_REQUEST: (targetUserId, requestorId) => `/transaction/clearance/${targetUserId}/validate-request/${requestorId}`,
+    PERFORM_CLEARANCE_REQUEST: (targetUserId, requestorId) => `/transaction/clearance/${targetUserId}/perform-request/${requestorId}`,
+    
+    MARK_AS_CLEARED: (userId) => `/transaction/clearance/${userId}/mark-as-cleared`,
+};
 
 
 export const INVALID_INPUT = 422;      // Input format or missing fields

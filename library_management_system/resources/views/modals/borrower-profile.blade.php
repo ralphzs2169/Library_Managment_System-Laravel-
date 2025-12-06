@@ -145,7 +145,7 @@
                                         <img src="{{ asset("build/assets/icons/reservation-white.svg")}}" alt="Approve Icon" class="w-5 h-5">
                                         Add Reservation
                                     </button>
-                                    <button id="mark-as-cleared-button" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
+                                    <button id="clearance-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                         {{-- <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Mark as Cleared Icon" class="w-5 h-5"> --}}
                                         Mark as Cleared
                                     </button>

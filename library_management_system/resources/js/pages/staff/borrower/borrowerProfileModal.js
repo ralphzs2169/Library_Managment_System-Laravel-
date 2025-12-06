@@ -49,9 +49,10 @@ export async function openBorrowerProfileModal(userId, reloadProfileTabs = true,
         modalContent.classList.remove('scale-95', 'opacity-0');
         modalContent.classList.add('scale-100', 'opacity-100');
     });
-    console.log('Fetching borrower details for ID:', userId);
-    const borrower = await fetchBorrowerDetails(userId)
-    await initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs, initialActiveTab);
+
+    const { borrower, actionPerformer } = await fetchBorrowerDetails(userId)
+   
+    await initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs, initialActiveTab, actionPerformer);
 
     // Ensure modal and its scrollable content are scrolled to top after showing
     const scrollableContainer = document.getElementById('borrower-profile-scrollable-content');

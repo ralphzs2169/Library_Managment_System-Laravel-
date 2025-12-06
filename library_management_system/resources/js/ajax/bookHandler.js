@@ -65,7 +65,7 @@ export async function fetchBooksSelectionContent({ search = '' , sort = 'title_a
             page
         });
         
-        const response = await fetch(BOOK_ROUTES.BOOK_SELECTION(transactionType, memberId, params.toString()), {
+        const response = await fetch(TRANSACTION_ROUTES.BOOK_SELECTION(transactionType, memberId, params.toString()), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',

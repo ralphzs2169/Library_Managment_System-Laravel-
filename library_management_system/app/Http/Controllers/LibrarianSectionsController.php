@@ -9,11 +9,10 @@ use App\Enums\PenaltyStatus;
 use App\Models\Reservation;
 use App\Models\Semester;
 use App\Enums\ReservationStatus;
-use App\Policies\BookPolicy;
-use App\Policies\BorrowPolicy;
-use App\Policies\RenewalPolicy;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
-class LibrarianController extends Controller
+
+class LibrarianSectionsController extends Controller
 {
     public function borrowingRecords(Request $request)
     {
@@ -554,5 +553,20 @@ class LibrarianController extends Controller
             'semesters' => $semesters,
             'activeSemesterId' => $activeSemesterId
         ]);
+    }
+
+    public function borrowers(Request $request)
+    {
+        $query = User::with(['students.department', 'teachers.department'])
+            ->whereIn('role', ['student', 'teacher']);
+
+        return view('pages.librarian.user-management.borrowers', [
+            'borrowers' => $query->paginate(20)->withQueryString()
+        ]);
+    }
+
+    public function personnelAccounts(Request $request)
+    {
+        // Implementation for personnel accounts section
     }
 }

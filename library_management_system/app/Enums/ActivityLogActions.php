@@ -16,4 +16,9 @@ class ActivityLogActions {
     const RENEWED = 'renewed';
     const READY_FOR_PICKUP = 'reservation_ready_for_pickup';
     const AUTO_EXPIRED = 'reservation_expired';
+
+    const CLEARANCE_REQUESTED = 'clearance_requested';
+    const CLEARANCE_APPROVED = 'clearance_approved';
+    const CLEARANCE_REJECTED = 'clearance_rejected';
+    
 }

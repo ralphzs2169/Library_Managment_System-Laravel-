@@ -162,4 +162,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(IssueReport::class, 'approved_by');
     }
+
+    public function clearances()
+    {
+        return $this->hasMany(Clearance::class, 'user_id');
+    }
 }

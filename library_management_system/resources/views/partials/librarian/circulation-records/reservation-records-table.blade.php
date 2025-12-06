@@ -187,7 +187,7 @@
     <td colspan="8" class="py-20 text-center text-gray-500 text-sm">
         <div class="flex flex-col items-center justify-center">
             <img class="w-24 h-24" src="{{ asset('build/assets/icons/no-results-found.svg') }}" alt="No Results Found">
-            <p class="text-gray-500 text-lg font-medium mb-2">No results found</p>
+            <p class="text-gray-500 text-lg font-medium mb-2">No reservation records found</p>
             <p class="text-gray-400 text-sm">Try adjusting your search or filters</p>
         </div>
     </td>

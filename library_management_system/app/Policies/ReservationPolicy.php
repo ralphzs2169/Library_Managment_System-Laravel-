@@ -4,17 +4,13 @@ namespace App\Policies;
 
 use App\Enums\ReservationStatus;
 use App\Models\Semester;
+use App\Enums\PenaltyStatus;
 
 class ReservationPolicy
 {
     public static function canReserve($user, $book, $checkWithBookPolicy = true)
     {   
-        // 1. Check user status
-        if ($user->library_status === 'suspended') {
-            return ['result' => 'business_rule_violation', 'message' => 'Reservation suspended due to an outstanding penalty.'];
-        }
-
-        // 2. If student, check active semester
+        // 1. If student, check active semester
         if ($user->role === 'student') {
             $hasActive = Semester::where('status', 'active')->exists();
             if (!$hasActive) {
@@ -22,7 +18,21 @@ class ReservationPolicy
             }
         }
 
-        // 3. Check user max pending reservations
+        // 2. Check borrower's library status
+        if ($user->library_status === 'suspended') {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrower\'s library privileges are suspended.'];
+        }
+    
+        
+         // 4. Check for outstanding penalties
+        $hasOutstandingPenalties = $user->penalties()
+            ->whereIn('penalties.status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
+            ->exists();
+        if ($hasOutstandingPenalties) {
+            return ['result' => 'business_rule_violation', 'message' => 'Reservation suspended due to an outstanding penalty.'];
+        }
+
+        // 5. Check user max pending reservations
         $maxPending = (int) config('settings.reservation.' . $user->role . '_max_pending_reservations');
 
         $pendingCount = $user->reservations()
@@ -44,6 +54,8 @@ class ReservationPolicy
                 return $bookReservationCheck;
             }
         }
+
+      
 
         return [
             'result' => 'success',

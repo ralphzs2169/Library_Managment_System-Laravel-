@@ -4,8 +4,8 @@ import { showBookSelectionContent } from '../bookSelection.js';
 import { populateCurrentlyBorrowedBooks } from './tableBorrowedBooks.js';
 import { populateActivePenalties } from './tablePenalties.js';
 import { populateReservationsTable } from './tableReservations.js';
-
-export async function initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs = true, initialActiveTab = 'currently-borrowed-tab') {
+import { requestClearance } from '../../../ajax/clearanceHandler.js';
+export async function initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs = true, initialActiveTab = 'currently-borrowed-tab', actionPerformer = null) {
 
     if (!borrower) return;
     // Show skeleton
@@ -26,8 +26,7 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
 
         setupProfileButton(modal, borrower, 'borrow');
         setupProfileButton(modal, borrower, 'reservation');
-
-        
+        setupProfileButton(modal, borrower, 'clearance', actionPerformer);
         // Borrower Section Tabs/Tables
         populateCurrentlyBorrowedBooks(modal, borrower);
         populateActivePenalties(modal, borrower);
@@ -42,7 +41,7 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
     }
 }
 
-function setupProfileButton(modal, borrower, type) {
+function setupProfileButton(modal, borrower, type, actionPerformer = null) {
     let button = '';
     let defaultIcon = '';
     let disabledIcon = '';
@@ -61,9 +60,16 @@ function setupProfileButton(modal, borrower, type) {
             disabledIcon = '/build/assets/icons/reservation-gray.svg';
             condition = borrower.can_reserve.result === 'success';
             break;
+        case 'clearance':
+            button = modal.querySelector("#clearance-btn");
+            defaultIcon = '/build/assets/icons/clearance-white.svg'; // Ensure this icon exists or use a fallback
+            disabledIcon = '/build/assets/icons/clearance-gray.svg';
+            break;
         default:
             return; // nothing to do
     }
+
+    if (!button) return;
 
     // Reset button to default state
     resetButton(button, defaultIcon);
@@ -91,6 +97,23 @@ function setupProfileButton(modal, borrower, type) {
             }
             disableMessage = borrower.can_reserve.message;
             break;
+        case 'clearance':
+            console.log('Action performer for clearance:', actionPerformer);
+            if (actionPerformer?.role === 'staff') {
+                // Change button text for staff
+                button.innerHTML = `<img src="${defaultIcon}" class="w-5 h-5"> Request Clearance`;
+                
+                if (borrower.can_request_clearance && borrower.can_request_clearance.result === 'success') {
+                    isAuthorized = true;
+                } else {
+                    disableMessage = borrower.can_request_clearance?.message || 'Clearance request not available.';
+                }
+            } else {
+                // Logic for librarian or other roles if needed (e.g., Approve Clearance)
+                // For now, disable if not staff based on current requirements
+                disableMessage = 'Only staff can request clearance.';
+            }
+            break;
         default:
             return; 
     }
@@ -98,7 +121,12 @@ function setupProfileButton(modal, borrower, type) {
     if (isAuthorized) {
         button.addEventListener('click', (e) => {
             e.preventDefault();
-            showBookSelectionContent(modal, borrower, type, false);
+            if (type === 'clearance') {
+                const requestorId = actionPerformer.id;
+                requestClearance(borrower.id, requestorId);
+            } else {
+                showBookSelectionContent(modal, borrower, type, false);
+            }
         });
         return;
     } 
