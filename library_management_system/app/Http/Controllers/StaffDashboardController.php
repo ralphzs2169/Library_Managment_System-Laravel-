@@ -346,7 +346,7 @@ class StaffDashboardController extends Controller
 
    public function queueReservationsList(Request $request)
     {
-        $query = Reservation::with(['borrower.students.department', 'borrower.teachers.department', 'book.author', 'bookCopy'])
+        $query = Reservation::with(['borrower.students.department', 'borrower.teachers.department', 'book.author', 'bookCopy', 'createdBy' ])
             ->whereIn('status', [\App\Enums\ReservationStatus::PENDING, \App\Enums\ReservationStatus::READY_FOR_PICKUP]);
 
         // Apply search filter

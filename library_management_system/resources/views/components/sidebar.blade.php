@@ -56,10 +56,10 @@
 
                 <ul class="mt-0.5 space-y-0">
                     <li class="hover:bg-secondary-light hover:text-white rounded py-1.5 px-3 pl-11 transition-colors duration-100 text-[#8593A6]">
-                        <a href="{{ asset('index.php?route=users') }}" class="sidebar-link block">Borrowers</a>
+                        {{-- <a href="{{ route('librarian.section.borrowers') }}" class="sidebar-link block">Borrowers</a> --}}
                     </li>
                     <li class="hover:bg-secondary-light hover:text-white rounded py-1.5 px-3 pl-11 transition-colors duration-100 text-[#8593A6]">
-                        <a href="{{ asset('index.php?route=users/staff') }}" class="sidebar-link block">Personnel Acounts</a>
+                        {{-- <a href="{{ route('librarian.section.personnel-accounts') }}" class="sidebar-link block">Personnel Acounts</a> --}}
                     </li>
                 </ul>
             </li>

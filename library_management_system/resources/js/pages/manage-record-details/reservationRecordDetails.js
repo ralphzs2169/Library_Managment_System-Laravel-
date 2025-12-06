@@ -83,6 +83,8 @@ function initializeReservationRecordDetailsModal(modal, data) {
     confirmedCopyNumber.textContent = reservation.book_copy ? `Copy No.${reservation.book_copy.copy_number}` : '-- (Pending Confirmation)';
     const creatorRole = reservation.created_by.role;
     const creatorName = `${reservation.created_by.lastname}, ${reservation.created_by.firstname}`;
+    console.log('Creator Role:', creatorRole);
+    console.log('Creator Name:', creatorName);
     reservationCreator.innerHTML = creatorRole === 'staff' 
         ? `<span class="font-bold text-gray-800">(Staff)</span>
            <span class="text-xs text-gray-800 font-light">${creatorName}</span>`
