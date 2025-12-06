@@ -93,13 +93,13 @@
             <div id="penalty-records-container">
                 @include('partials.librarian.circulation-records.penalty-records-table', ['penalties' => $penalties, 'semesters' => $semesters ])
             </div>
-            @include('modals.librarian.manage-penalty-record-details')
+            @include('modals.librarian.penalty-record-details')
             @include('modals.confirm-payment')
 
         </div>
 
         @vite('resources/js/pages/librarian/utils/popupDetailsModal.js')
-        @vite('resources/js/pages/librarian/penaltyRecords/penaltyRecordDetails.js')
+        @vite('resources/js/pages/manage-record-details/penaltyRecordDetails.js')
         @vite('resources/js/ajax/librarianSectionsHandler.js')
         @vite('resources/js/pages/librarian/penaltyRecords/penaltyRecordsTableControls.js')
     </section>

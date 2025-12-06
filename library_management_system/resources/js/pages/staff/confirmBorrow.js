@@ -6,6 +6,7 @@ import { closeConfirmReservationModal } from './transactions/confirmReservation.
 import { closeBorrowerModal, openBorrowerProfileModal } from './borrower/borrowerProfileModal.js';
 import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulators.js'; 
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
+import { populateRoleBadge } from '../librarian/utils/popupDetailsModal.js';
 
 const confirmBorrowModal = document.getElementById('confirm-borrow-modal');
 
@@ -32,6 +33,9 @@ export async function initializeConfirmBorrowModal(modal, borrower, book, isFrom
                 : borrower.teachers?.employee_number;
             borrowerId.textContent = idNumber || 'N/A';
         }
+
+        // Populate role badge
+        populateRoleBadge(modal, '#confirm-borrower-role-badge', borrower);
     }
 
 
@@ -194,15 +198,47 @@ if (backToBorrowBookButton) {
 
         if (fromReservation) {
             
-            const withAnimation = false
-            closeConfirmBorrowModal(withAnimation);
-
-            if (context === 'profile_view') {
-                openBorrowerProfileModal(backToBorrowBookButton.dataset.borrowerId, false, 'reservations-tab');
+            if (context === 'main_table_view') {
+                // Fade out confirm borrow modal first
+                const modal = document.getElementById('confirm-borrow-modal');
+                const modalContent = document.getElementById('confirm-borrow-content');
                 
+                modal.classList.remove('bg-opacity-50');
+                modal.classList.add('bg-opacity-0');
+                modalContent.classList.remove('scale-100', 'opacity-100');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    
+                    // Reopen reservation record details modal with animation
+                    const reservationModal = document.getElementById('reservation-record-details-modal');
+                    const reservationModalContent = document.getElementById('reservation-record-content');
+                    
+                    if (reservationModal && reservationModalContent) {
+                        // Reset to initial hidden state
+                        reservationModal.classList.add('bg-opacity-0');
+                        reservationModal.classList.remove('bg-opacity-50');
+                        reservationModalContent.classList.add('scale-95', 'opacity-0');
+                        reservationModalContent.classList.remove('scale-100', 'opacity-100');
+                        
+                        reservationModal.classList.remove('hidden');
+
+                        // Trigger animation with double rAF
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                reservationModal.classList.remove('bg-opacity-0');
+                                reservationModal.classList.add('bg-opacity-50');
+                                reservationModalContent.classList.remove('scale-95', 'opacity-0');
+                                reservationModalContent.classList.add('scale-100', 'opacity-100');
+                            });
+                        });
+                    }
+                }, 150);
             } else {
-                   const modal = document.getElementById('reservation-record-details-modal');
-            modal.classList.remove('hidden');
+                // profile_view context
+                closeConfirmBorrowModal(false);
+                openBorrowerProfileModal(backToBorrowBookButton.dataset.borrowerId, false, 'reservations-tab');
             }
             return;
         } 
@@ -254,15 +290,23 @@ export function openConfirmBorrowModal(borrower, book, isFromReservation = false
         titleElement.textContent = 'Finalize Borrowing Details';
     }
 
+    // Reset to initial hidden state before showing
+    modal.classList.add('bg-opacity-0');
+    modal.classList.remove('bg-opacity-50');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+
     // Show modal immediately but invisible
     modal.classList.remove('hidden');
     
-    // Trigger animation on next frame
+    // Use double requestAnimationFrame for smoother animation
     requestAnimationFrame(() => {
-        modal.classList.remove('bg-opacity-0');
-        modal.classList.add('bg-opacity-50');
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
+        requestAnimationFrame(() => {
+            modal.classList.remove('bg-opacity-0');
+            modal.classList.add('bg-opacity-50');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        });
     });
     
     // Initialize modal with data
@@ -300,7 +344,7 @@ export function closeConfirmBorrowModal(withAnimation = true) {
             const freshBorrowerDetails = await fetchBorrowerDetails(currentBorrower.id);
             await initializeBorrowerProfileUI(profileModal, freshBorrowerDetails, true);
         }
-    }, 150);
+    }, 50);
 
 }
 
@@ -336,7 +380,7 @@ export function returnToBookSelection(transactionType, member) {
                 showBookSelectionContent(borrowerModal, member, 'reservation', true);
             }
         }
-    }, 150); // Wait for close animation to complete
+    }, 50); // Wait for close animation to complete
 }
 
 async function handleConfirmBorrow(isFromReservation = false) {

@@ -83,7 +83,7 @@
                                               
                                                 px-3 py-2">
                     <img id="tab-queue-reservations-icon" src="{{ asset('build/assets/icons/reservation.svg') }}" alt="Reservations Icon" class="w-5 h-5 tab-icon">
-                    <span class="truncate max-w-[50px] sm:max-w-none  font-medium tracking-wide text-md">Reservations</span>
+                    <span class="truncate max-w-[50px] sm:max-w-none  font-medium tracking-wide text-md">Queue Reservations</span>
                 </button>
             </div>
 
@@ -142,6 +142,7 @@
                     </div>
                     @include ('partials.staff.active-borrows.table-controls')
                     <div id="active-borrows-table-container">
+
                         {{-- Table will be loaded via AJAX --}}
                     </div>
                 </div>
@@ -220,4 +221,3 @@
 @vite('resources/js/pages/staff/transactions/confirmReservation.js')
 @vite('resources/js/pages/staff/dashboardTableControls.js')
 @vite('resources/js/pages/staff/mainTabbedContainers.js')
-{{-- @vite('resources/js/pages/staff/kebabDropdown.js') --}}

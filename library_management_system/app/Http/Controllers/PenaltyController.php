@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\LibraryStatus;
 use App\Enums\PenaltyStatus;
+use App\Models\ActivityLog;
 use App\Models\Penalty;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -59,7 +60,15 @@ class PenaltyController extends Controller
             $borrower = User::findOrFail($borrowerId);
             $this->userService->resetToActiveIfClear($borrower);
 
-            return $this->jsonResponse('success', 'Penalty cancelled successfully', 200, ['penalty' => $penalty]);
+            ActivityLog::create([
+                'action' => 'cancelled_penalty',
+                'user_id' => $request->user()->id,
+                'entity_type' => 'Penalty',
+                'entity_id' => $penalty->id,
+                'details' => 'Cancelled penalty ID: ' . $penalty->id . ' for borrower ID: ' . $borrowerId,
+            ]);
+
+            return $this->jsonResponse('success', 'Penalty cancelled successfully', 200, ['penalty' => $penalty, 'action_performer_role' => $request->user()->role]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);
             return $this->jsonResponse('error', 'The penalty could not be found.', 404);

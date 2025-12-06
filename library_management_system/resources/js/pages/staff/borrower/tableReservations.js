@@ -67,12 +67,12 @@ export function populateReservationsTable(modal, borrower) {
         if (reservation.status === 'ready_for_pickup') {
             if (borrower.can_borrow.result === 'success'){
                 pickupButton = `
-                    <button class="pickup-reservation-button cursor-pointer tracking-wider inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-xs font-medium transition-all shadow-sm" 
+                    <button class="pickup-reservation-button cursor-pointer tracking-wide inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition-all shadow-sm" 
                         data-reservation='${JSON.stringify(reservation).replace(/'/g, "&#39;")}'>
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Fulfill
+                        Checkout
                     </button>
                 `; 
                 
@@ -83,7 +83,7 @@ export function populateReservationsTable(modal, borrower) {
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Fulfill
+                        Checkout
                     </button>
                     <div class="tooltip absolute bottom-full right-0 text-center transform mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap">
                         ${borrower.can_borrow.message}

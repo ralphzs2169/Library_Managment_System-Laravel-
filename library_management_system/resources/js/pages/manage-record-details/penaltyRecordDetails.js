@@ -1,11 +1,14 @@
-import { openDetailsModal } from "../utils/popupDetailsModal";
-import { showError } from "../../../utils/alerts";
-import { populateRoleBadge } from "../utils/popupDetailsModal";
-import { cancelPenalty } from "../../../ajax/penaltyHandler";
-import { openPaymentModal } from "../../staff/confirmPayment";
+import { openDetailsModal } from "../librarian/utils/popupDetailsModal";
+import { showError } from "../../utils/alerts";
+import { populateRoleBadge } from "../librarian/utils/popupDetailsModal";
+import { cancelPenalty } from "../../ajax/penaltyHandler";
+import { openPaymentModal } from "../staff/confirmPayment";
+import { getPenaltyStatusBadge, getPenaltyTypeBadge } from "../../utils/statusBadge";
+import { formatDate } from "../../utils";
 
 export function initPenaltyRecordsListeners() {
-    const detailButtons = document.querySelectorAll('.open-borrow-record-details');
+
+    const detailButtons = document.querySelectorAll('.open-penalty-record-details');
     detailButtons.forEach(button => {
 
         button.addEventListener('click', async (e) => {
@@ -58,8 +61,20 @@ function initializePenaltyRecordDetailsModal(modal, data) {
         }
 
         processPaymentBtn.onclick = async () => {
-            openPaymentModal(user, penaltyRecord, false);
-            closePenaltyRecordModal(false);
+            const modal = document.getElementById('penalty-record-details-modal');
+            const modalContent = document.getElementById('penalty-record-content');
+            
+            // Fade out penalty modal first
+            modal.classList.remove('bg-opacity-50');
+            modal.classList.add('bg-opacity-0');
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                const context = 'main_table_view';
+                openPaymentModal(user, penaltyRecord, context);
+            }, 50);
         }
 
     } else if (penalty.status === 'cancelled') {
@@ -100,10 +115,10 @@ function initializePenaltyRecordDetailsModal(modal, data) {
     penaltyAssocBorrowId.textContent = `#${penaltyRecord.penalty.borrow_transaction_id}`;
 
     // Reason badge
-    penaltyReason.innerHTML = generatePenaltyReasonBadge(penalty);
+    penaltyReason.innerHTML = getPenaltyTypeBadge(penalty.type);
 
     // Status badge
-    penaltyStatus.innerHTML = generatePenaltyStatusBadge(penalty);
+    penaltyStatus.innerHTML = getPenaltyStatusBadge(penalty.status);
 
     // Amount
     penaltyAmount.textContent = `₱ ${Number(penalty.amount).toFixed(2)}`;
@@ -114,39 +129,6 @@ function initializePenaltyRecordDetailsModal(modal, data) {
         penaltyRemaining.textContent = 'N/A';
  
     }
-
-    // Status badge
-    let statusBadgeHTML = '';
-    if (penalty.status === 'unpaid') {
-        statusBadgeHTML = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
-            </svg>
-            Unpaid
-        </span>`;
-    } else if (penalty.status === 'partially_paid') {
-        statusBadgeHTML = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
-            <img src="/build/assets/icons/partially-paid.svg" alt="Partially Paid Icon" class="w-3.5 h-3.5">
-            Partially Paid
-        </span>`;
-    } else if (penalty.status === 'paid') {
-        statusBadgeHTML = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Paid
-        </span>`;
-    } else if (penalty.status === 'cancelled') {
-        statusBadgeHTML = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Cancelled
-        </span>`;
-    } else {
-        statusBadgeHTML = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Unknown</span>`;
-    }
-    penaltyStatus.innerHTML = statusBadgeHTML;
 
     // Issued at
     penaltyIssuedAt.textContent = formatDate(penalty.created_at);
@@ -195,72 +177,7 @@ function initializePenaltyRecordDetailsModal(modal, data) {
     }
 }
 
-// Generate reason badge HTML
-function generatePenaltyReasonBadge(penalty) {
-    if (penalty.type === 'late_return') {
-        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-red-50 text-red-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Late Return
-        </span>`;
-    } else if (penalty.type === 'lost_book') {
-        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-purple-50 text-purple-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Lost
-        </span>`;
-    } else if (penalty.type === 'damaged_book') {
-        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-orange-50 text-orange-700">
-            <img src="/build/assets/icons/damaged-badge.svg" alt="Damaged Icon" class="w-3.5 h-3.5">
-            Damaged
-        </span>`;
-    } else {
-        return `<span class="text-gray-500">${penalty.type ? penalty.type.replace('_', ' ') : 'Unknown'}</span>`;
-    }
-}
 
-// Generate status badge HTML
-function generatePenaltyStatusBadge(penalty) {
-    if (penalty.status === 'unpaid') {
-        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
-            </svg>
-            Unpaid
-        </span>`;
-    } else if (penalty.status === 'partially_paid') {
-        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-200 text-orange-700">
-            <img src="/build/assets/icons/partially-paid.svg" alt="Partially Paid Icon" class="w-3.5 h-3.5">
-            Partially Paid
-        </span>`;
-    } else if (penalty.status === 'paid') {
-        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Paid
-        </span>`;
-    } else if (penalty.status === 'cancelled') {
-        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Cancelled
-        </span>`;
-    } else {
-        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Unknown</span>`;
-    }
-}
-
-// Helper: format date as 'MMM DD, YYYY'
-function formatDate(dateStr) {
-    if (!dateStr) return 'N/A';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return 'N/A';
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
 
 // Close modal function
 function closePenaltyRecordModal(withAnimation = true) {
@@ -276,22 +193,19 @@ function closePenaltyRecordModal(withAnimation = true) {
         cancelledAtContainer.classList.add('hidden');
     };
 
-    modalContent.classList.remove('scale-100', 'opacity-100');
-    modalContent.classList.add('scale-95', 'opacity-0');
     modal.classList.remove('bg-opacity-50');
     modal.classList.add('bg-opacity-0');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-95', 'opacity-0');
 
     if (withAnimation) {    
         setTimeout(() => {
             cleanup();
             modal.classList.add('hidden');
-        }, 150);
+        }, 50);
     } else {       
         cleanup();
         modal.classList.add('hidden');
-        modal.classList.remove('bg-opacity-0'); 
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100'); 
     }
 }
 

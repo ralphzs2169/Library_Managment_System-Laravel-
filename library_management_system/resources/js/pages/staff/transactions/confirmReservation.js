@@ -3,6 +3,7 @@ import { clearInputError } from '../../../helpers.js';
 import { returnToBookSelection } from '../confirmBorrow.js';
 import { addReservation } from '../../../ajax/transactions/reservationHandler.js';
 import { openBorrowerProfileModal } from '../borrower/borrowerProfileModal.js';
+import { populateRoleBadge } from '../../librarian/utils/popupDetailsModal.js';
 
 let currentReserver = null;
 let currentBook = null;
@@ -31,6 +32,8 @@ export async function initializeConfirmReservationModal(modal, reserver, book) {
             reserverInitials.textContent = initials || '--';
         }
     }
+
+    populateRoleBadge(modal, '#reserver-role-badge', reserver);
 
     // Book info
     if (book) {
@@ -103,32 +106,47 @@ export function openConfirmReservationModal(reserver, book) {
     currentBook = book;
     
     const modal = document.getElementById('confirm-reservation-modal');
-
     const modalContent = modal.querySelector('#confirm-reservation-content');
+
+    // Reset to initial hidden state before showing
+    modal.classList.add('bg-opacity-0');
+    modal.classList.remove('bg-opacity-50');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+
     modal.classList.remove('hidden');
 
+    // Use double requestAnimationFrame for smoother animation
     requestAnimationFrame(() => {
-        modal.classList.remove('bg-opacity-0');
-        modal.classList.add('bg-opacity-50');
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
+        requestAnimationFrame(() => {
+            modal.classList.remove('bg-opacity-0');
+            modal.classList.add('bg-opacity-50');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        });
     });
 
     initializeConfirmReservationModal(modal, currentReserver, currentBook);
 }
 
-export function closeConfirmReservationModal() {
+export function closeConfirmReservationModal(withAnimation = true) {
     const modal = document.getElementById('confirm-reservation-modal');
     const modalContent = document.getElementById('confirm-reservation-content');
     clearInputError(document.getElementById('pickup_deadline'));
     clearInputError(document.getElementById('reserve_notes'));
+    
     modal.classList.remove('bg-opacity-50');
     modal.classList.add('bg-opacity-0');
     modalContent.classList.remove('scale-100', 'opacity-100');
     modalContent.classList.add('scale-95', 'opacity-0');
-    setTimeout(() => {
+    
+    if (withAnimation) {
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 50);
+    } else {
         modal.classList.add('hidden');
-    }, 150);
+    }
 }
 
 async function handleConfirmReservation() {

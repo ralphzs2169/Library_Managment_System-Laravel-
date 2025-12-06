@@ -3,11 +3,10 @@
         <!-- Header -->
         <div class="bg-modal-header drop-shadow-md px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-
-                <h2 class="text-xl font-semibold text-black flex items-center gap-2">
-                    {{-- <img src="{{ asset('build/assets/icons/payment-accent.svg') }}" alt="Payment Icon" class="w-8 h-8"> --}}
-                    Finalize Payment Details
-                </h2>
+                <button id="payment-back-to-penalty-details" class="cursor-pointer text-gray-600 hover:text-gray-800 transition hidden">
+                    <img src="{{ asset('build/assets/icons/back-gray.svg') }}" alt="Back" class="w-6 h-6">
+                </button>
+                <h2 class="text-xl font-semibold text-black">Process Payment</h2>
             </div>
             <button id="close-confirm-payment-modal" class="cursor-pointer text-gray-500 hover:text-gray-700 hover:scale-110 transition">
                 <img src="{{ asset('build/assets/icons/close-gray.svg') }}" alt="Close" class="w-6 h-6">
@@ -18,21 +17,31 @@
         <div class="px-6 py-5 overflow-y-auto">
             <!-- Borrower Info Banner -->
             <div class="border border-gray-200 rounded-lg p-3 mb-4 flex items-center justify-between">
+
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-accent to-teal-600 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                        <span id="confirm-payment-borrower-initials">--</span>
+                    <div class="w-12 h-12 bg-gradient-to-br from-accent to-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        <span id="confirm-payment-borrower-initials">AB</span>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 font-medium">Paying for</p>
-                        <p id="confirm-payment-borrower-name" class="font-bold text-gray-900"></p>
+                        <p class="text-xs text-gray-500 font-medium">Borrower</p>
+                        <p id="confirm-payment-borrower-name" class="font-bold text-gray-900">Name Loading...</p>
+                        <p id="confirm-payment-borrower-id" class="text-xs text-gray-700 font-mono"></p>
+
                     </div>
                 </div>
-                <p id="confirm-payment-borrower-id" class="text-xs text-gray-500 font-mono"></p>
+                <span id="confirm-payment-borrower-role-badge"></span>
+
             </div>
 
             <!-- Penalty Details Card -->
             <div class="bg-white rounded-xl border border-gray-200 p-4 mb-4 relative">
+                <label class="block text-xs font-semibold text-gray-700 pb-2 border-gray-300 border-b mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-accent">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
 
+                    Penalty Status Summary
+                </label>
                 {{-- Status Badge --}}
                 <div id="confirm-payment-penalty-status" class="absolute top-3 right-3"></div>
 

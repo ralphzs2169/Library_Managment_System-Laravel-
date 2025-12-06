@@ -5,15 +5,27 @@ import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulator
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { showWarning } from '../../utils/alerts.js';
 import { getBorrowingStatusBadge } from '../../utils/statusBadge.js';
+import { populateRoleBadge } from '../librarian/utils/popupDetailsModal.js';
 
 let currentRenewer = null;
 let currentTransaction = null;
 let confirmRenewModalListenersInitialized = false;
 
-export async function initializeConfirmRenewModal(modal, renewer, transaction) {
+export async function initializeConfirmRenewModal(modal, renewer, transaction, context = 'profile_view') {
 
     currentRenewer = renewer;
     currentTransaction = transaction;
+
+    // Handle Back Button Visibility and Context
+    const backBtn = modal.querySelector('#renew-back-to-borrower-profile');
+    if (backBtn) {
+        backBtn.dataset.context = context;
+        if (context === 'main_table_view') {
+            backBtn.classList.remove('hidden');
+        } else {
+            backBtn.classList.add('hidden');
+        }
+    }
 
     // renewer info
     const renewerName = modal.querySelector('#renewer-name');
@@ -31,6 +43,9 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
         renewerInitials.textContent = initials || '--';
     }
 
+    // Populate role badge
+    populateRoleBadge(modal, '#renewer-role-badge', renewer);
+
     // Book info
     const book = transaction.book_copy.book;
     modal.querySelector('#renew-book-cover').src = book.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
@@ -41,6 +56,7 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
     modal.querySelector('#renew-copy-number').textContent = transaction.book_copy.copy_number || 'N/A';
     modal.querySelector('#renew-initial-borrow-date').textContent = transaction.borrowed_at ? new Date(transaction.borrowed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
     modal.querySelector('#renew-current-due-date').textContent = transaction.due_at ? new Date(transaction.due_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+
 
     // Due date input
     const dueDateInput = modal.querySelector('#new-due-date');
@@ -58,10 +74,20 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
     const renewDuration = (renewer.role === 'student')
         ? settings['renewing.student_duration']
         : settings['renewing.teacher_duration'];
-   
+    
+    const maxRenewals = (renewer.role === 'student')
+        ? settings['renewing.student_renewal_limit']
+        : settings['renewing.teacher_renewal_limit'];
+
+    const timesRenewedEl = modal.querySelector('#renew-times-renewed');
+    if (timesRenewedEl) {
+        timesRenewedEl.textContent = `${transaction.times_renewed || 0} / ${maxRenewals}`;
+    }
+
     if (renewDurationMsg) {
         renewDurationMsg.textContent = `Standard: ${renewDuration} days from today`;
     }
+
 
     if (dueDateInput) {
         // Use the current due date as the base (NOT today)
@@ -98,19 +124,18 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
         // Cancel button
         const cancelBtn = modal.querySelector('#renew-cancel-button');
         if (cancelBtn) {
-            cancelBtn.onclick = closeConfirmRenewModal;
+            cancelBtn.onclick = () => closeConfirmRenewModal();
         }
 
         // Back button
-        const backBtn = modal.querySelector('#renew-back-to-borrower-profile');
         if (backBtn) {
-            backBtn.onclick = returnToBorrowerProfileModal;
+            backBtn.onclick = returnToPreviousModal;
         }
 
         // Close button (X icon)
         const closeBtn = modal.querySelector('#renew-close-confirm-modal');
         if (closeBtn) {
-            closeBtn.onclick = closeConfirmRenewModal;
+            closeBtn.onclick = () => closeConfirmRenewModal();
         }
 
         // Click outside modal to close
@@ -126,34 +151,93 @@ export async function initializeConfirmRenewModal(modal, renewer, transaction) {
    statusBadge.innerHTML = getBorrowingStatusBadge(transaction);
 }
 
-export function openConfirmRenewModal(renewer, transaction) {
+export function openConfirmRenewModal(renewer, transaction, context = 'profile_view') {
     const modal = document.getElementById('confirm-renew-modal');
     const modalContent = document.getElementById('confirm-renew-content');
+    
+    // Reset to initial hidden state before showing
+    modal.classList.add('bg-opacity-0');
+    modal.classList.remove('bg-opacity-50');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    
     modal.classList.remove('hidden');
+    
+    // Use double requestAnimationFrame for smoother animation
     requestAnimationFrame(() => {
-        modal.classList.remove('bg-opacity-0');
-        modal.classList.add('bg-opacity-50');
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
+        requestAnimationFrame(() => {
+            modal.classList.remove('bg-opacity-0');
+            modal.classList.add('bg-opacity-50');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        });
     });
-    initializeConfirmRenewModal(modal, renewer, transaction);
+    
+    initializeConfirmRenewModal(modal, renewer, transaction, context);
 }
 
-// Add close/cancel/back logic as needed, similar to confirmBorrow.js
-
-export function closeConfirmRenewModal() {
+export function closeConfirmRenewModal(withAnimation = true) {
     const modal = document.getElementById('confirm-renew-modal');
     const modalContent = document.getElementById('confirm-renew-content');
     clearInputError(document.getElementById('confirm-renew-due-date'));
-    // Start closing animation
+    
     modal.classList.remove('bg-opacity-50');
     modal.classList.add('bg-opacity-0');
     modalContent.classList.remove('scale-100', 'opacity-100');
     modalContent.classList.add('scale-95', 'opacity-0');
-    setTimeout(() => {
+
+    if (withAnimation) {
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 150);
+    } else {
         modal.classList.add('hidden');
-        // Optionally restore profile content if needed
-    }, 150);
+    }
+}
+
+function returnToPreviousModal() {
+    const backBtn = document.getElementById('renew-back-to-borrower-profile');
+    const context = backBtn.dataset.context || 'profile_view';
+
+    if (context === 'main_table_view') {
+        const modal = document.getElementById('confirm-renew-modal');
+        const modalContent = document.getElementById('confirm-renew-content');
+        
+        // Fade out confirm renew modal
+        modal.classList.remove('bg-opacity-50');
+        modal.classList.add('bg-opacity-0');
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            
+            const detailsModal = document.getElementById('borrow-record-details-modal');
+            const detailsModalContent = document.getElementById('borrow-record-content');
+
+            if (detailsModal && detailsModalContent) {
+                // Reset to initial hidden state
+                detailsModal.classList.add('bg-opacity-0');
+                detailsModal.classList.remove('bg-opacity-50');
+                detailsModalContent.classList.add('scale-95', 'opacity-0');
+                detailsModalContent.classList.remove('scale-100', 'opacity-100');
+                
+                detailsModal.classList.remove('hidden');
+
+                // Trigger animation with double rAF
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        detailsModal.classList.remove('bg-opacity-0');
+                        detailsModal.classList.add('bg-opacity-50');
+                        detailsModalContent.classList.remove('scale-95', 'opacity-0');
+                        detailsModalContent.classList.add('scale-100', 'opacity-100');
+                    });
+                });
+            }
+        }, 150);
+    } else {
+        returnToBorrowerProfileModal();
+    }
 }
 
 function returnToBorrowerProfileModal() {
@@ -186,10 +270,18 @@ async function handleConfirmRenew(currentRenewer, currentTransaction) {
     // Call the borrow handler
     const result = await renewBook(formData);
     if (result) {
-        const modal = document.getElementById('borrower-profile-modal');
-        console.log('currentRenewer:', currentRenewer);
-        const freshBorrowerDetails = await fetchBorrowerDetails(currentRenewer.id);
-        await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true);
-        closeConfirmRenewModal();
+        const backBtn = document.getElementById('renew-back-to-borrower-profile');
+        const context = backBtn.dataset.context || 'profile_view';
+
+        if (context === 'main_table_view') {
+            closeConfirmRenewModal();
+            // Dashboard reloads automatically via renewBook -> reloadStaffDashboardData
+        } else {
+            const modal = document.getElementById('borrower-profile-modal');
+           
+            const freshBorrowerDetails = await fetchBorrowerDetails(currentRenewer.id);
+            await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true);
+            closeConfirmRenewModal();
+        }
     }
 }

@@ -2,31 +2,33 @@
     <table class="w-full text-sm rounded-lg">
         <thead>
             <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">No.</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Book</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Copy No.</th>
-                <th class="py-3 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap"></th>
-                <th class="py-3 pl-2 pr-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Borrower</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Borrowed At</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Due Date</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Status</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-20">Actions</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-8">No.</th>
+                {{-- <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Copy No.</th> --}}
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider w-70">Book</th>
+                <th class="py-3 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-12"></th>
+                <th class="py-3 pl-2 pr-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-40">Borrower</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-24">Borrowed At</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-24">Due Date</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-26">Status</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-26">Times Renewed</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-24">Actions</th>
             </tr>
         </thead>
 
         <tbody id="active-borrows-real-table-body" class="bg-white divide-y divide-gray-100">
-            @foreach ($activeBorrows as $index => $transaction)
+            @forelse ($activeBorrows as $index => $transaction)
             <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100">
                 <td class="py-3 px-4 whitespace-nowrap text-gray-700">{{ $index + 1 + ($activeBorrows->currentPage() - 1) * $activeBorrows->perPage() }}</td>
 
-                <td class="py-3 px-4 whitespace-nowrap text-gray-700 flex items-center gap-3">
+                {{-- <td class="py-3 px-4 whitespace-nowrap text-gray-700">Copy #{{ $transaction->bookCopy->copy_number }}</td> --}}
+                <td class="py-3 px-4 text-gray-700 flex items-center gap-3" title="{{ $transaction->bookCopy->book->title }}">
                     <img src="{{ $transaction->bookCopy->book->cover_image ? asset('storage/' . $transaction->bookCopy->book->cover_image) : asset('images/no-cover.png') }}" alt="{{ $transaction->bookCopy->book->title }}" class="w-12 h-16 rounded-md object-cover shadow-sm border border-gray-200">
                     <div class="flex  flex-col">
-                        <div class="font-semibold text-gray-800 truncate max-w-xs">{{ $transaction->bookCopy->book->title }}</div>
+                        <div class="font-semibold text-gray-800 max-w-xs line-clamp-2">{{ $transaction->bookCopy->book->title }}</div>
+                        <div class="text-xs text-gray-700 max-w-xs">Copy #{{ $transaction->bookCopy->copy_number }}</div>
                         <div class="text-xs text-gray-500 mt-1">by {{ $transaction->bookCopy->book->author->fullname }}</div>
                     </div>
                 </td>
-                <td class="py-3 px-4 whitespace-nowrap text-gray-700">Copy #{{ $transaction->bookCopy->copy_number }}</td>
                 <td class="py-2 text-center">
                     <!-- Borrower initials icon -->
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-teal-600 flex items-center justify-center text-white font-bold text-xs">
@@ -79,7 +81,7 @@
                     </span>
                     @elseif ($transaction->status === 'borrowed')
                     @php
-                    $isDueSoon = $transaction->days_until_due <= config('settings.notifications.reminder_days_before_due'); $badgeBg=$isDueSoon ? 'bg-orange-200 text-orange-700 border border-orange-100' : 'bg-green-200 text-green-700 border border-green-100' ; $svg=$isDueSoon ? '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' ; @endphp <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold {!! $badgeBg !!}">
+                    $isDueSoon = $transaction->days_until_due <= config('settings.notifications.reminder_days_before_due'); $badgeBg=$isDueSoon ? 'bg-orange-200 text-orange-700 border border-orange-100' : 'bg-blue-200 text-blue-700' ; $svg=$isDueSoon ? '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' ; @endphp <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold {!! $badgeBg !!}">
                         {!! $svg !!}
 
                         @if ((int) $transaction->days_until_due === 0)
@@ -90,55 +92,36 @@
                         </span>
                         @endif
                 </td>
+                @php
+
+                $studentMaxRenewals = (int) config('settings.renewing.student_renewal_limit');
+                $teacherMaxRenewals = (int) config('settings.renewing.teacher_renewal_limit');
+
+                @endphp
+                <td class="py-3 px-4 whitespace-nowrap font-semibold text-gray-700">{{ $transaction->times_renewed }} / {{ $transaction->user->role === 'teacher' ? $teacherMaxRenewals : $studentMaxRenewals }}</td>
                 <td class="py-3 px-4 whitespace-nowrap text-gray-700">
-                    <div class="relative inline-block text-left w-full">
-                        <button type="button" class="kebab-menu-btn cursor-pointer flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-accent transition" data-transaction-id="{{ $transaction->id }}">
-                            <!-- Kebab (three dots) icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <circle cx="5" cy="12" r="1.5" fill="currentColor" />
-                                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-                                <circle cx="19" cy="12" r="1.5" fill="currentColor" />
-                            </svg>
-                        </button>
-                        <div class="kebab-menu-dropdown absolute right-0 z-10 w-44 origin-top-right bg-secondary rounded-lg shadow-lg hidden" style="min-width:11rem;">
-                            <!-- Arrow indicator -->
-                            <div class="kebab-menu-arrow absolute bottom-full right-12 border-4 border-transparent border-b-gray-900"></div>
-                            <ul class="py-1">
-                                <li>
-                                    <button class="kebab-action-btn flex items-center gap-2 px-4 py-2 w-full text-left text-xs text-white cursor-pointer hover:bg-secondary/80 transition" data-action="renew" data-member="{{ $transaction->user }}" data-transaction="{{ $transaction}}">
-                                        <!-- Renew icon (same as in JS) -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                        Renew
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="kebab-action-btn flex items-center gap-2 px-4 py-2 w-full text-left text-xs text-white cursor-pointer hover:bg-secondary/80 transition" data-action="return" data-member="{{ $transaction->user }}" data-transaction="{{ $transaction}}">
-                                        <!-- Return icon (same as in JS) -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                                        </svg>
-                                        Return
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="kebab-action-btn flex items-center gap-2 px-4 py-2 w-full text-left text-xs text-white cursor-pointer hover:bg-secondary/80 transition" data-action="lost" data-transaction-id="{{ $transaction->id }}">
-                                        <!-- Lost icon (use report/danger icon) -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Report Lost
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
+                    <button class="open-borrow-record-details cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-xs font-medium transition-all shadow-sm" data-borrow-record='@json($transaction)'>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Manage
+                    </button>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="9" class="py-20 px-4 text-center text-gray-500">
+                    <div class="flex flex-col items-center justify-center">
+                        <img class="w-24 h-24" src="{{ asset('build/assets/icons/no-results-found.svg') }}" alt="No Results Found">
+                        <p class="text-gray-500 text-lg font-medium mb-2">No results found</p>
+                        <p class="text-gray-400 text-sm">Try adjusting your search or filters</p>
                     </div>
                 </td>
             </tr>
-            @endforeach
+            @endforelse
         </tbody>
     </table>
+    @include('modals.librarian.borrow-record-details')
 </div>
 
 @if($activeBorrows->isNotEmpty())
@@ -168,3 +151,4 @@
     </div>
 </div>
 @endif
+@vite('resources/js/pages/manage-record-details/borrowRecordDetails.js')

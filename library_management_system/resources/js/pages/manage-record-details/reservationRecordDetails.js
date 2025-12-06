@@ -1,13 +1,13 @@
-import { openDetailsModal } from "../utils/popupDetailsModal";
-import { showError } from "../../../utils/alerts";
-import { populateRoleBadge } from "../utils/popupDetailsModal";
-import { cancelReservation } from "../../../ajax/transactions/reservationHandler";
-import { closeConfirmBorrowModal, openConfirmBorrowModal } from "../../staff/confirmBorrow";
-import { getReservationStatusBadge } from "../../../utils/statusBadge";
-import { formatDate } from "../../../utils";
+import { openDetailsModal } from "../librarian/utils/popupDetailsModal";
+import { showError } from "../../utils/alerts";
+import { populateRoleBadge } from "../librarian/utils/popupDetailsModal";
+import { cancelReservation } from "../../ajax/transactions/reservationHandler";
+import { closeConfirmBorrowModal, openConfirmBorrowModal } from "../staff/confirmBorrow";
+import { getReservationStatusBadge } from "../../utils/statusBadge";
+import { formatDate } from "../../utils";
 
 
-export function initializeReservationRecordDetailListeners() {
+export function initReservationRecordDetailListeners() {
     // Always re-attach listeners after table updates (AJAX)
     const detailButtons = document.querySelectorAll('.open-reservation-record-details');
     if (!detailButtons.length) return; // No buttons found
@@ -154,7 +154,7 @@ function initializeReservationRecordDetailsModal(modal, data) {
                 
             const reservationId = reservation.id;
 
-            const result = await cancelReservation(reservationId, isStaffAction );
+            const result = await cancelReservation(reservationId );
             if (result) {
                 closeReservationRecordModal();
             }
@@ -162,18 +162,20 @@ function initializeReservationRecordDetailsModal(modal, data) {
 
         checkoutBtn && (checkoutBtn.onclick = () => {
             const modal = document.getElementById('reservation-record-details-modal');
-            modal.classList.add('hidden');
-            book.book_copy = reservation.book_copy;
-            // closeReservationRecordModal(false);
-
-            //This context indicates where the borrow action is initiated from
-            const context = 'main_table_view';
-            const result = openConfirmBorrowModal(borrower, book, true, context);
-
-            if (result) {
-                closeConfirmBorrowModal(false);
-            }
-
+            const modalContent = document.getElementById('reservation-record-content');
+            
+            // Fade out reservation modal first
+            modal.classList.remove('bg-opacity-50');
+            modal.classList.add('bg-opacity-0');
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                book.book_copy = reservation.book_copy;
+                const context = 'main_table_view';
+                openConfirmBorrowModal(borrower, book, true, context);
+            }, 50);
         });
 
         // Close button
@@ -205,16 +207,15 @@ function closeReservationRecordModal(withAnimation = true) {
     const cancelledAtContainer = document.getElementById('reservation-record-cancelled-at').parentElement;
     const completedAtContainer = document.getElementById('reservation-completion-date-container');
 
-
     const cleanup = () => {
         cancelledAtContainer.classList.add('hidden');
         completedAtContainer.classList.remove('hidden');
     }
     
-    modalContent.classList.remove('scale-100', 'opacity-100');
-    modalContent.classList.add('scale-95', 'opacity-0');
     modal.classList.remove('bg-opacity-50');
     modal.classList.add('bg-opacity-0');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-95', 'opacity-0');
 
     if (withAnimation) {
         setTimeout(() => {
@@ -222,13 +223,9 @@ function closeReservationRecordModal(withAnimation = true) {
             modal.classList.add('hidden');
         }, 150); 
     } else {
-       
         cleanup();
         modal.classList.add('hidden');
-        modal.classList.remove('bg-opacity-0'); 
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100'); 
     }
 }
 
-initializeReservationRecordDetailListeners();
+initReservationRecordDetailListeners();

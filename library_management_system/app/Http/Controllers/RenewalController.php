@@ -42,7 +42,7 @@ class RenewalController extends Controller
     {
         try {
             $transaction = $this->renewalService->renewBook($request);
-            return $this->jsonResponse('success', 'Book renewed successfully', 200, ['transaction' => $transaction]);
+            return $this->jsonResponse('success', 'Book renewed successfully', 200, ['transaction' => $transaction, 'action_performed_by' => $request->user()->role]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);
             return $this->jsonResponse('error', 'The book or transaction could not be found.', 404);

@@ -128,6 +128,7 @@
                         </svg>
                         Completed
                     </span>
+
                     @elseif($reservation->status === 'cancelled')
                     <span class="inline-flex items-center gap-1 w-full px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,6 +150,8 @@
                         Queue: {{ $pos }}{{ $suffix }}
 </div>
 
+@elseif($reservation->status === 'completed')
+<span class="text-xs pl-2 text-gray-500 mt-0.5">{{ \Carbon\Carbon::parse($reservation->completed_at)->format('M d, Y') }}</span>
 @else
 {{-- Placeholder for non-pending items --}}
 <span class="text-xs pl-2 text-gray-500 mt-0.5">— Not in Queue</span>

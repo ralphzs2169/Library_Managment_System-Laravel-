@@ -119,11 +119,23 @@
 
 
                 {{-- Department/Year Level Column --}}
-                <td class=" py-3 px-4 text-black whitespace-nowrap text-xs">
+                <td class="py-3 px-4 text-black whitespace-nowrap text-xs">
                     @if($user->role === 'teacher')
-                    {{ $user->teachers->department->name }}
+                    <div class="font-medium text-gray-700">{{ $user->teachers->department->name }}</div>
+                    <div class="text-gray-500 text-xs">Faculty</div>
                     @elseif($user->role === 'student')
-                    {{ $user->students->department->name }} - {{ $user->students->year_level }}
+                    <div class="font-medium text-gray-700">{{ $user->students->department->name }}</div>
+                    @php
+                    $yearLevel = $user->students->year_level;
+                    $yearSuffix = match((int)$yearLevel) {
+                    1 => '1st',
+                    2 => '2nd',
+                    3 => '3rd',
+                    4 => '4th',
+                    default => $yearLevel . 'th',
+                    };
+                    @endphp
+                    <div class="text-gray-500 text-xs">{{ $yearSuffix }} Year Student</div>
                     @endif
                 </td>
 

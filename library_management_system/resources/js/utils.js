@@ -142,7 +142,7 @@ export function debounce(fn, delay) {
 
 export function resetButton(button, defaultIcon) {
     // Remove disabled state
-    button.classList.add('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow');
+    button.classList.add('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow', 'bg-secondary-light', 'hover:bg-secondary-light/90');
     button.classList.remove(
         'cursor-not-allowed',
         'opacity-50',
@@ -176,7 +176,7 @@ export function resetButton(button, defaultIcon) {
 
 export function disableButton(button, tooltipMsg = '', icon) {
     button.disabled = true;
-    button.classList.remove('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow');
+    button.classList.remove('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow', 'bg-secondary-light', 'hover:bg-secondary-light/90');
     button.classList.add(
         'cursor-not-allowed',
         'opacity-50',

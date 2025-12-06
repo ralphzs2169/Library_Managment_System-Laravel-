@@ -8,7 +8,7 @@ import { highlightSearchMatches } from "../tableControls";
 export async function loadBorrowRecords(page = BORROW_RECORDS_FILTERS.page, scrollUp = true, isFiltered = false) {
     const container = document.getElementById('borrow-records-container');
     const countElement = document.getElementById('header-total-borrow-records');
-
+    console.log('Loading borrow records...');
     if (scrollUp) {
         window.scrollTo(0, 0);
     }
@@ -60,9 +60,9 @@ export async function loadBorrowRecords(page = BORROW_RECORDS_FILTERS.page, scro
         hideSkeleton(container, '#borrowing-records-skeleton', '#borrowing-records-real-table-body');
 
         // Re-attach borrow record detail listeners after table update (like staff side)
-        import('../pages/librarian/borrowingRecords/borrowRecordDetails.js').then(mod => {
-            if (mod.initializeBorrowRecordDetailListeners) {
-                mod.initializeBorrowRecordDetailListeners();
+        import('../pages/manage-record-details/borrowRecordDetails.js').then(mod => {
+            if (mod.initBorrowRecordDetailListeners) {
+                mod.initBorrowRecordDetailListeners();
             }
         });
 
@@ -133,9 +133,9 @@ export async function loadReservationRecords(page = RESERVATION_RECORDS_FILTERS.
         hideSkeleton(container, '#reservation-records-skeleton', '#reservation-records-real-table-body');
 
         // Re-attach reservation record detail listeners after table update (like staff side)
-        import('../pages/librarian/reservationRecords/reservationRecordDetails.js').then(mod => {
-            if (mod.initializeReservationRecordDetailListeners) {
-                mod.initializeReservationRecordDetailListeners();
+        import('../pages/manage-record-details/reservationRecordDetails.js').then(mod => {
+            if (mod.initReservationRecordDetailListeners) {
+                mod.initReservationRecordDetailListeners();
             }
         });
 
@@ -208,7 +208,7 @@ export async function loadPenaltyRecords(page = PENALTY_RECORDS_FILTERS.page, sc
         hideSkeleton(container, '#penalty-records-skeleton', '#penalty-records-real-table-body');
 
         // Re-attach penalty record detail listeners after table update
-        import('../pages/librarian/penaltyRecords/penaltyRecordDetails.js').then(mod => {
+        import('../pages/manage-record-details/penaltyRecordDetails.js').then(mod => {
             if (mod.initPenaltyRecordsListeners) {
                 mod.initPenaltyRecordsListeners();
             }

@@ -84,12 +84,12 @@
                 @include('partials.librarian.circulation-records.reservation-records-table', ['reservations' => $reservations, 'semesters' => $semesters])
             </div>
 
-            @include('modals.librarian.manage-reservation-record')
+            @include('modals.librarian.reservation-record-details')
             @include('modals.confirm-borrow')
 
         </div>
 
-        @vite('resources/js/pages/librarian/reservationRecords/reservationRecordDetails.js')
+        @vite('resources/js/pages/manage-record-details/reservationRecordDetails.js')
         @vite('resources/js/pages/librarian/reservationRecords/reservationRecordTableControls.js')
     </section>
 </x-layout>

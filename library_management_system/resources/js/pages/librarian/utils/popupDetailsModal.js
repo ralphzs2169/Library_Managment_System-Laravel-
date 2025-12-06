@@ -1,12 +1,20 @@
 export async function openDetailsModal(modal, modalContent, data, initializer) {
+    // Reset to initial hidden state before showing
+    modal.classList.add('bg-opacity-0');
+    modal.classList.remove('bg-opacity-50');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    
     modal.classList.remove('hidden');
     
-    // Trigger animation on next frame
+    // Use double requestAnimationFrame for smoother animation
     requestAnimationFrame(() => {
-        modal.classList.remove('bg-opacity-0');
-        modal.classList.add('bg-opacity-50');
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
+        requestAnimationFrame(() => {
+            modal.classList.remove('bg-opacity-0');
+            modal.classList.add('bg-opacity-50');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        });
     });
     
     await initializer(modal, data);

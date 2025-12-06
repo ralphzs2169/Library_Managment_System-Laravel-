@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\Reservation;
+use App\Models\Semester;
 
 class StaffDashboardController extends Controller
 {
@@ -89,7 +90,7 @@ class StaffDashboardController extends Controller
 
     public function activeBorrowsList(Request $request)
     {
-        $query = BorrowTransaction::with(['bookCopy.book.author', 'user.students.department', 'user.teachers.department'])
+        $query = BorrowTransaction::with(['bookCopy.book.author','bookCopy.book.genre.category', 'user.students.department', 'user.teachers.department', 'semester'])
             ->whereNull('returned_at')
             ->whereIn('borrow_transactions.status', ['borrowed', 'overdue']); // <-- Fix ambiguous column
 
@@ -186,7 +187,7 @@ class StaffDashboardController extends Controller
             return $borrow;
         });
 
-        Log::info('Active Borrows Retrieved: ', ['count' => $activeBorrows]);
+
         if ($request->ajax()) {
             $html = view('partials.staff.active-borrows.table', [
                 'activeBorrows' => $activeBorrows,
@@ -198,7 +199,10 @@ class StaffDashboardController extends Controller
             ]);
         }
 
-        return view('pages.staff.active-borrows', compact('activeBorrows'));
+          $semesters = Semester::orderBy('start_date', 'desc')->get();
+        $activeSemesterId = Semester::where('status', 'active')?->value('id');
+
+        return view('pages.staff.active-borrows', compact('activeBorrows', 'semesters', 'activeSemesterId'));
     }
 
     public function unpaidPenaltiesList(Request $request)
@@ -341,109 +345,109 @@ class StaffDashboardController extends Controller
     }
 
    public function queueReservationsList(Request $request)
-{
-    $query = Reservation::with(['borrower.students.department', 'borrower.teachers.department', 'book.author', 'bookCopy'])
-        ->whereIn('status', [\App\Enums\ReservationStatus::PENDING, \App\Enums\ReservationStatus::READY_FOR_PICKUP]);
+    {
+        $query = Reservation::with(['borrower.students.department', 'borrower.teachers.department', 'book.author', 'bookCopy'])
+            ->whereIn('status', [\App\Enums\ReservationStatus::PENDING, \App\Enums\ReservationStatus::READY_FOR_PICKUP]);
 
-    // Apply search filter
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->whereHas('borrower', function ($uq) use ($search) {
-                $uq->where('firstname', 'like', "%{$search}%")
-                   ->orWhere('lastname', 'like', "%{$search}%")
-                   ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"])
-                   ->orWhereRaw("CONCAT(firstname, ' ', middle_initial, '.', ' ', lastname) LIKE ?", ["%{$search}%"]);
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('borrower', function ($uq) use ($search) {
+                    $uq->where('firstname', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("CONCAT(firstname, ' ', middle_initial, '.', ' ', lastname) LIKE ?", ["%{$search}%"]);
 
+                });
+                $q->orWhereHas('borrower.students', function ($uq) use ($search) {
+                    $uq->where('student_number', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('borrower.teachers', function ($uq) use ($search) {
+                    $uq->where('employee_number', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('book', function ($bq) use ($search) {
+                    $bq->where('title', 'like', "%{$search}%");
+                });
             });
-            $q->orWhereHas('borrower.students', function ($uq) use ($search) {
-                $uq->where('student_number', 'like', "%{$search}%");
-            });
-            $q->orWhereHas('borrower.teachers', function ($uq) use ($search) {
-                $uq->where('employee_number', 'like', "%{$search}%");
-            });
-            $q->orWhereHas('book', function ($bq) use ($search) {
-                $bq->where('title', 'like', "%{$search}%");
-            });
-        });
-    }
-
-    // Role filter
-    if ($request->filled('role')) {
-        $query->whereHas('borrower', function ($uq) use ($request) {
-            $uq->where('role', $request->role);
-        });
-    }
-
-    // Status filter
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-
-    // Sort filter
-    if ($request->filled('sort')) {
-        switch ($request->sort) {
-            case 'position_asc':
-                $query->orderByRaw("FIELD(status, 'pending', 'ready_for_pickup'), created_at ASC");
-                break;
-            case 'date_desc':
-                $query->orderBy('created_at', 'desc');
-                break;
-            case 'date_asc':
-                $query->orderBy('created_at', 'asc');
-                break;
-            case 'deadline_asc':
-                $query->orderBy('pickup_start_date', 'asc');
-                break;
-            default:
-                $query->orderBy('created_at', 'asc');
         }
-    } else {
-        $query->orderBy('created_at', 'asc');
-    }
 
-    // Get ALL sorted results for accurate queue calculation
-    $reservations = $query->get();
+        // Role filter
+        if ($request->filled('role')) {
+            $query->whereHas('borrower', function ($uq) use ($request) {
+                $uq->where('role', $request->role);
+            });
+        }
 
-    $pendingReservations = $reservations->where('status', \App\Enums\ReservationStatus::PENDING);
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
-    $positionsByBook = $pendingReservations
-        ->groupBy('book_id')
-        ->map(fn($reservationsForBook) => $reservationsForBook->pluck('id')->flip());
-
-    $reservations->each(function ($reservation) use ($positionsByBook) {
-        if ($reservation->status === \App\Enums\ReservationStatus::PENDING) {
-            if (isset($positionsByBook[$reservation->book_id][$reservation->id])) {
-                $reservation->queue_position = $positionsByBook[$reservation->book_id][$reservation->id] + 1;
-            } else {
-                $reservation->queue_position = 1;
+        // Sort filter
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'position_asc':
+                    $query->orderByRaw("FIELD(status, 'pending', 'ready_for_pickup'), created_at ASC");
+                    break;
+                case 'date_desc':
+                    $query->orderBy('created_at', 'desc');
+                    break;
+                case 'date_asc':
+                    $query->orderBy('created_at', 'asc');
+                    break;
+                case 'deadline_asc':
+                    $query->orderBy('pickup_start_date', 'asc');
+                    break;
+                default:
+                    $query->orderBy('created_at', 'asc');
             }
-            $reservation->pickup_deadline_date = null;
-        } else { // READY_FOR_PICKUP
-            $reservation->pickup_deadline_date = $reservation->pickup_deadline;
+        } else {
+            $query->orderBy('created_at', 'asc');
         }
-    });
 
-    Log::info('Queue Reservations Retrieved: ', ['count' => $reservations]);
-    // Manual Pagination
-    $page = $request->input('page', 1);
-    $perPage = 20;
-    $paginatedReservations = new \Illuminate\Pagination\LengthAwarePaginator(
-        $reservations->forPage($page, $perPage),
-        $reservations->count(),
-        $perPage,
-        $page,
-        ['path' => $request->url(), 'query' => $request->query()]
-    );
-    Log::info('Paginated Queue Reservations: ', ['count' => $paginatedReservations]);
-    if ($request->ajax()) {
-        $html = view('partials.staff.queue-reservations.table', ['queueReservations' => $paginatedReservations])->render();
-        return response()->json([
-            'html' => $html,
-            'count' => $paginatedReservations->total()
-        ]);
+        // Get ALL sorted results for accurate queue calculation
+        $reservations = $query->get();
+
+        $pendingReservations = $reservations->where('status', \App\Enums\ReservationStatus::PENDING);
+
+        $positionsByBook = $pendingReservations
+            ->groupBy('book_id')
+            ->map(fn($reservationsForBook) => $reservationsForBook->pluck('id')->flip());
+
+        $reservations->each(function ($reservation) use ($positionsByBook) {
+            if ($reservation->status === \App\Enums\ReservationStatus::PENDING) {
+                if (isset($positionsByBook[$reservation->book_id][$reservation->id])) {
+                    $reservation->queue_position = $positionsByBook[$reservation->book_id][$reservation->id] + 1;
+                } else {
+                    $reservation->queue_position = 1;
+                }
+                $reservation->pickup_deadline_date = null;
+            } else { // READY_FOR_PICKUP
+                $reservation->pickup_deadline_date = $reservation->pickup_deadline;
+            }
+        });
+
+        Log::info('Queue Reservations Retrieved: ', ['count' => $reservations->count()]);
+        // Manual Pagination
+        $page = $request->input('page', 1);
+        $perPage = 20;
+        $paginatedReservations = new \Illuminate\Pagination\LengthAwarePaginator(
+            $reservations->forPage($page, $perPage),
+            $reservations->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        if ($request->ajax()) {
+            $html = view('partials.staff.queue-reservations.table', ['queueReservations' => $paginatedReservations])->render();
+            return response()->json([
+                'html' => $html,
+                'count' => $paginatedReservations->total()
+            ]);
+        }
+
+        return view('pages.staff.queue-reservations', ['queueReservations' => $paginatedReservations]);
     }
-
-    return view('pages.staff.queue-reservations', ['queueReservations' => $paginatedReservations]);
-}
 }

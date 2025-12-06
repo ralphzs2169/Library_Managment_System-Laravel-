@@ -21,19 +21,28 @@
             <!-- Borrower Info Banner -->
             <div class="border border-gray-200 rounded-lg p-3 mb-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-accent to-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        <span id="confirm-borrower-initials">--</span>
+                    <div class="w-12 h-12 bg-gradient-to-br from-accent to-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        <span id="confirm-borrower-initials">AB</span>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 font-medium">Borrowing for</p>
-                        <p id="confirm-borrower-name" class="font-bold text-gray-900"></p>
+                        <p class="text-xs text-gray-500 font-medium">Borrower</p>
+                        <p id="confirm-borrower-name" class="font-bold text-gray-900">Name Loading...</p>
+                        <p id="confirm-borrower-id" class="text-xs text-gray-700 font-mono"></p>
+
                     </div>
                 </div>
-                <p id="confirm-borrower-id" class="text-xs text-gray-500 font-mono">1352085</p>
+                <span id="confirm-borrower-role-badge"></span>
             </div>
 
             <!-- Book Details Card -->
             <div class="bg-white rounded-xl border border-gray-200 p-4">
+                <label class="block text-xs font-semibold text-gray-700 pb-2 border-gray-300 border-b mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="size-5 text-accent">
+                        <path strokeLinecap="round" stroke-width="2" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                    </svg>
+
+                    Book Information
+                </label>
                 <div class="flex gap-4">
                     <!-- Book Cover -->
                     <img id="confirm-book-cover" src="" alt="Book Cover" class="w-24 h-36 object-cover rounded-lg shadow-sm border border-gray-200 flex-shrink-0">

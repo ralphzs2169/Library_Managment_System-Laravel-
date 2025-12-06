@@ -3,19 +3,43 @@ import { initializeBorrowerProfileUI } from './borrower/borrowerProfilePopulator
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { clearInputError } from '../../helpers.js';
 import { getPenaltyStatusBadge, getPenaltyTypeBadge } from '../../utils/statusBadge.js';
+import { populateRoleBadge } from '../librarian/utils/popupDetailsModal.js';
 
-export function openPaymentModal(borrower, transaction) {
+let confirmPaymentModalListenersInitialized = false;
+
+export function openPaymentModal(borrower, transaction, context = 'profile_view') {
     const modal = document.getElementById('confirm-payment-modal');
     const content = document.getElementById('confirm-payment-content');
     if (!modal || !content) return;
 
+    // Handle Back Button Visibility and Context
+    const backBtn = modal.querySelector('#payment-back-to-penalty-details');
+    if (backBtn) {
+        backBtn.dataset.context = context;
+        if (context === 'main_table_view') {
+            backBtn.classList.remove('hidden');
+        } else {
+            backBtn.classList.add('hidden');
+        }
+    }
+
+    // Reset to initial hidden state before showing
+    modal.classList.add('bg-opacity-0');
+    modal.classList.remove('bg-opacity-50');
+    content.classList.add('scale-95', 'opacity-0');
+    content.classList.remove('scale-100', 'opacity-100');
+
     // Show modal
     modal.classList.remove('hidden');
+    
+    // Use double requestAnimationFrame for smoother animation
     requestAnimationFrame(() => {
-        modal.classList.remove('bg-opacity-0');
-        modal.classList.add('bg-opacity-50');
-        content.classList.remove('scale-95', 'opacity-0');
-        content.classList.add('scale-100', 'opacity-100');
+        requestAnimationFrame(() => {
+            modal.classList.remove('bg-opacity-0');
+            modal.classList.add('bg-opacity-50');
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        });
     });
 
     // Borrower info
@@ -26,6 +50,9 @@ export function openPaymentModal(borrower, transaction) {
         ? borrower.students?.student_number
         : borrower.teachers?.employee_number;
     content.querySelector('#confirm-payment-borrower-id').textContent = idNumber || '';
+
+    // Populate role badge
+    populateRoleBadge(modal, '#confirm-payment-borrower-role-badge', borrower);
 
     // Book & penalty info
     const penalty = transaction.penalty || (transaction.penalties?.[0] || {});
@@ -75,18 +102,37 @@ export function openPaymentModal(borrower, transaction) {
     // Remove previous button onclick to avoid duplicate calls
     newPaymentForm.querySelector('#confirm-payment-button').onclick = null;
 
-    // Button actions
-    const closeBtn = content.querySelector('#close-confirm-payment-modal');
-    const cancelBtn = newPaymentForm.querySelector('#cancel-payment-button');
-    
-    closeBtn.onclick = () => closePaymentModal();
-    cancelBtn.onclick = () => closePaymentModal();
+    // Initialize listeners once
+    if (!confirmPaymentModalListenersInitialized) {
+        confirmPaymentModalListenersInitialized = true;
 
-    document.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closePaymentModal(borrower);
+        // Back button
+        if (backBtn) {
+            backBtn.onclick = returnToPreviousModal;
         }
-    });
+
+        // Button actions
+        const closeBtn = content.querySelector('#close-confirm-payment-modal');
+        if (closeBtn) {
+            closeBtn.onclick = () => closePaymentModal();
+        }
+
+        document.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closePaymentModal();
+            }
+        });
+    } else {
+        // If listeners already initialized, just update the context on the back button
+        if (backBtn) {
+            backBtn.dataset.context = context;
+        }
+    }
+
+    const cancelBtn = newPaymentForm.querySelector('#cancel-payment-button');
+    if (cancelBtn) {
+        cancelBtn.onclick = () => closePaymentModal();
+    }
 
     // Add input/focus listeners for error clearing
     ['input', 'focus'].forEach(event =>
@@ -97,7 +143,7 @@ export function openPaymentModal(borrower, transaction) {
     );
 }
 
-export function closePaymentModal() {
+export function closePaymentModal(withAnimation = true) {
     const modal = document.getElementById('confirm-payment-modal');
     const content = document.getElementById('confirm-payment-content');
 
@@ -109,13 +155,68 @@ export function closePaymentModal() {
 
     modal.classList.remove('bg-opacity-50');
     modal.classList.add('bg-opacity-0');
-
     content.classList.remove('scale-100', 'opacity-100');
     content.classList.add('scale-95', 'opacity-0');
 
-    setTimeout(() => {
+    if (withAnimation) {
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 50);
+    } else {
         modal.classList.add('hidden');
-    }, 150);
+    }
+}
+
+function returnToPreviousModal() {
+    const backBtn = document.getElementById('payment-back-to-penalty-details');
+    const context = backBtn.dataset.context || 'profile_view';
+
+    if (context === 'main_table_view') {
+        const modal = document.getElementById('confirm-payment-modal');
+        const modalContent = document.getElementById('confirm-payment-content');
+        
+        // Clear amount input
+        const amountInput = modalContent.querySelector('#amount');
+        if (amountInput) {
+            amountInput.value = '';
+            clearInputError(amountInput);
+        }
+        
+        // Fade out confirm payment modal
+        modal.classList.remove('bg-opacity-50');
+        modal.classList.add('bg-opacity-0');
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            
+            const detailsModal = document.getElementById('penalty-record-details-modal');
+            const detailsModalContent = document.getElementById('penalty-record-content');
+
+            if (detailsModal && detailsModalContent) {
+                // Reset to initial hidden state
+                detailsModal.classList.add('bg-opacity-0');
+                detailsModal.classList.remove('bg-opacity-50');
+                detailsModalContent.classList.add('scale-95', 'opacity-0');
+                detailsModalContent.classList.remove('scale-100', 'opacity-100');
+                
+                detailsModal.classList.remove('hidden');
+
+                // Trigger animation with double rAF
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        detailsModal.classList.remove('bg-opacity-0');
+                        detailsModal.classList.add('bg-opacity-50');
+                        detailsModalContent.classList.remove('scale-95', 'opacity-0');
+                        detailsModalContent.classList.add('scale-100', 'opacity-100');
+                    });
+                });
+            }
+        },50);
+    } else {
+        closePaymentModal();
+    }
 }
 
 async function processPenaltyPayment(penaltyId, currentBorrower) {
@@ -133,6 +234,14 @@ async function processPenaltyPayment(penaltyId, currentBorrower) {
         await initializeBorrowerProfileUI(modal, freshBorrower, true, 'penalties-tab');
         closePaymentModal();
     } else if (performedBy === 'librarian') {
-        closePaymentModal();
+        const backBtn = document.getElementById('payment-back-to-penalty-details');
+        const context = backBtn.dataset.context || 'profile_view';
+
+        if (context === 'main_table_view') {
+            closePaymentModal();
+            // Dashboard reloads automatically via processPenalty
+        } else {
+            closePaymentModal();
+        }
     }
 }

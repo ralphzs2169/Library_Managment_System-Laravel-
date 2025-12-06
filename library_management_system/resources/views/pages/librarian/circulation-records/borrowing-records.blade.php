@@ -78,12 +78,15 @@
                 @include('partials.librarian.circulation-records.borrowing-records-table', ['borrowTransactions' => $borrowTransactions])
             </div>
 
-            @include('modals.librarian.borrow-record-details')
         </div>
-
-        @vite('resources/js/pages/librarian/utils/popupDetailsModal.js')
-        @vite('resources/js/pages/librarian/borrowingRecords/borrowRecordDetails.js')
-        @vite('resources/js/ajax/librarianSectionsHandler.js')
-        @vite('resources/js/pages/librarian/borrowingRecords/borrowRecordsTableControls.js')
     </section>
+
+    @include('modals.librarian.borrow-record-details')
+    @include('modals.confirm-renew')
+    @include('modals.confirm-return')
 </x-layout>
+
+@vite('resources/js/pages/librarian/utils/popupDetailsModal.js')
+@vite('resources/js/pages/manage-record-details/borrowRecordDetails.js')
+@vite('resources/js/ajax/librarianSectionsHandler.js')
+@vite('resources/js/pages/librarian/borrowingRecords/borrowRecordsTableControls.js')

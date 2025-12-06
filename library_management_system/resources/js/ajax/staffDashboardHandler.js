@@ -6,7 +6,9 @@ import { initStaffDashboardPagination } from "../tableControls.js";
 import { STAFF_DASHBOARD_ROUTES } from "../config.js";
 import { showSkeleton, hideSkeleton } from "../utils.js";
 import { activeBorrowsSkeletonLoader, unpaidPenaltiesSkeletonLoader, queueReservationsSkeletonLoader } from "../pages/staff/skeleton-loader/skeletonMainTabs.js";
-import { initializeReservationRecordDetailListeners } from "../pages/librarian/reservationRecords/reservationRecordDetails.js";
+import { initReservationRecordDetailListeners } from "../pages/manage-record-details/reservationRecordDetails.js";
+import { initBorrowRecordDetailListeners } from "../pages/manage-record-details/borrowRecordDetails.js";
+import { initPenaltyRecordsListeners } from "../pages/manage-record-details/penaltyRecordDetails.js";
 
 export async function loadMembers(page = BORROWER_FILTERS.page, scrollUp = true, isFiltered = false) {
     const container = document.getElementById('members-table-container');
@@ -132,6 +134,7 @@ export async function loadActiveBorrows(page = ACTIVE_BORROW_FILTERS.page, scrol
         clearTimeout(skeletonTimer);
         hideSkeleton(container, '#active-borrows-skeleton-body', '#active-borrows-real-table-body');
         initStaffDashboardPagination(loadActiveBorrows);
+        initBorrowRecordDetailListeners();
         
 
         const searchTerm = searchInput?.value?.trim();
@@ -206,6 +209,7 @@ export async function loadUnpaidPenalties(page = UNPAID_PENALTIES_FILTERS.page, 
         clearTimeout(skeletonTimer);
         hideSkeleton(container, '#unpaid-penalties-skeleton-body', '#unpaid-penalties-real-table-body');
         initStaffDashboardPagination(loadUnpaidPenalties);
+        initPenaltyRecordsListeners();
 
         const searchTerm = searchInput?.value?.trim();
         if (searchTerm) {
@@ -276,7 +280,7 @@ export async function loadQueueReservations(page = QUEUE_RESERVATIONS_FILTERS.pa
         hideSkeleton(container, '#queue-reservations-skeleton-body', '#queue-reservations-real-table-body');
         // Re-attach pagination listeners for active borrows
         initStaffDashboardPagination(loadQueueReservations);
-        initializeReservationRecordDetailListeners();
+        initReservationRecordDetailListeners();
         const searchTerm = searchInput?.value?.trim();
         if (searchTerm) {
             highlightSearchMatches(searchTerm, '#queue-reservations-table-container', SEARCH_COLUMN_INDEXES.QUEUE_RESERVATIONS);

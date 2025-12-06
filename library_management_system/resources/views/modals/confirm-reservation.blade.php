@@ -26,14 +26,23 @@
                     <div>
                         <p class="text-xs text-gray-500 font-medium">Reservation for</p>
                         <p id="confirm-reserver-name" class="font-bold text-gray-900"></p>
+                        <p id="confirm-reserver-id" class="text-xs text-gray-500 font-mono"></p>
                     </div>
                 </div>
-                <p id="confirm-reserver-id" class="text-xs text-gray-500 font-mono"></p>
+                <span id="reserver-role-badge"></span>
             </div>
 
             <!-- Book Details Card -->
             <div class="bg-white rounded-xl border border-gray-200 p-4">
+                <label class="block text-xs font-semibold text-gray-700 pb-2 border-gray-300 border-b mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="size-5 text-accent">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                    </svg>
+
+                    Book Information
+                </label>
                 <div class="flex gap-4">
+
                     <img id="confirm-reserve-book-cover" src="" alt="Book Cover" class="w-24 h-36 object-cover rounded-lg shadow-sm border border-gray-200 flex-shrink-0">
 
                     <div class="flex-1 space-y-2">

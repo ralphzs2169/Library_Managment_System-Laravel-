@@ -1,18 +1,22 @@
-import { fetchSettings } from "../../../ajax/settingsHandler.js";
-import { showError } from "../../../utils/alerts.js";
-import { openDetailsModal } from "../utils/popupDetailsModal.js";
-import { populateRoleBadge } from "../utils/popupDetailsModal.js";
-import { formatDate } from "../../../utils.js";
-import { getBorrowingStatusBadge } from "../../../utils/statusBadge.js";
+import { fetchSettings } from "../../ajax/settingsHandler.js";
+import { showError } from "../../utils/alerts.js";
+import { openDetailsModal } from "../librarian/utils/popupDetailsModal.js";
+import { populateRoleBadge } from "../librarian/utils/popupDetailsModal.js";
+import { formatDate } from "../../utils.js";
+import { getBorrowingStatusBadge } from "../../utils/statusBadge.js";
+import { openConfirmReturnModal } from "../staff/confirmReturn.js";
+import { openConfirmRenewModal } from "../staff/confirmRenew.js";
 
-export function initializeBorrowRecordDetailListeners() {
-    
+export function initBorrowRecordDetailListeners() {
+
     const detailButtons = document.querySelectorAll('.open-borrow-record-details');
+    
     detailButtons.forEach(button => {
+   
         button.addEventListener('click', async (e) => {
             e.preventDefault();
             const borrowRecord = JSON.parse(button.getAttribute('data-borrow-record'));
-
+            console.log(borrowRecord);
             if (!borrowRecord) {
                 showError('Data Error', 'Borrow record data is missing or invalid.');
                 return;
@@ -28,7 +32,6 @@ export function initializeBorrowRecordDetailListeners() {
 }
 
 // Initial attach on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', initializeBorrowRecordDetailListeners);
 
 let borrowRecordModalListenersInitialized = false;
 
@@ -36,7 +39,7 @@ async function initializeBorrowRecordDetailsModal(modal, data) {
   
     const borrower = data.borrowRecord.user;
     const borrowRecord = data.borrowRecord;
-    console.log(borrower);
+  
     const borrowerInitials = document.getElementById('borrower-initials');
     const borrowerName = document.getElementById('borrower-name');
     const borrowerIdNumber = document.getElementById('borrower-id-number');
@@ -47,6 +50,59 @@ async function initializeBorrowRecordDetailsModal(modal, data) {
 
     // Populate role badge
     populateRoleBadge(modal, '#borrower-role-badge', borrower);
+
+        // Handle Return and Renew Buttons
+    const returnBtn = document.getElementById('borrow-record-return-btn');
+    const renewBtn = document.getElementById('borrow-record-renew-btn');
+
+    if (returnBtn) returnBtn.classList.add('hidden');
+    if (renewBtn) renewBtn.classList.add('hidden');
+        // Only show if the book is currently borrowed (not returned)
+    if (!borrowRecord.returned_at) {
+        if (returnBtn) {
+            returnBtn.classList.remove('hidden');
+            const newReturnBtn = returnBtn.cloneNode(true);
+            returnBtn.parentNode.replaceChild(newReturnBtn, returnBtn);
+            newReturnBtn.addEventListener('click', () => {
+                // First fade out the current modal
+                const modal = document.getElementById('borrow-record-details-modal');
+                const modalContent = document.getElementById('borrow-record-content');
+                
+                modal.classList.remove('bg-opacity-50');
+                modal.classList.add('bg-opacity-0');
+                modalContent.classList.remove('scale-100', 'opacity-100');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    const context = 'main_table_view';
+                    openConfirmReturnModal(borrower, borrowRecord, context);
+                }, 50);
+            });
+        }
+
+        if (renewBtn) {
+            renewBtn.classList.remove('hidden');
+            const newRenewBtn = renewBtn.cloneNode(true);
+            renewBtn.parentNode.replaceChild(newRenewBtn, renewBtn);
+            newRenewBtn.addEventListener('click', () => {
+                // First fade out the current modal
+                const modal = document.getElementById('borrow-record-details-modal');
+                const modalContent = document.getElementById('borrow-record-content');
+                
+                modal.classList.remove('bg-opacity-50');
+                modal.classList.add('bg-opacity-0');
+                modalContent.classList.remove('scale-100', 'opacity-100');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    const context = 'main_table_view';
+                    openConfirmRenewModal(borrower, borrowRecord, context);
+                }, 50);
+            });
+        }
+    }
 
     const settings = await fetchSettings(); 
 
@@ -96,7 +152,9 @@ async function initializeBorrowRecordDetailsModal(modal, data) {
     // Status badge
     const statusBadge = document.getElementById('record-status-badge');
     statusBadge.className = 'absolute top-3 right-3'; // Ensure correct position
+
     data.borrowRecord.due_reminder_threshold = dueReminderThreshold;
+
     statusBadge.innerHTML = getBorrowingStatusBadge(data.borrowRecord);
 
     // Transaction ID in header
@@ -107,42 +165,44 @@ async function initializeBorrowRecordDetailsModal(modal, data) {
     if (!borrowRecordModalListenersInitialized) {
         borrowRecordModalListenersInitialized = true;
 
-        // Close button
+
         const closeBtn = document.getElementById('close-borrow-details-button');
         if (closeBtn) {
-            closeBtn.onclick = closeBorrowRecordModal;
+            closeBtn.onclick = () => closeBorrowRecordModal(true);
         }
 
-        // X icon
         const xBtn = document.getElementById('close-borrow-record-modal');
         if (xBtn) {
-            xBtn.onclick = closeBorrowRecordModal;
+            xBtn.onclick = () => closeBorrowRecordModal(true);
         }
 
         // Click outside modal to close
         document.addEventListener('click', function(event) {
             const modalEl = document.getElementById('borrow-record-details-modal');
             if (event.target === modalEl) {
-                closeBorrowRecordModal();
+                closeBorrowRecordModal(true);
             }
         });
     }
 }
 
-// Close modal function
-function closeBorrowRecordModal() {
+function closeBorrowRecordModal(withAnimation = true) {
     const modal = document.getElementById('borrow-record-details-modal');
     const modalContent = document.getElementById('borrow-record-content');
 
-    // Start closing animation
     modal.classList.remove('bg-opacity-50');
     modal.classList.add('bg-opacity-0');
     modalContent.classList.remove('scale-100', 'opacity-100');
     modalContent.classList.add('scale-95', 'opacity-0');
-    setTimeout(() => {
+
+    if (withAnimation) {
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 50);
+    } else {
         modal.classList.add('hidden');
-    }, 150);
+    }
 }
 
-
+initBorrowRecordDetailListeners();
 

@@ -6,7 +6,7 @@ import { closeConfirmBorrowModal } from "../../pages/staff/confirmBorrow.js";
 import { closeConfirmRenewModal } from "../../pages/staff/confirmRenew.js";
 import { closeConfirmReturnModal } from "../../pages/staff/confirmReturn.js";
 import { reloadStaffDashboardData } from "../staffDashboardHandler.js";
-import { loadReservationRecords } from "../librarianSectionsHandler.js";
+import { loadReservationRecords, loadBorrowRecords } from "../librarianSectionsHandler.js";
 
 export async function borrowBook(borrowData) {
     // Add CSRF token
@@ -151,17 +151,21 @@ export async function returnBook(returnData) {
         body: returnData
     });
 
-    const data = await response.json(); 
-      console.log(data);
-
-
+    result = await response.json(); 
+  
     if (!response.ok) {
-        showError('Something went wrong', data.message || 'Please try again.');
+        showError('Something went wrong', result.message || 'Please try again.');
         return false;
     }
 
+    const performedBy = result.data.action_performed_by;
+
+    if (performedBy === 'staff') {
+        reloadStaffDashboardData();
+    } else if(performedBy === 'librarian') {
+        loadBorrowRecords(undefined, false);
+    }
     showToast('Book Returned Successfully!', 'success');
-    reloadStaffDashboardData();
     return true;
 }
 
@@ -219,14 +223,20 @@ export async function renewBook(renewData) {
         body: renewData
     });
 
-    const data = await response.json(); 
+    result = await response.json(); 
 
     if (!response.ok) {
-        showError('Something went wrong', data.message || 'Please try again.');
+        showError('Something went wrong', result.message || 'Please try again.');
         return false;
     }
+    
+    const performedBy = result.data.action_performed_by;
 
-    reloadStaffDashboardData();
+    if (performedBy === 'staff') {
+        reloadStaffDashboardData();
+    } else if (performedBy === 'librarian') {
+        loadBorrowRecords(undefined, false);
+    }
 
     showToast('Renewal Successful!', 'success');
     return true;

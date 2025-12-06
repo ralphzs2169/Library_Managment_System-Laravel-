@@ -4,11 +4,11 @@
     <table class="w-full text-sm rounded-lg">
         <thead>
             <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">No.</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap"></th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Borrower</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Book</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Status</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-8">No.</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-10"></th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-40">Borrower</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider w-70">Book</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-">Status</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Queue Position</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Pickup Deadline</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">Reserved at</th>
@@ -125,14 +125,18 @@
             </tr>
             @empty
             <tr>
-                <td colspan="8" class="py-10 text-center text-gray-500 text-sm">
-                    No queue reservation found.
+                <td colspan="9" class="py-20 px-4 text-center text-gray-500">
+                    <div class="flex flex-col items-center justify-center">
+                        <img class="w-24 h-24" src="{{ asset('build/assets/icons/no-results-found.svg') }}" alt="No Results Found">
+                        <p class="text-gray-500 text-lg font-medium mb-2">No queue reservations found</p>
+                        <p class="text-gray-400 text-sm">Try adjusting your search or filters</p>
+                    </div>
                 </td>
             </tr>
             @endforelse
         </tbody>
     </table>
-    @include('modals.librarian.manage-reservation-record')
+    @include('modals.librarian.reservation-record-details')
 </div>
 
 @if($queueReservations->isNotEmpty())
@@ -160,4 +164,4 @@
 </div>
 @endif
 
-@vite('resources/js/pages/librarian/reservationRecords/reservationRecordDetails.js')
+@vite('resources/js/pages/manage-record-details/reservationRecordDetails.js')

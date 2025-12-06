@@ -3,14 +3,6 @@ import { initActiveBorrowsTableControls,
          initUnpaidPenaltiesTableControls, 
          initQueueReservationsTableControls } from './dashboardTableControls.js';
 import { loadMembers, loadActiveBorrows, loadUnpaidPenalties, loadQueueReservations } from '../../ajax/staffDashboardHandler.js';
-import { showSkeleton, hideSkeleton } from '../../utils.js';
-
-const isLoaded = {
-    membersTable: false,
-    activeBorrowsTable: false,
-    unpaidPenaltiesTable: false,
-    queueReservationsTable: false,
-}
 
 export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-tab') {
     const tabMembersBtn = document.getElementById('tab-members-btn');
@@ -52,24 +44,16 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
     ];
 
     function activateTab(tab) {
-        if (tab.key === 'members' && !isLoaded.membersTable) {
-            isLoaded.membersTable = true;
+        if (tab.key === 'members') {
             initBorrowersTableControls();
             loadMembers();
-        }else if (tab.key === 'borrows' && !isLoaded.activeBorrowsTable) {
-            const container = document.getElementById('active-borrows-table-container');
-
-            // showSkeleton(container, '#active-borrows-skeleton-body', '#active-borrows-real-table-body');
-            isLoaded.activeBorrowsTable = true;
+        }else if (tab.key === 'borrows') {
             initActiveBorrowsTableControls();
             loadActiveBorrows();
-            // hideSkeleton(container, '#active-borrows-skeleton-body', '#active-borrows-real-table-body');
-        }else if (tab.key === 'penalties' && !isLoaded.unpaidPenaltiesTable) {
-            isLoaded.unpaidPenaltiesTable = true;
+        }else if (tab.key === 'penalties') {
             initUnpaidPenaltiesTableControls();
             loadUnpaidPenalties();
-        }else if (tab.key === 'reservations' && !isLoaded.queueReservationsTable) {
-            isLoaded.queueReservationsTable = true;
+        }else if (tab.key === 'reservations') {
             initQueueReservationsTableControls();
             loadQueueReservations();
         }
@@ -105,10 +89,6 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
     }
 
     function setActiveTab(activeTab) {
-        // Save active tab to localStorage
-        if (activeTab && activeTab.key) {
-            localStorage.setItem('staffDashboardActiveTab', activeTab.key);
-        }
         tabs.forEach(tab => {
             if (!tab.btn || !tab.content) return;
             if (tab === activeTab) {
@@ -133,18 +113,8 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
         tabs.forEach(deactivateTab);
     }
 
-    // Restore tab from localStorage if available
-    let tabToActivate = tabs[0];
-    const savedTabKey = localStorage.getItem('staffDashboardActiveTab');
-    if (savedTabKey) {
-        const foundTab = tabs.find(tab => tab.key === savedTabKey);
-        if (foundTab && foundTab.btn && foundTab.content) {
-            tabToActivate = foundTab;
-        }
-    }
-
     resetTabsToDefault();
-    setActiveTab(tabToActivate);
+    setActiveTab(tabs[0]);
 
     return { resetTabsToDefault };
 }

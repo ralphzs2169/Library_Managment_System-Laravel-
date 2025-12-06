@@ -15,13 +15,13 @@ function replaceNodeWithClone(selector) {
 
 export function initBorrowersTableControls() {
     // Remove previous listeners by replacing nodes
-    const searchInput = replaceNodeWithClone('#borrowers-search');
-    const roleFilter = replaceNodeWithClone('#borrower-role-filter');
-    const statusFilter = replaceNodeWithClone('#borrower-status-filter');
-    const sortFilter = replaceNodeWithClone('#borrower-sort-filter');
+    replaceNodeWithClone('#borrowers-search');
+   replaceNodeWithClone('#borrower-role-filter');
+    replaceNodeWithClone('#borrower-status-filter');
+    replaceNodeWithClone('#borrower-sort-filter');
 
     const resetBtn = replaceNodeWithClone('#reset-borrower-filters');
-    const container = document.getElementById('members-table-container');
+
 
     // Use tableControls.js helpers
     initStaffDashboardPagination(loadMembers);

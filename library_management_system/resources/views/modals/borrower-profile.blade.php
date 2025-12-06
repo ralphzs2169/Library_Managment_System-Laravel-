@@ -137,15 +137,15 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex flex-wrap gap-3 mt-5">
-                                    <button id="borrow-book-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
+                                    <button id="borrow-book-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                         <img src="{{ asset("build/assets/icons/add-book-white.svg")}}" alt="Borrow Icon" class="w-5 h-5">
                                         Borrow a Book
                                     </button>
-                                    <button id="add-reservation-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/90 cursor-pointer text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
+                                    <button id="add-reservation-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 cursor-pointer text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                         <img src="{{ asset("build/assets/icons/reservation-white.svg")}}" alt="Approve Icon" class="w-5 h-5">
                                         Add Reservation
                                     </button>
-                                    <button id="mark-as-cleared-button" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
+                                    <button id="mark-as-cleared-button" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                         {{-- <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Mark as Cleared Icon" class="w-5 h-5"> --}}
                                         Mark as Cleared
                                     </button>

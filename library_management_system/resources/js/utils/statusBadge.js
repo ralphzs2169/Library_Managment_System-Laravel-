@@ -31,7 +31,7 @@ export function getBorrowingStatusBadge(transaction) {
             if (typeof daysOverdue === 'number' && daysOverdue > 0) {
                 const dayText = daysOverdue === 1 ? 'day' : 'days';
                 // Note: The inner HTML must be escaped/formatted carefully in JS string
-                label += `<div class="mt-1 text-[11px] text-orange-700 font-semibold">(${daysOverdue} ${dayText} late)</div>`;
+                label += `<div class="mt-1 text-[11px] text-red-700">(${daysOverdue} ${dayText} late)</div>`;
             }
         }
     } 
@@ -90,23 +90,26 @@ export function getReservationStatusBadge(status) {
     let badgeHtml = '';
     let badgeIcon = '';
     let badgeClass = '';
-    let label = formatLabel(status);
+    let formattedStatus = formatLabel(status);
+    let label = '';
     
-    switch (label) {
+    switch (formattedStatus) {
         case 'pending':
             badgeClass = 'bg-yellow-200 text-yellow-800';
             badgeIcon = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>`;
+            label = 'Pending';
             break;
 
-        case 'ready_for_pickup':
+        case 'ready for pickup':
             badgeClass = 'bg-blue-100 text-blue-700'; 
             badgeIcon = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 384 512">
                     <path fill="#1D4ED8" d="M368 48h4c6.627 0 12-5.373 12-12V12c0-6.627-5.373-12-12-12H12C5.373 0 0 5.373 0 12v24c0 6.627 5.373 12 12 12h4c0 80.564 32.188 165.807 97.18 208C47.899 298.381 16 383.9 16 464h-4c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h360c6.627 0 12-5.373 12-12v-24c0-6.627-5.373-12-12-12h-4c0-80.564-32.188-165.807-97.18-208C336.102 213.619 368 128.1 368 48zM64 48h256c0 101.62-57.307 184-128 184S64 149.621 64 48zm256 416H64c0-101.62 57.308-184 128-184s128 82.38 128 184z" />
                 </svg>`;
+            label = 'Ready for Pickup';
             break;
 
         case 'completed':
@@ -115,6 +118,7 @@ export function getReservationStatusBadge(status) {
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>`;
+            label = 'Completed';
             break;
 
         case 'cancelled':
@@ -124,11 +128,12 @@ export function getReservationStatusBadge(status) {
                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>`;
+            label = formattedStatus === 'expired' ? 'Expired' : 'Cancelled';
             break;
 
         default:
             // Fallback for any other unexpected status
-            return `<span class="text-gray-500 text-xs">${label}</span>`;
+            return `<span class="text-gray-500 text-xs">${formattedStatus}</span>`;
     }
 
     // Construct the final HTML badge

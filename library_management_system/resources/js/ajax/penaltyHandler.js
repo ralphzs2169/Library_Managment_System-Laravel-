@@ -85,8 +85,6 @@ export async function processPenalty(paymentDetails, form, isStaff = true) {
 
 export async function cancelPenalty(penaltyId, borrowerId, isStaff = true) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-    const route = isStaff ? TRANSACTION_ROUTES.STAFF_CANCEL_PENALTY(penaltyId, borrowerId) : TRANSACTION_ROUTES.LIBRARIAN_CANCEL_PENALTY(penaltyId, borrowerId);
     
     const isConfirmed = await showDangerConfirmation(
         'Cancel Penalty?',
@@ -96,7 +94,7 @@ export async function cancelPenalty(penaltyId, borrowerId, isStaff = true) {
 
     if (!isConfirmed) return false;
 
-    const response = await fetch(route, {
+    const response = await fetch(TRANSACTION_ROUTES.CANCEL_PENALTY(penaltyId, borrowerId), {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -112,7 +110,13 @@ export async function cancelPenalty(penaltyId, borrowerId, isStaff = true) {
         return false;
     }
 
-    isStaff ? reloadStaffDashboardData() : loadPenaltyRecords(undefined, false);
+    const performedBy = result.data.action_performer_role;
+    
+    if (performedBy === 'staff'){
+        reloadStaffDashboardData();
+    } else {
+        loadPenaltyRecords(undefined, false);
+    }
 
     showToast('Penalty Cancelled!', 'success');
     return true;
