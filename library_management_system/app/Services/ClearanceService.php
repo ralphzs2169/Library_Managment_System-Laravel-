@@ -30,10 +30,11 @@ class ClearanceService
             $clearance->update([
                 'status' => ClearanceStatus::APPROVED,
                 'approved_by_id' => $librarianId, // Fixed column name
+                'remarks' => 'Clearance granted. User privileges set to INACTIVE.',
             ]);
 
             $clearance->user->update([
-                'library_status' => 'cleared',
+                'library_status' => 'inactive',
             ]);
 
             ActivityLog::create([
@@ -87,6 +88,7 @@ class ClearanceService
                 'semester_id' => $semesterId,
                 'status' => ClearanceStatus::PENDING,
                 'requested_by_id' => $requestorId,
+                'remarks' => 'Clearance request submitted. Status set to PENDING.',
             ]);
 
             if ($requestorId !== $userId && $requestorId !== null) {

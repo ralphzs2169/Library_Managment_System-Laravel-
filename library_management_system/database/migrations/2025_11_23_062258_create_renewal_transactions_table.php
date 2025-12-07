@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('renewal_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('staff_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('semester_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('borrow_transaction_id')->nullable()->constrained()->nullOnDelete();
             $table->date('renewed_at');
             $table->date('previous_due_at');

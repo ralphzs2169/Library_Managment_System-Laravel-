@@ -1,6 +1,6 @@
 import { INVALID_INPUT } from "./config.js";
 import { displayInputErrors } from "./helpers.js";
-
+import { showError } from "./utils/alerts.js";
 
 export function showSkeleton(container, skeletonSelector = '.skeleton', realContentSelector = '.real-content') {
     const skeleton = container.querySelector(skeletonSelector);
@@ -34,6 +34,14 @@ export function getJsonHeaders() {
 export function formatDate(date, locale = 'en-US') {
     const d = (date instanceof Date) ? date : new Date(date);
     return d.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+export function formatTime(time, locale = 'en-US') {
+    // Ensure the input is a Date object, converting it if it's a string/timestamp.
+    const t = (time instanceof Date) ? time : new Date(time);
+
+    // Use toLocaleTimeString to format the time, showing hours and minutes.
+    return t.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
 }
 
 export async function parseJsonSafely(response) {
@@ -142,7 +150,7 @@ export function debounce(fn, delay) {
 
 export function resetButton(button, defaultIcon) {
     // Remove disabled state
-    button.classList.add('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow', 'bg-secondary-light', 'hover:bg-secondary-light/90');
+    button.classList.add('inline-flex','cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow', 'bg-secondary-light', 'hover:bg-secondary-light/90');
     button.classList.remove(
         'cursor-not-allowed',
         'opacity-50',

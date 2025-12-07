@@ -274,8 +274,8 @@ async function handleConfirmReturn() {
             // Dashboard reloads automatically via returnBook -> reloadStaffDashboardData
         } else {
             const modal = document.getElementById('borrower-profile-modal');
-            const freshBorrowerDetails = await fetchBorrowerDetails(currentBorrower.id)
-            await initializeBorrowerProfileUI(modal, freshBorrowerDetails);
+            const { borrower, actionPerformer }= await fetchBorrowerDetails(currentBorrower.id)
+            await initializeBorrowerProfileUI(modal, borrower, true, 'currently-borrowed-tab', actionPerformer);
             closeConfirmReturnModal();
         }
     }

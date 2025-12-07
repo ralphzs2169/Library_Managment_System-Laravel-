@@ -21,6 +21,7 @@ use App\Policies\BookPolicy;
 use App\Enums\ReservationStatus;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Semester;
 
 class BookService {
 
@@ -145,7 +146,7 @@ class BookService {
 
             // Exclude the book if policy fails or no eligible copies are loaded
             if ($result['result'] !== 'success' || $book->copies->isEmpty()) {
-                Log::info('Excluding book: ' . $book->title . ' due to policy failure or no eligible copies.');
+                Log::info('Excluding book: ' . $book->title . ' due to ' . $result['message']);
                 return false;
             }
 
@@ -506,6 +507,8 @@ class BookService {
                             $reservation->book_copy_id = null;
                             $reservation->save();
                         }
+
+                        continue;
                     }
 
 
@@ -598,6 +601,8 @@ class BookService {
                     if (!$transaction) {
                         $errors[] = "No borrow transaction found for copy ID: {$copy->id}";
                     }
+
+                    $activeSemesterId = Semester::where('status', 'active')->value('id');
                     // Create penalty record
                     $penalty =Penalty::create([
                         'borrow_transaction_id' => $transaction ? $transaction->id : null,
@@ -605,6 +610,7 @@ class BookService {
                         'type' => $penaltyType,
                         'status' => PenaltyStatus::UNPAID,
                         'issued_at' => now(),
+                        'semester_id' => $activeSemesterId ?? null,
                     ]);
 
                     if (!$penalty) {

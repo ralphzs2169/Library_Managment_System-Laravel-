@@ -1,16 +1,16 @@
 {{-- filepath: c:\Users\Angela\library_management_system\resources\views\partials\librarian\books-table.blade.php --}}
 <div class="overflow-x-auto rounded-lg border border-gray-200">
-    <table class="w-full text-sm rounded-lg">
+    <table class="w-full text-sm rounded-lg table-fixed">
         <thead>
             <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">No.</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Cover</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-80">Title & ISBN</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Author</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Category</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Copies</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-46 whitespace-nowrap">Status</th>
-                <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-8">No.</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-18">Cover</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-70">Book Info</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-36">ISBN</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-32">Price</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-20">Copies</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-46 whitespace-nowrap w-26">Status</th>
+                <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-24">Actions</th>
             </tr>
         </thead>
         <tbody id="books-table-body" class="bg-white divide-y divide-gray-100">
@@ -41,19 +41,25 @@
                 <td class="px-4 py-3">
                     <img src="{{ $book->cover_image ? asset('storage/' . $book->cover_image) : asset('images/no-cover.png') }}" alt="{{ $book->title }}" class="w-12 h-16 rounded-md object-cover shadow-sm border border-gray-200">
                 </td>
-                <td class="px-4 py-3" title="{{ $book->title }}">
-                    <p class="font-semibold line-clamp-2 text-gray-800 max-w-xs">{{ $book->title }}</p>
-                    <p class="text-xs text-gray-500 font-mono mt-1">ISBN: {{ $book->isbn ?? 'N/A' }}</p>
-                </td>
-                <td class="px-4 py-3 text-gray-600">
-                    {{ $book->author->formal_name }}
-                </td>
-                <td class="px-4 py-3 text-gray-700 text-center">
-                    <span class="inline-flex w-full px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                        {{ $book->genre->category->name ?? 'N/A' }}
-                    </span>
+                <td class="px-4 py-3">
+                    <p class="font-semibold line-clamp-2 text-gray-800 max-w-xs line-clamp-2" title="{{ $book->title }}">{{ $book->title }}</p>
+                    <div class="flex flex-wrap gap-1.5 mt-1.5 mb-2">
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                            {{ $book->genre->category->name ?? 'N/A' }}
+                        </span>
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                            {{ $book->genre->name ?? 'N/A' }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1.5 mb-2">by {{ $book->author->formal_name }}</p>
                 </td>
                 <td class="px-4 py-3">
+                    <p class="text-xs text-gray-900 ">{{ $book->isbn ?? 'N/A' }}</p>
+                </td>
+                <td class="px-4 py-3">
+                    <p class="text-xs text-gray-900">{{ $book->price ? '₱ ' . number_format($book->price, 2) : 'N/A' }}</p>
+                </td>
+                <td class="px-4 py-3 ">
                     @php
                     $filteredStatus = request('status');
                     $totalCopies = $book->copies->count();
@@ -142,9 +148,9 @@
                         'damaged' => ['class'=>'bg-orange-200 text-orange-700','icon'=>'<img src="/build/assets/icons/damaged-badge.svg" alt="Damaged Icon" class="w-3.5 h-3.5">' ],
                         'lost' => ['class'=>'bg-red-200 text-red-700','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>'],
-                        'withdrawn' => ['class'=>'bg-gray-200 text-gray-700','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        'withdrawn' => ['class'=>'bg-gray-200 text-gray-700','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>'],
-                        'pending_issue_review' => ['class'=>'bg-amber-300 text-amber-800','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        'pending_issue_review' => ['class'=>'bg-amber-300 text-amber-800','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'],
                         'on_hold_for_pickup' => [
                         'class' => 'bg-yellow-100 text-yellow-800', // The new lighter yellow class
@@ -170,13 +176,13 @@
                 </td>
                 <td class="px-4 py-3 relative">
                     @if($hasPendingReview)
-                    <div class="absolute top-1 right-1 z-10 pointer-events-none">
+                    <div class="absolute top-1 right-1 z-10 group/tooltip cursor-help">
                         <span class="inline-flex items-center justify-center w-6 h-6 bg-amber-500 text-white rounded-full shadow-md">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </span>
-                        <div class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+                        <div class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none shadow-lg">
                             Pending Issue Review
                             <div class="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
                         </div>

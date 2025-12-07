@@ -1,5 +1,5 @@
-import { API_ROUTES, BASE_URL } from '../config.js';
-import { showError, showSuccessWithRedirect, confirmLogout } from "../utils/alerts.js";
+import { API_ROUTES, AUTH_ROUTES, BASE_URL } from '../config.js';
+import { showError, showSuccessWithRedirect, confirmLogout, showToast } from "../utils/alerts.js";
 import { apiRequest, getJsonHeaders, showLoader, hideLoader } from '../utils.js';
 import { displayInputErrors } from '../helpers.js';
 
@@ -79,4 +79,38 @@ export async function logoutHandler(){
       console.error('Error:', error);
       showError('Network Error', 'Unable to connect to the server. Please check your internet connection or try again later.');
     }
+}
+
+export async function signupNewPersonnelHandler(personnelData, form) {  
+     showLoader();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    
+    try {
+        const response = await fetch(AUTH_ROUTES.NEW_PERSONNEL_ACCOUNT, {
+            method: 'POST',
+            headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(personnelData)
+        });
+
+        const result = await response.json();
+
+        if (result.errors){
+            displayInputErrors(result.errors, form);
+            hideLoader();
+            return false;
+        }
+
+        hideLoader();
+    } catch (error) {
+        hideLoader();
+        console.error('Error:', error);
+        showError('Something went wrong', 'Please try again later.');
+        return false;
+    }
+
+    return true;
 }

@@ -23,7 +23,6 @@ class BorrowTransaction extends Model
         'days_overdue' => 'integer',
         'borrowed_at' => 'datetime',
         'due_at' => 'datetime',
-        'returned_at' => 'datetime',
     ];
 
     public function markAsBorrowed()

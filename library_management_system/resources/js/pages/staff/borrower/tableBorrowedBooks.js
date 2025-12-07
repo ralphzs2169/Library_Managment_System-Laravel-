@@ -3,7 +3,7 @@ import { showWarning } from '../../../utils/alerts.js';
 import { openConfirmReturnModal } from '../confirmReturn.js';
 import { openConfirmRenewModal } from '../confirmRenew.js';
 import { closeBorrowerModal } from './borrowerProfileModal.js';
-import { formatDate } from '../../../utils.js';
+import { formatDate, formatTime } from '../../../utils.js';
 import { getBorrowingStatusBadge } from '../../../utils/statusBadge.js';
 
 export async function populateCurrentlyBorrowedBooks(modal, borrower) {
@@ -58,6 +58,7 @@ export async function populateCurrentlyBorrowedBooks(modal, borrower) {
     }
     
     borrowedBooks.forEach((transaction, index) => {
+   
         const book = transaction.book_copy.book;
         const copyNumber = transaction.book_copy.copy_number;
         const author = book?.author;
@@ -89,19 +90,22 @@ export async function populateCurrentlyBorrowedBooks(modal, borrower) {
                     <div class="flex items-center gap-3">
                         <img src="${coverImage}" class="w-10 h-14 rounded-md object-cover shadow-sm flex-shrink-0 border border-gray-200">
                         <div class="min-w-0">
-                            <p class="font-semibold text-gray-800 truncate">${book?.title || 'Unknown'}</p>
-                            <p class="text-xs text-gray-500">Copy #${copyNumber || 'N/A'} • ${authorName}</p>
+                            <p class="font-semibold text-gray-800 line-clamp-2">${book?.title || 'Unknown'}</p>
+                            <p class="text-xs text-gray-700">Copy #${copyNumber || 'N/A'}</p>
+                            <p class="text-xs text-gray-500 mt-1">by ${authorName}</p>
                         </div>
                     </div>
                 </td>
-                <td class="py-3 px-4 text-gray-700 text-sm">${formatDate(transaction.borrowed_at)}</td>
+                <td class="py-3 px-4 text-gray-700 text-sm">
+                    ${formatDate(transaction.borrowed_at)}
+                    <div class="text-xs text-gray-500">${formatTime(transaction.created_at)}</div>
+                    </td>
                 <td class="py-3 px-4">
                     <div class="flex flex-col gap-1">
                         <span class="text-sm text-gray-800">${formatDate(dueDate)}</span>
-                       
                     </div>
                 </td>
-                <td class="py-3 px-4">
+                <td class="py-3">
                     <span class="inline-flex items-center w-full gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold">
                         ${getBorrowingStatusBadge(transaction)}
                     </span>

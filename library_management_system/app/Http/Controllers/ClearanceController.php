@@ -30,7 +30,7 @@ class ClearanceController extends Controller
 
         // Eager load 'approvedBy' along with user and requestedBy
         return view('pages.librarian.clearance-management', [
-            'clearances' => Clearance::with(['user', 'requestedBy', 'approvedBy'])->get(), 
+            'clearances' => Clearance::with(['user', 'requestedBy', 'approvedBy', 'semester'])->get(), 
             'semesters' => $semesters,
             'activeSemesterId' => $activeSemesterId,
         ]);
@@ -112,7 +112,7 @@ class ClearanceController extends Controller
             return $this->jsonResponse('error', 'The clearance request could not be found.', 404);
         } catch (\Exception $e) {
             Log::error($e);
-            return $this->jsonResponse('error', 'Something went wrong while approving clearance. Please try again later.', 500);
+            return $this->jsonResponse('error', $e . 'Something went wrong while approving clearance. Please try again later.', 500);
         }
     }
 

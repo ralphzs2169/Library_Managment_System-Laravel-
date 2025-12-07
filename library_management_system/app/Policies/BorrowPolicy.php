@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\ClearanceStatus;
 use App\Enums\PenaltyStatus;
 use App\Models\User;
 use App\Models\Book;
@@ -19,35 +20,42 @@ class BorrowPolicy
 
         if (!$borrower) {
             return ['result' => 'not_found', 'message' => 'Borrower not found.'];
-        }   
+        }       
 
-        if ($borrower->library_status === 'cleared') {
-            return ['result' => 'business_rule_violation', 'message' => 'Borrower has been  cleared and cannot borrow books.'];
+        // 2. check active semester 
+        $hasActive = Semester::where('status', 'active')->exists();
+        if (!$hasActive) {
+            return ['result' => 'business_rule_violation', 'message' => 'No active semester found. User can only borrow during an active semester.'];
         }
 
-        // 2. For students, check active semester first (Highest specificity)
-        if ($borrower->role === 'student') {
-            $hasActive = Semester::where('status', 'active')->exists();
-            if (!$hasActive) {
-                return ['result' => 'business_rule_violation', 'message' => 'No active semester found. Students can only borrow during an active semester.'];
-            }
+        // 3. Check if borrower is inactive (cleared)
+        if ($borrower->library_status === 'inactive') {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrowing privileges revoked: User has been officially cleared.'];
         }
 
-        // 3. Check for outstanding penalties
+        // 4. Check if borrower already has a pending clearance request
+        $hasPendingClearance = $borrower->clearances()
+            ->where('status', ClearanceStatus::PENDING)
+            ->exists();
+
+        if ($hasPendingClearance) {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrower already has a pending clearance request.'];
+        }
+
+        // 5. Check for outstanding penalties
         $hasOutstandingPenalties = $borrower->penalties()
             ->whereIn('penalties.status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
             ->exists();
         if ($hasOutstandingPenalties) {
             return ['result' => 'business_rule_violation', 'message' => 'Borrowing suspended due to an outstanding penalty.'];
         }
-        
-        // 4. Check borrower's library status
+
+        // 6. Check if suspended
         if ($borrower->library_status === 'suspended') {
             return ['result' => 'business_rule_violation', 'message' => 'Borrower\'s library privileges are suspended.'];
         }
 
-
-        // 4. Check borrow limits
+        // 7. Check borrow limits
         if ($borrower->role === 'student') {
             $borrowCount = BorrowTransaction::where('user_id', $borrower->id)
                 ->where('status', 'borrowed')
@@ -68,7 +76,7 @@ class BorrowPolicy
             }
         }
 
-        // 5. Field validation
+        // 8. Field validation
         if ($includeInputValidation) {
             $duration = $borrower->role === 'student'
                 ? (int) config('settings.borrowing.student_duration', 7)

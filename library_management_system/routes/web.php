@@ -18,6 +18,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\LibrarianSectionsController;
+use App\Http\Controllers\LibrarianDashboardController;
 
 
 Route::get('/', function () {
@@ -55,11 +56,13 @@ Route::prefix('librarian')
         Route::put('/category-management/genres/{genre}', [GenreController::class, 'update'])->name('category-management.genres.update');
         Route::delete('/category-management/genres/{genre}', [GenreController::class, 'destroy'])->name('category-management.genres.destroy');
 
+        Route::get('/section/dashboard', [LibrarianDashboardController::class, 'index'])->name('section.dashboard');
         Route::get('/section/borrowing-records', [LibrarianSectionsController::class, 'borrowingRecords'])->name('section.borrowing-records');
         Route::get('/section/reservation-records', [LibrarianSectionsController::class, 'reservationRecords'])->name('section.reservation-records');
         Route::get('/section/penalty-records', [LibrarianSectionsController::class, 'penaltyRecords'])->name('section.penalty-records');
         Route::get('/section/borrowers', [LibrarianSectionsController::class, 'borrowers'])->name('section.borrowers');
         Route::get('/section/personnel-accounts', [LibrarianSectionsController::class, 'personnelAccounts'])->name('section.personnel-accounts');
+        Route::post('/section/personnel-account/create', [LibrarianSectionsController::class, 'storePersonnel'])->name('section.personnel-accounts.store');
         Route::get('/section/clearance-management', [ClearanceController::class, 'index'])->name('section.clearance-management');
         
         // Fixed: Removed double naming and incorrect prefixing

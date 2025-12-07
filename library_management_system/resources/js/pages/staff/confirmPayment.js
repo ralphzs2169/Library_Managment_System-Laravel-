@@ -230,8 +230,8 @@ async function processPenaltyPayment(penaltyId, currentBorrower) {
 
     if (performedBy === 'staff') {
         const modal = document.getElementById('borrower-profile-modal');
-        const freshBorrower = await fetchBorrowerDetails(currentBorrower.id);
-        await initializeBorrowerProfileUI(modal, freshBorrower, true, 'penalties-tab');
+        const { borrower, actionPerformer } = await fetchBorrowerDetails(currentBorrower.id);
+        await initializeBorrowerProfileUI(modal, borrower, true, 'penalties-tab', actionPerformer);
         closePaymentModal();
     } else if (performedBy === 'librarian') {
         const backBtn = document.getElementById('payment-back-to-penalty-details');

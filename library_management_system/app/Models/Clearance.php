@@ -28,4 +28,9 @@ class Clearance extends Model
     {
         return $this->belongsTo(User::class, 'approved_by_id');
     }
+
+    public function semester()
+    {
+        return $this->belongsTo(Semester::class, 'semester_id');
+    }
 }

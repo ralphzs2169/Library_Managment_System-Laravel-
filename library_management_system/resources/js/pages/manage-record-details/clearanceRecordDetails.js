@@ -2,6 +2,7 @@ import { openDetailsModal, populateRoleBadge } from "../librarian/utils/popupDet
 import { showError } from "../../utils/alerts.js";
 import { formatDate } from "../../utils.js";
 import { approveClearance, rejectClearance } from "../../ajax/clearanceHandler.js";
+import { getClearanceStatusBadge } from "../../utils/statusBadge.js";
 
 export function initClearanceRecordDetailListeners() {
     const detailButtons = document.querySelectorAll('.open-clearance-record-details');
@@ -52,11 +53,9 @@ function initializeClearanceRecordDetailsModal(modal, data) {
     if (borrower.role === 'teacher' && borrower.teachers) idNumber = borrower.teachers.employee_number;
     borrowerIdNumber.textContent = `User ID: ${idNumber}`;
 
-    populateRoleBadge(modal, '#clearance-borrower-role-badge', borrower);
-
     // --- Clearance Info ---
-    populateStatusBadge(record.status);
-
+    const clearanceStatusBadger = document.getElementById('clearance-record-status-badge');
+    clearanceStatusBadger.innerHTML = getClearanceStatusBadge(record.status);
     document.getElementById('clearance-record-semester').textContent = record.semester ? record.semester.name : 'N/A';
     
     const requestedBy = record.requested_by;
@@ -148,33 +147,5 @@ function closeClearanceRecordModal(withAnimation = true) {
     }
 }
 
-function populateStatusBadge(status) {
-    const badgeContainer = document.getElementById('clearance-record-status-badge');
-    badgeContainer.innerHTML = '';
-    
-    const span = document.createElement('span');
-    span.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-bold shadow-sm';
-
-    if (status === 'approved') {
-        span.classList.add('bg-green-200', 'text-green-700', 'border', 'border-green-100');
-        span.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg> Approved`;
-    } else if (status === 'rejected') {
-        span.classList.add('bg-red-200', 'text-red-700', 'border', 'border-red-100');
-        span.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg> Rejected`;
-    } else {
-        span.classList.add('bg-yellow-100', 'text-yellow-700', 'border', 'border-yellow-200');
-        span.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg> Pending`;
-    }
-    badgeContainer.appendChild(span);
-}
 
 initClearanceRecordDetailListeners();

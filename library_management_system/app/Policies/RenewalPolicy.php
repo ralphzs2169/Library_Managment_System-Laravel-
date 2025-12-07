@@ -23,7 +23,23 @@ class RenewalPolicy
             return ['result' => 'not_found', 'message' => 'No renewer found for this transaction.'];
         }
 
-        // 2. Renewal limit
+        // 2. Check active semester for students
+        $hasActive = Semester::where('status', 'active')->exists();
+        if (!$hasActive) {
+            return ['result' => 'business_rule_violation', 'message' => 'No active semester found. User can only borrow during an active semester.'];
+        }
+
+        // 3. Check penalties
+        if ($renewer->library_status === 'suspended') {
+            return ['result' => 'business_rule_violation', 'message' => 'Renewal suspended due to an outstanding penalty.'];
+        }
+
+        // 4. Check if borrower is inactive (cleared)
+        if ($renewer->library_status === 'inactive') {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrowing privileges revoked: User has been officially cleared.'];
+        }
+
+        // 5. Renewal limit
         $timesRenewed = $transaction->times_renewed;
         $renewalLimit = $renewer->role === 'student'
             ? (int) config('settings.renewing.student_renewal_limit')
@@ -36,35 +52,27 @@ class RenewalPolicy
             ];
         }
 
-        // 3. Check transaction
+        // 6. Check transaction
         if (!$transaction) {
             return ['result' => 'not_found', 'message' => 'No active borrow transaction found for this book.'];
         }
 
-        // 3a. Check if overdue
+        // 6a. Check if overdue
         if($transaction->status === 'overdue') {
             return ['result' => 'business_rule_violation', 'message' => 'Overdue books cannot be renewed.'];
         }
 
-        // 3b. Check if status is 'borrowed'
+        // 6b. Check if status is 'borrowed'
         if($transaction->status !== 'borrowed') {
             return ['result' => 'business_rule_violation', 'message' => 'Only borrowed books can be renewed.'];
         }
 
-        // 3c. Check if already returned
+        // 6c. Check if already returned
         if($transaction->returned_at !== null) {
             return ['result' => 'business_rule_violation', 'message' => 'This book has already been returned.'];
         }
 
-        // 4. Check active semester for students
-        if ($renewer->role === 'student') {
-            $hasActive = Semester::where('status', 'active')->exists();
-            if (!$hasActive) {
-                return ['result' => 'business_rule_violation', 'message' => 'No active semester found. Students can only borrow during an active semester.'];
-            }
-        }
-
-        // 5. Check for outstanding penalties
+        // 7. Check for outstanding penalties
         $hasOutstandingPenalties = $renewer->penalties()
             ->whereIn('penalties.status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
             ->exists();
@@ -72,12 +80,7 @@ class RenewalPolicy
             return ['result' => 'business_rule_violation', 'message' => 'Borrowing suspended due to an outstanding penalty.'];
         }
 
-        // 6. Check penalties
-        if ($renewer->library_status === 'suspended') {
-            return ['result' => 'business_rule_violation', 'message' => 'Renewal suspended due to an outstanding penalty.'];
-        }
-
-        // 7.  Check for any pending reservations under this book title
+        // 8. Check for any pending reservations under this book title
         $hasPendingReservations = $transaction->bookCopy->book->reservations()
                 ->where('status', ReservationStatus::PENDING)
                 ->exists();
@@ -89,7 +92,7 @@ class RenewalPolicy
             ];
         }
 
-        // 7. Minimum days before due date
+        // 9. Minimum days before due date
         $minDaysBeforeRenewal = $renewer->role === 'student'
             ? (int) config('settings.renewing.student_min_days_before_renewal')
             : (int) config('settings.renewing.teacher_min_days_before_renewal');

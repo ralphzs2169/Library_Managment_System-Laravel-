@@ -26,7 +26,7 @@ export function enableFieldEdit(input) {
 export function disableFieldEdit(input) {
     if (!input) return;
     input.disabled = true;
-    console.log('Disabling field edit for', input);
+    // console.log('Disabling field edit for', input);
     if(input.tagName === 'SELECT') {
             input.classList.add('appearance-none');
     }
@@ -47,6 +47,9 @@ export function initializeEditableFields(container) {
         
         if (!input) return;
         
+        // Skip checkboxes and radio buttons
+        if (input.type === 'checkbox' || input.type === 'radio') return;
+
         // Skip if already initialized
         if (input.parentElement.querySelector('.edit-field-icon')) return;
         
@@ -152,4 +155,30 @@ export function disableAllFields(container) {
         }
     });
 
+}
+
+export function resetEditableFields(container) {
+    const containerEl = typeof container === 'string' 
+        ? document.querySelector(container) 
+        : container;
+    
+    if (!containerEl) return;
+    
+    const inputs = containerEl.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        // Disable input
+        input.disabled = true;
+        if(input.tagName === 'SELECT') {
+            input.classList.add('appearance-none');
+        }
+
+        // Show icon if it exists in the wrapper
+        const wrapper = input.parentElement;
+        if (wrapper.classList.contains('relative')) {
+            const icon = wrapper.querySelector('.edit-field-icon');
+            if (icon) {
+                icon.style.display = 'block';
+            }
+        }
+    });
 }

@@ -18,6 +18,10 @@ export const API_ROUTES ={
     // Add other API routes as needed
 };
 
+export const AUTH_ROUTES = {
+    NEW_PERSONNEL_ACCOUNT: BASE_URL + 'librarian/section/personnel-account/create',
+}
+
 export const BOOK_ROUTES = {
     INDEX: '/librarian/books/index',
     CREATE: '/librarian/books/create',
@@ -83,7 +87,8 @@ export const CLEARANCE_ROUTES = {
     VALIDATE_CLEARANCE_REQUEST: (targetUserId, requestorId) => `/transaction/clearance/${targetUserId}/validate-request/${requestorId}`,
     PERFORM_CLEARANCE_REQUEST: (targetUserId, requestorId) => `/transaction/clearance/${targetUserId}/perform-request/${requestorId}`,
     
-    MARK_AS_CLEARED: (userId) => `/transaction/clearance/${userId}/mark-as-cleared`,
+    APPROVE_CLEARANCE: (clearanceId) => `/transaction/clearance/${clearanceId}/approve`,
+    REJECT_CLEARANCE: (clearanceId) => `/transaction/clearance/${clearanceId}/reject`,
 };
 
 

@@ -56,15 +56,19 @@ class BookCopyPolicy
             ];
         }   
 
-        // 4. Check if the book has a pending/ready to pickup reservation
-        $hasReservation = $book->reservations()
+        // 4. Check if the  book has a pending/ready to pickup reservation and no other available copies
+        $hasActiveReservation = $book->reservations()
             ->whereIn('status', [
                 ReservationStatus::PENDING,
                 ReservationStatus::READY_FOR_PICKUP
             ])
             ->exists();
-
-        if ($hasReservation) {
+            
+        $availableCopiesCount = $book->copies
+            ->where('status', BookCopyStatus::AVAILABLE)
+            ->count();
+            
+        if ($hasActiveReservation && $availableCopiesCount < 1) {
             return [
                 'result' => 'business_rule_violation',
                 'message' => 'This book has active reservations and cannot be borrowed directly.'

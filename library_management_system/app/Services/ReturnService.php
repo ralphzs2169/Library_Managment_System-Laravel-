@@ -19,7 +19,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Models\Book;
+use App\Models\Semester;
 
 class ReturnService 
 {
@@ -57,11 +57,14 @@ class ReturnService
                 $transactionStatus = BorrowTransactionStatus::RETURNED;
                 $copyStatus = BookCopyStatus::AVAILABLE;
 
+                $activeSemesterId = Semester::where('status', 'active')->value('id');
+
                 $penalty = Penalty::create([
                     'borrow_transaction_id' => $transaction->id,
                     'amount' => min(round($dueDate->diffInDays($returnedDate) * (float)config('settings.penalty.rate_per_day', 0), 2), (float)config('settings.penalty.max_amount', 0)),
                     'type' => PenaltyType::LATE_RETURN,
                     'status' => PenaltyStatus::UNPAID,
+                    'semester_id' => $activeSemesterId ?? null,
                     'issued_at' => now(),
                 ]);
 

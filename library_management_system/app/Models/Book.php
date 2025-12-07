@@ -20,6 +20,7 @@ class Book extends Model
         'price',
         'genre_id',
         'author_id',
+        
     ];
 
     public function author()
@@ -49,6 +50,10 @@ class Book extends Model
             ->where('status', ReservationStatus::READY_FOR_PICKUP);
     }
 
+    public function borrowTransactions()
+    {
+        return $this->hasManyThrough(BorrowTransaction::class, BookCopy::class);
+    }
     /** @use HasFactory<\Database\Factories\BookFactory> */
     use HasFactory;
 }

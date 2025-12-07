@@ -11,6 +11,7 @@ use App\Enums\ActivityLogActions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Semester;
 
 class RenewalService
 {
@@ -43,6 +44,7 @@ class RenewalService
                 'renewed_at' => now(),
                 'previous_due_at' => $previousDueDate,
                 'new_due_at' => $newDueDate,
+                'semester_id' => Semester::where('status', 'active')->value('id') ?? null,
             ]);
 
             // Log activity

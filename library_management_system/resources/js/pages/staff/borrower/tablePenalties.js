@@ -3,6 +3,7 @@ import { cancelPenalty } from "../../../ajax/penaltyHandler";
 import { fetchBorrowerDetails } from "../../../ajax/borrowerHandler";
 import { initializeBorrowerProfileUI } from "./borrowerProfilePopulators";
 import { getPenaltyStatusBadge, getPenaltyTypeBadge } from "../../../utils/statusBadge.js";
+import { formatDate, formatTime } from "../../../utils.js";
 
 export function populateActivePenalties(modal, borrower) {
     const tbody = modal.querySelector('#active-penalties-tbody');
@@ -42,7 +43,6 @@ export function populateActivePenalties(modal, borrower) {
         const book = transaction.book_copy?.book;
         const copyNumber = transaction.book_copy?.copy_number;
         const author = book?.author;
-        const returnedDate = new Date(transaction.returned_at);
         
         // Reason badge (unchanged)
         let reasonBadge = '';
@@ -70,7 +70,6 @@ export function populateActivePenalties(modal, borrower) {
 
         const coverImage = book?.cover_image ? `/storage/${book.cover_image}` : '/images/no-cover.png';
         const authorName = author ? `${author.firstname} ${author.lastname}` : 'Unknown Author';
-        const returnedDateText = returnedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
         const typeBadge = getPenaltyTypeBadge(penaltyType);
         const statusBadge = getPenaltyStatusBadge(status);
@@ -81,21 +80,25 @@ export function populateActivePenalties(modal, borrower) {
         } else if (status === 'partially_paid') {
             amount = transaction.penalty.remaining_amount;
         }
-        
+            console.log('Rendering penalty transaction:', transaction);
         const row = `
             <tr class="hover:bg-gray-50 transition-colors ${borderClass}">
                 <td class="py-3 px-4 text-gray-600 font-medium">${index + 1}</td>
                 <td class="py-3 px-4">
-                    <div class="flex items-center gap-3 ">
+                    <div class="flex items-center gap-3">
                         <img src="${coverImage}" class="w-10 h-14 rounded-md object-cover shadow-sm flex-shrink-0 border border-gray-200">
                         <div class="min-w-0">
-                            <p class="font-semibold text-gray-800 truncate">${book?.title || 'Unknown'}</p>
-                            <p class="text-xs text-gray-500">Copy #${copyNumber || 'N/A'} • ${authorName}</p>
+                            <p class="font-semibold text-gray-800 line-clamp-2">${book?.title || 'Unknown'}</p>
+                            <p class="text-xs text-gray-700">Copy #${copyNumber || 'N/A'}</p>
+                            <p class="text-xs text-gray-500 mt-1">by ${authorName}</p>
                         </div>
                     </div>
                 </td>
-                <td class="py-3 px-4 text-gray-700 text-sm">${returnedDateText}</td>
-                <td class="py-3 px-4">${typeBadge}</td>
+                <td class="py-3 px-4 text-gray-700 text-sm">
+                    ${formatDate(transaction.returned_at)}
+                    <div class="text-xs text-gray-500">${formatTime(transaction.returned_at)}</div>
+                </td>
+                <td class="py-3 ">${typeBadge}</td>
                 <td class="py-3 px-4">
                     <span class="text-red-700 font-bold text-sm">₱${Number(amount).toFixed(2)}</span>
                 </td>

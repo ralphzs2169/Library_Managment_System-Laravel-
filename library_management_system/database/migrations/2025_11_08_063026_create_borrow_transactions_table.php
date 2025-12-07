@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('book_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('semester_id')->nullable()->constrained()->nullOnDelete();
-            $table->date('borrowed_at');
+            $table->timestamp('borrowed_at');
             $table->date('due_at');
             $table->date('returned_at')->nullable();
             $table->enum('status', ['borrowed', 'returned', 'overdue'])->default('borrowed');

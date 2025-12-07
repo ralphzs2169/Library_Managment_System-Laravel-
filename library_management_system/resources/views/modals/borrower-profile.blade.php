@@ -207,15 +207,15 @@
 
                                     </div>
                                     <div class="overflow-x-auto rounded-xl border border-gray-200">
-                                        <table class="w-full text-sm">
+                                        <table class="w-full text-sm table-fixed">
                                             <thead>
                                                 <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">No.</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Book</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Date Borrowed</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Due Date</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-38 min-w-42 max-w-42 whitespace-nowrap">Status</th>
-                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-10">No.</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-80">Book</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-32">Borrowed At</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-32">Due Date</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-32">Status</th>
+                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-42">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="currently-borrowed-tbody" class="bg-white divide-y divide-gray-100">
@@ -241,13 +241,13 @@
                                         <table class="w-full text-sm table-fixed">
                                             <thead>
                                                 <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-12 ">No.</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs truncate w-1/4">Book</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-30">Returned On</th>
-                                                    <th class="py-3 px-2 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  w-38 min-w-38 max-w-38 whitespace-nowrap">Reason</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-10 ">No.</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-80">Book</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-32">Returned At</th>
+                                                    <th class="py-3 px-2 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-38">Reason</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-24">Amount</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs  whitespace-nowrap w-40">Status</th>
-                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase truncate tracking-wider text-xs  w-46 min-w-46 max-w-46 whitespace-nowrap">Actions</th>
+                                                    <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase truncate tracking-wider text-xs whitespace-nowrap w-46">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="active-penalties-tbody" class="bg-white divide-y divide-gray-100">
@@ -274,8 +274,8 @@
                                         <table class="w-full text-sm table-fixed">
                                             <thead>
                                                 <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-8">No.</th>
-                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs truncate w-1/4">Book</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-10">No.</th>
+                                                    <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-80">Book</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-14">Queue</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-32">Status</th>
                                                     <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-26">Reserved at</th>

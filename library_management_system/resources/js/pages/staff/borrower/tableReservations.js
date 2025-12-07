@@ -1,10 +1,11 @@
 import { openConfirmBorrowModal } from "../confirmBorrow";
-import { formatDate } from '../../../utils.js';
+import { formatDate, formatTime } from '../../../utils.js';
 import { cancelReservation } from "../../../ajax/transactions/reservationHandler.js";
 import { fetchBorrowerDetails } from '../../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from './borrowerProfilePopulators.js';
 import { closeConfirmReturnModal } from '../confirmReturn.js';
 import { getReservationStatusBadge } from '../../../utils/statusBadge.js';
+
 
 export function populateReservationsTable(modal, borrower) {
     const tbody = modal.querySelector('#active-reservations-tbody');
@@ -127,14 +128,17 @@ export function populateReservationsTable(modal, borrower) {
                     <div class="flex items-center gap-3">
                         <img src="${coverImage}" class="w-10 h-14 rounded-md object-cover shadow-sm flex-shrink-0 border border-gray-200">
                         <div class="min-w-0">
-                            <p class="font-semibold text-gray-800 truncate">${book?.title || 'Unknown'}</p>
-                            <p class="text-xs text-gray-500">by ${authorName}</p>
+                            <p class="font-semibold text-gray-800 line-clamp-2">${book?.title || 'Unknown'}</p>
+                            <p class="text-xs text-gray-500 mt-1">by ${authorName}</p>
                         </div>
                     </div>
                 </td>
                 <td class="py-3 px-4 text-gray-700  text-sm">${queuePosition}</td>
                 <td class="py-3 px-4">${getReservationStatusBadge(reservation.status)}</td>
-                <td class="py-3 px-4">${formatDate(reservation.created_at) }</td>
+                <td class="py-3 px-4">
+                    ${formatDate(reservation.created_at) }
+                    <div class="text-xs text-gray-500">${formatTime(reservation.created_at)}</div>    
+                </td>
                 <td class="py-3 px-4">${dateExpired}</td>
            
                 <td class="py-3 px-4">

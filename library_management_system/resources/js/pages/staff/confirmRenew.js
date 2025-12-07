@@ -279,8 +279,8 @@ async function handleConfirmRenew(currentRenewer, currentTransaction) {
         } else {
             const modal = document.getElementById('borrower-profile-modal');
            
-            const freshBorrowerDetails = await fetchBorrowerDetails(currentRenewer.id);
-            await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true);
+            const { borrower, actionPerformer }= await fetchBorrowerDetails(currentRenewer.id);
+            await initializeBorrowerProfileUI(modal, borrower, true, 'currently-borrowed-tab', actionPerformer);
             closeConfirmRenewModal();
         }
     }

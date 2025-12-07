@@ -32,14 +32,14 @@ class BorrowService
 
             $activeSemester = Semester::where('status', 'active')->first();
             
-            if (!$activeSemester && $borrower->role === 'student') {
+            if (!$activeSemester) {
                 throw new \Exception('No active semester found. Cannot proceed with borrowing.');
             }
             // Create the borrow transaction
             $transaction = BorrowTransaction::create([
                 'user_id' => $borrower->id,
                 'book_copy_id' => $bookCopy->id,
-                'semester_id' => $activeSemester ? $activeSemester->id : null,
+                'semester_id' => $activeSemester->id,
                 'borrowed_at' => now(),
                 'due_at' => $request->input('due_date'),
                 'status' => 'borrowed'

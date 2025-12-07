@@ -135,15 +135,14 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Cancelled
-                        </span>
+                            Cancelled </span>
                         @endif
                 </td>
 
 
                 {{-- Returned at column  --}}
                 <td class="py-3 px-4 whitespace-nowrap text-gray-700">
-                    {{ $unpaidPenalty->returned_at ? $unpaidPenalty->returned_at->format('M d, Y') : 'N/A' }}
+                    {{ $unpaidPenalty->returned_at ? \Carbon\Carbon::parse($unpaidPenalty->penalty->returned_at)->format('M d, Y') : 'N/A' }}
                 </td>
 
                 {{-- Actions column  --}}

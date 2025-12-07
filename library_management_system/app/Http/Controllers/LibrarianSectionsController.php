@@ -11,9 +11,16 @@ use App\Models\Semester;
 use App\Enums\ReservationStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class LibrarianSectionsController extends Controller
 {
+
+    public function dashboard(Request $request)
+    {
+        // Return the librarian section dashboard view. Adjust view name if your project uses a different path.
+        return view('pages.librarian.dashboard');
+    }
     public function borrowingRecords(Request $request)
     {
          $query = BorrowTransaction::with(['semester', 'bookCopy.book.author', 'bookCopy.book.genre.category', 'user.students.department', 'user.teachers.department']);
@@ -567,6 +574,87 @@ class LibrarianSectionsController extends Controller
 
     public function personnelAccounts(Request $request)
     {
-        // Implementation for personnel accounts section
+        $query = User::whereIn('role', ['staff', 'librarian']);
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('firstname', 'like', "%{$search}%")
+                  ->orWhere('lastname', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"]);
+            });
+        }
+
+        // Role filter
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Sort
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'name_asc':
+                    $query->orderBy('firstname', 'asc')->orderBy('lastname', 'asc');
+                    break;
+                case 'name_desc':
+                    $query->orderBy('firstname', 'desc')->orderBy('lastname', 'desc');
+                    break;
+                case 'role_asc':
+                    $query->orderBy('role', 'asc');
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $personnel = $query->paginate(20)->withQueryString();
+
+        if ($request->ajax()) {
+            $html = view('partials.librarian.user-management.personnel-accounts-table', [
+                'personnel' => $personnel,
+            ])->render();
+            
+            return response()->json([
+                'html' => $html,
+                'count' => $personnel->total()
+            ]);
+        }
+
+        return view('pages.librarian.user-management.personnel-accounts', [
+            'personnel' => $personnel,
+            'totalPersonnelCount' => $personnel->total()
+        ]);
+    }
+
+    public function storePersonnel(Request $request)
+    {
+        $validated = $request->validate([
+            'firstname' => 'required|string|max:45',
+            'lastname' => 'required|string|max:45',
+            'middle_initial' => 'nullable|string|max:1',
+            'email' => 'required|string|email|max:255|unique:users',
+            'contact_number' => ['nullable', 'string', 'max:13', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+            'username' => 'required|string|max:50|unique:users,username',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:staff,librarian',
+        ]);
+
+        User::create([
+            'firstname' => $validated['firstname'],
+            'lastname' => $validated['lastname'],
+            'middle_initial' => $validated['middle_initial'],
+            'email' => $validated['email'],
+            'contact_number' => $validated['contact_number'],
+            'username' => $validated['username'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'library_status' => 'active',
+        ]);
+
+        return response()->json(['message' => 'Personnel account created successfully.']);
     }
 }

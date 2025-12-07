@@ -12,6 +12,7 @@ class Payment extends Model
         'processed_by_id', 
         'amount', 
         'paid_at',
+        'semester_id',
     ];
 
     public function penalty()

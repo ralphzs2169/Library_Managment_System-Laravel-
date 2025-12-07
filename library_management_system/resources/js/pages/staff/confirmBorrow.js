@@ -341,8 +341,8 @@ export function closeConfirmBorrowModal(withAnimation = true) {
         const profileModal = document.getElementById('borrower-profile-modal');
         if (profileModal && currentBorrower) {
             // Fetch fresh borrower details before restoring profile
-            const freshBorrowerDetails = await fetchBorrowerDetails(currentBorrower.id);
-            await initializeBorrowerProfileUI(profileModal, freshBorrowerDetails, true);
+            const { borrower } = await fetchBorrowerDetails(currentBorrower.id);
+            await initializeBorrowerProfileUI(profileModal, borrower, true);
         }
     }, 50);
 

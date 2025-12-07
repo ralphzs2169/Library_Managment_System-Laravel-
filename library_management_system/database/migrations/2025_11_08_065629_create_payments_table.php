@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('penalty_id')->constrained()->onDelete('cascade');
             $table->foreignId('paid_by_id')->nullable()->constrained('users')->nullOnDelete();  
             $table->foreignId('processed_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('semester_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('amount', 8, 2);
             $table->enum('method', ['cash', 'gcash']);
             $table->date('paid_at');

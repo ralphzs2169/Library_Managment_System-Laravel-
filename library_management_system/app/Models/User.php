@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Enums\ClearanceStatus;
 use App\Enums\ReservationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -121,7 +122,13 @@ class User extends Authenticatable
             ->whereIn('status', [ReservationStatus::PENDING, ReservationStatus::READY_FOR_PICKUP]);
     }
     
-    
+    public function getHasPendingClearanceRequestAttribute()
+    {
+        return $this->clearances()
+            ->where('status', ClearanceStatus::PENDING)
+            ->exists();
+    }
+
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class, 'user_id');

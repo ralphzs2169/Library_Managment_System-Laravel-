@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('penalties', function (Blueprint $table) {
             $table->id();
             $table->foreignId('borrow_transaction_id')->constrained()->onDelete('cascade');
+            $table->foreignId('semester_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('amount', 8, 2);
             $table->enum('type', ['late_return', 'lost_book', 'damaged_book']);
             $table->enum('status', ['unpaid', 'paid', 'partially_paid', 'cancelled'])->default('unpaid');

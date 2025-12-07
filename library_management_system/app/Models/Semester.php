@@ -21,4 +21,9 @@ class Semester extends Model
     {
         return $this->hasMany(ActivityLog::class);
     }
+
+    public function clearances()
+    {
+        return $this->hasMany(Clearance::class);
+    }
 }

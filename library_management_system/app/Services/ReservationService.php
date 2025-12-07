@@ -29,7 +29,7 @@ class ReservationService
 
             $activeSemester = Semester::where('status', 'active')->first();
             
-            if (!$activeSemester && $reserver->role === 'student') {
+            if (!$activeSemester) {
                 throw new \Exception('No active semester found. Cannot proceed with borrowing.');
             }
 
@@ -39,7 +39,7 @@ class ReservationService
                 'status' => ReservationStatus::PENDING,
                 'created_by_id' => $request->user()->id,
                 'created_by' => $request->user()->role,
-                'semester_id' => $activeSemester ? $activeSemester->id : null
+                'semester_id' => $activeSemester->id
             ]);
 
             // Log activity

@@ -82,16 +82,16 @@ export function showBookSelectionContent(modal, member, transactionType, restore
            
 
             <div class="overflow-x-auto rounded-xl border border-gray-200" style="min-height: 400px;">
-                <table class="min-w-full text-sm">
+                <table class="min-w-full text-sm table-fixed">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs">No.</th>
-                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs">Cover</th>
-                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs">Title & ISBN</th>
-                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs">Author</th>
-                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs">Year</th>
-                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs">Copies</th>
-                            <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider text-xs">Action</th>
+                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-10">No.</th>
+                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-18">Cover</th>
+                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-80">Book Info</th>
+                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-40">ISBN</th>
+                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-40">Publication Year</th>
+                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-20">Copies</th>
+                            <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider text-xs w-36">Action</th>
                         </tr>
                     </thead>
                     <tbody id="books-table-body" class="bg-white divide-y divide-gray-100">
@@ -182,7 +182,6 @@ async function loadBookSelectionContent(member, { search = '', sort = 'title_asc
     tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-gray-500">Loading...</td></tr>`;
     paginationContainer.innerHTML = '';
 
-    const buttonLabel = transactionType === 'borrow' ? 'Borrow' : 'Reserve';
     const buttonIcon = transactionType === 'borrow' ? 'plus-white' : 'reservation-white';
 
     try {
@@ -214,19 +213,30 @@ tbody.innerHTML = books
                 <img src="${book.cover_image ? '/storage/' + book.cover_image : '/images/no-cover.png'}" alt="${book.title || 'Book'}" class="w-12 h-16 rounded-md object-cover shadow-sm">
             </td>
             <td class="px-4 py-3">
-                <p class="font-semibold text-gray-800">${book.title || 'Untitled'}</p>
-                <p class="text-xs text-gray-500 font-mono mt-1">ISBN: ${book.isbn || 'N/A'}</p>
+                <p class="font-semibold text-gray-800 line-clamp-2" title="${book.title || 'Untitled'}">${book.title || 'Untitled'}</p>
+                <div class="flex flex-wrap gap-1.5 mt-1.5 mb-2">
+                    <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                        ${book.genre?.category?.name || 'N/A'}
+                    </span>
+                    <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                        ${book.genre?.name || 'N/A'}
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1.5 mb-2">by ${formatLastNameFirst(book.author?.firstname, book.author?.lastname, book.author?.middle_initial)}</p>
             </td>
-            <td class="px-4 py-3 text-gray-700">${formatLastNameFirst(book.author?.firstname, book.author?.lastname, book.author?.middle_initial)}</td>
+            <td class="px-4 py-3 text-gray-700">
+                <p class="text-xs text-gray-900">${book.isbn || 'N/A'}</p>
+            </td>
+
             <td class="px-4 py-3 text-gray-700">${book.publication_year || 'N/A'}</td>
             <td class="px-4 py-3">
                 ${renderCopiesBadge(book.eligible_copies, transactionType)}
             </td>
             <td class="px-4 py-3 text-center">
-                <button class="borrow-book-btn cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg text-xs font-medium transition-all shadow-sm hover:shadow" 
+                <button class="borrow-book-btn cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg text-xs transition-all shadow-sm hover:shadow" 
                         data-book="${encodeURIComponent(JSON.stringify(book))}">
-                    <img src="${window.location.origin}/build/assets/icons/${buttonIcon}.svg" alt="${buttonLabel}" class="w-4 h-4">
-                    <span class="font-medium tracking-wider">${buttonLabel}</span>
+                    <img src="${window.location.origin}/build/assets/icons/${buttonIcon}.svg" alt="Select Book" class="w-4 h-4">
+                    <span class="font-medium tracking-wider">Select Book</span>
                 </button>
             </td>
         </tr>

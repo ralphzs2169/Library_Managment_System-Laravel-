@@ -14,6 +14,7 @@ class Penalty extends Model
         'type',
         'status',
         'issued_at',
+        'semester_id',
     ];
 
     public function borrowTransaction()

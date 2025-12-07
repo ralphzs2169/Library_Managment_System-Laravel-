@@ -217,7 +217,7 @@ export async function loadUnpaidPenalties(page = UNPAID_PENALTIES_FILTERS.page, 
         }
 
     } catch (error) {
-       showError("Something went wrong", "Failed to load unpaid penalties.");
+       showError("Something went wrong", error + " Failed to load unpaid penalties.");
     }
 }
 

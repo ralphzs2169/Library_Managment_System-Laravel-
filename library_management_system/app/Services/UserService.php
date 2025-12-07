@@ -123,7 +123,7 @@ public function getBorrowerDetails($targetUserId, $requestorId)
                 $reservation->pickup_deadline_date = $reservation->pickup_deadline;
             }
         });
-
+   
         // Assign to user
         $borrower->total_unpaid_fines;
         $borrower->full_name;
@@ -179,12 +179,16 @@ public function getBorrowerDetails($targetUserId, $requestorId)
             $penalty = Penalty::with('payments', 'borrowTransaction')
                 ->findOrFail($penaltyId);
 
+            $activeSemesterId = Semester::where('status', 'active')->value('id');
+
+
             // Add new payment
             Payment::create([
                 'penalty_id' => $penalty->id,
                 'amount' => $request->input('amount'),
                 'paid_by_id' => $penalty->borrowTransaction->user_id,
                 'processed_by_id' => $request->user()->id,
+                'semester_id' => $activeSemesterId ?? null,
                 'paid_at' => now(),
             ]);
 

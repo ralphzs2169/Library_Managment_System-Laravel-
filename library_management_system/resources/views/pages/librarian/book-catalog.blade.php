@@ -6,10 +6,10 @@
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-gradient-to-br from-accent to-teal-600 rounded-xl flex items-center justify-center shadow-md">
-                        <img src="{{ asset('build/assets/icons/book-catalog-white.svg ')}}" alt="Book Catalog Icon" class="w-8 h-8">
+                        <img src="{{ asset('build/assets/icons/book-management.svg')}}" alt="Book Catalog Icon" class="w-8 h-8">
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Book Catalog</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">Book Inventory</h1>
                         <p class="text-sm text-gray-500 mt-0.5">Manage your library's book collection</p>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import { populateCurrentlyBorrowedBooks } from './tableBorrowedBooks.js';
 import { populateActivePenalties } from './tablePenalties.js';
 import { populateReservationsTable } from './tableReservations.js';
 import { requestClearance } from '../../../ajax/clearanceHandler.js';
+import { fetchBorrowerDetails } from '../../../ajax/borrowerHandler.js';
 
 
 export async function initializeBorrowerProfileUI(modal, borrower, reloadProfileTabs = true, initialActiveTab = 'currently-borrowed-tab', actionPerformer = null) {
@@ -36,22 +37,41 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
         const existingMsg = modal.querySelector('#cleared-status-message');
         if (existingMsg) existingMsg.remove();
 
-        if (borrower.library_status === 'cleared') {
+        if (borrower.library_status === 'inactive') {
             // Hide buttons
-            if(borrowBtn) borrowBtn.classList.replace('inline-flex', 'hidden');
-            if(reserveBtn) reserveBtn.classList.replace('inline-flex', 'hidden');
-            if(clearanceBtn) clearanceBtn.classList.replace('inline-flex', 'hidden');
+             if(borrowBtn) borrowBtn.classList.replace('inline-flex','hidden');
+            if(reserveBtn) reserveBtn.classList.replace('inline-flex','hidden');
+            if(clearanceBtn) clearanceBtn.classList.replace('inline-flex','hidden');
 
-            // Show message
+            // Show message - Clearance Granted (Gray/Neutral)
             if (buttonsContainer) {
                 const msgDiv = document.createElement('div');
                 msgDiv.id = 'cleared-status-message';
-                msgDiv.className = 'w-full p-4 bg-blue-50 border border-blue-100 text-blue-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2';
+                msgDiv.className = 'w-full p-4 bg-gray-100 border border-gray-300 text-gray-800 rounded-lg text-sm font-medium flex items-center justify-center gap-2';
                 msgDiv.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Clearance granted. User account is currently inactive for borrowing and reservations.
+                    <span>Clearance granted. User account is currently inactive for borrowing and reservations.</span>
+                `;
+                buttonsContainer.appendChild(msgDiv);
+            }
+        } else if (borrower.can_request_clearance?.message === 'Borrower already has a pending clearance request.') {
+            // Hide buttons
+            if(borrowBtn) borrowBtn.classList.replace('inline-flex','hidden');
+            if(reserveBtn) reserveBtn.classList.replace('inline-flex','hidden');
+            if(clearanceBtn) clearanceBtn.classList.replace('inline-flex','hidden');
+
+            // Show message - Clearance Pending (Blue)
+            if (buttonsContainer) {
+                const msgDiv = document.createElement('div');
+                msgDiv.id = 'cleared-status-message';
+                msgDiv.className = 'w-full p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm font-medium flex items-center justify-center gap-2';
+                msgDiv.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Clearance request is pending. User account is currently inactive for borrowing and reservations.</span>
                 `;
                 buttonsContainer.appendChild(msgDiv);
             }
@@ -162,7 +182,7 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
             e.preventDefault();
             if (type === 'clearance') {
                 const requestorId = actionPerformer.id;
-                requestClearance(borrower.id, requestorId);
+                handleClearanceRequest(borrower.id, requestorId);
             } else {
                 showBookSelectionContent(modal, borrower, type, false);
             }
@@ -172,10 +192,21 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
     disableButton(button, disableMessage, disabledIcon);
 }
 
+async function handleClearanceRequest(borrowerId, requestorId) {
+    
+    const result = await requestClearance(borrowerId, requestorId);
+    
+    if (result){
+         const modal = document.getElementById('borrower-profile-modal');
+                   
+    const { borrower } = await fetchBorrowerDetails(borrowerId);
+       initializeBorrowerProfileUI(modal, borrower, true);
+    }
+}
 
 
-
-function populateProfilePicture(modal, borrower) {  
+function populateProfilePicture(modal, borrower) {
+    console.log('Populating profile picture for borrower:', borrower);
     const profilePicture = modal.querySelector('#borrower-profile-picture');
 
     if (profilePicture) {   
@@ -244,8 +275,8 @@ function populateStatusBadge(modal, borrower) {
             </svg>
             ${statusText}
         `;
-    } else if (status === 'cleared') {
-        statusBadge.classList.add('bg-blue-100', 'text-blue-700');
+    } else if (status === 'inactive') {
+        statusBadge.classList.add('bg-gray-200', 'text-gray-800');
         statusBadge.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />

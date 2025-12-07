@@ -207,7 +207,7 @@ export function getPenaltyTypeBadge(type) {
     
     // Standardize key for comparison
     const formattedType = formatLabel(type);
-    console.log(formattedType);
+
     let badgeClass = '';
     let iconHtml = '';
     let label = '';
@@ -255,4 +255,49 @@ function formatLabel(s) {
         .split('_')
         .map(word => word.charAt(0).toLowerCase() + word.slice(1))
         .join(' ');
+}
+export function getClearanceStatusBadge(status) {
+    const formattedStatus = formatLabel(status); 
+   
+    let badgeClass = '';
+    let badgeIcon = '';
+    let label = '';
+    
+    switch (formattedStatus) {
+        case 'approved':
+            badgeClass = 'bg-green-200 text-green-700 border border-green-100';
+            badgeIcon = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>`;
+            label = 'Approved';
+            break;
+
+        case 'rejected':
+            badgeClass = 'bg-red-200 text-red-700 border border-red-100';
+            badgeIcon = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>`;
+            label = 'Rejected';
+            break;
+            
+        case 'pending':
+        default: // Use pending as the default if status is unexpected/unformatted
+            badgeClass = 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+            badgeIcon = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>`;
+            label = 'Pending';
+            break;
+    }
+
+    // Construct the final HTML badge, consistent with getBorrowingStatusBadge structure
+    const badgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}">
+        ${badgeIcon}
+        ${label}
+    </span>`;
+
+    return badgeHtml;
 }

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Enums\PenaltyStatus;
 use App\Enums\IssueReportStatus;
 use App\Enums\ReservationStatus;
+use App\Models\Semester;
 
 class ClearancePolicy
 {
@@ -41,7 +42,6 @@ class ClearancePolicy
         if ($user->library_status === 'suspended') {
             return ['result' => 'business_rule_violation', 'message' => 'Borrower\'s library privileges are suspended.'];
         }
-
 
         // 6. if request context, check for existing pending clearance requests
         if ($context === 'request') {

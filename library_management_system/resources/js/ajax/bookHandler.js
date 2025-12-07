@@ -4,6 +4,7 @@ import { showSuccessWithRedirect, showWarning, showConfirmation, showError, show
 import { highlightSearchMatches } from "../tableControls.js";
 import { BOOK_FILTERS } from "../utils/tableFilters.js";
 import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters.js";
+import { resetEditableFields } from "../utils/fieldEditor.js";
 
 export async function addBookHandler(bookData, form) {
     // Step 1: Validate only
@@ -123,6 +124,8 @@ export async function editBookHandler(bookDetails, form) {
     
     if (result.status === 'unchanged') {
         showInfo('No changes detected', 'You didn’t make any modifications to update.');
+        const formElement = typeof form === 'string' ? document.getElementById(form) : form;
+        if (formElement) resetEditableFields(formElement);
         return;
     }
 
@@ -133,7 +136,11 @@ export async function editBookHandler(bookDetails, form) {
         'Yes, save'
     );
     
-    if (!isConfirmed) return;
+    if (!isConfirmed) {
+        const formElement = typeof form === 'string' ? document.getElementById(form) : form;
+        if (formElement) resetEditableFields(formElement);
+        return;
+    }
     
     bookDetails.delete('validate_only');
 
@@ -160,6 +167,9 @@ export async function editBookHandler(bookDetails, form) {
     
     loadBooks(undefined, false);
     showToast('Book updated successfully!', 'success');
+
+    const formElement = typeof form === 'string' ? document.getElementById(form) : form;
+    if (formElement) resetEditableFields(formElement);
 }
 
 export async function fetchBookDetails(book) {

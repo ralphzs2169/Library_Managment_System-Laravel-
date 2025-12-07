@@ -5,25 +5,32 @@ namespace App\Policies;
 use App\Enums\ReservationStatus;
 use App\Models\Semester;
 use App\Enums\PenaltyStatus;
+use App\Enums\ClearanceStatus;
 
 class ReservationPolicy
 {
     public static function canReserve($user, $book, $checkWithBookPolicy = true)
     {   
-        // 1. If student, check active semester
-        if ($user->role === 'student') {
-            $hasActive = Semester::where('status', 'active')->exists();
-            if (!$hasActive) {
-                return ['result' => 'business_rule_violation', 'message' => 'No active semester found. Students can only reserve during an active semester.'];
-            }
+        // 1. Check active semester
+        $hasActive = Semester::where('status', 'active')->exists();
+        if (!$hasActive) {
+            return ['result' => 'business_rule_violation', 'message' => 'No active semester found. User can only reserve during an active semester.'];
         }
 
-        // 2. Check borrower's library status
-        if ($user->library_status === 'suspended') {
-            return ['result' => 'business_rule_violation', 'message' => 'Borrower\'s library privileges are suspended.'];
+        // 2. Check if borrower is inactive (cleared)
+        if ($user->library_status === 'inactive') {
+            return ['result' => 'business_rule_violation', 'message' => 'Reservation privileges revoked: User has been officially cleared.'];
+        }
+
+        // 3. Check if borrower already has a pending clearance request
+        $hasPendingClearance = $user->clearances()
+            ->where('status', ClearanceStatus::PENDING)
+            ->exists();
+
+        if ($hasPendingClearance) {
+            return ['result' => 'business_rule_violation', 'message' => 'Borrower already has a pending clearance request.'];
         }
     
-        
          // 4. Check for outstanding penalties
         $hasOutstandingPenalties = $user->penalties()
             ->whereIn('penalties.status', [PenaltyStatus::UNPAID, PenaltyStatus::PARTIALLY_PAID])
@@ -32,7 +39,12 @@ class ReservationPolicy
             return ['result' => 'business_rule_violation', 'message' => 'Reservation suspended due to an outstanding penalty.'];
         }
 
-        // 5. Check user max pending reservations
+        // 5. Check if suspended
+        if ($user->library_status === 'suspended') {
+            return ['result' => 'business_rule_violation', 'message' => 'User\'s library privileges are suspended.'];
+        }
+        
+        // 6. Check user max pending reservations
         $maxPending = (int) config('settings.reservation.' . $user->role . '_max_pending_reservations');
 
         $pendingCount = $user->reservations()
@@ -46,7 +58,7 @@ class ReservationPolicy
             ];
         }
 
-        // 4. Check if the book can be reserved (business rule)
+        // 7. Check if the book can be reserved (business rule)
         if ($checkWithBookPolicy) {
             $bookReservationCheck = BookPolicy::canBeReserved($book, $user);
 
@@ -54,8 +66,6 @@ class ReservationPolicy
                 return $bookReservationCheck;
             }
         }
-
-      
 
         return [
             'result' => 'success',

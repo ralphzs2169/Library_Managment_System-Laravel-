@@ -65,12 +65,12 @@ class StaffDashboardController extends Controller
                     $query->orderBy('created_at', 'asc');
                     break;
                 default:
-                    $query->orderByRaw("FIELD(library_status, 'active', 'suspended', 'cleared')")
+                    $query->orderByRaw("FIELD(library_status, 'suspended', 'active', 'inactive')")
                           ->orderBy('firstname', 'asc');
             }
         } else {
             // Default sort: active first, then suspended, then cleared, then firstname ascending
-            $query->orderByRaw("FIELD(library_status, 'active', 'suspended', 'cleared')")
+            $query->orderByRaw("FIELD(library_status, 'suspended', 'active', 'inactive')")
                   ->orderBy('firstname', 'asc');
         }
 
