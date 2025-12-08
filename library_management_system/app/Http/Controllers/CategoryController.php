@@ -16,13 +16,28 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $categories = Category::all();
+        $categories = Category::with(['genres' => function($query) {
+            $query->withCount('books');
+        }])
+        ->withCount('books')
+        ->get();
+        
         $genres = Genre::all();
 
         if ($user->role === 'librarian') {
-            // $categories = Category::all();
             return view('pages.librarian.category-management', ['categories' => $categories, 'genres' => $genres]);
         }
+    }
+
+    public function getContent(Request $request)
+    {
+        $categories = Category::with(['genres' => function($query) {
+            $query->withCount('books');
+        }])
+        ->withCount('books')
+        ->get();
+
+        return view('partials.librarian.category-management-content', ['categories' => $categories])->render();
     }
 
     public function genresByCategory(Request $request)

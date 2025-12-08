@@ -5,19 +5,23 @@ export const API_ROUTES ={
     SIGNUP: BASE_URL + 'signup',
     LOGOUT: BASE_URL + 'logout',
 
-    GET_CATEGORIES: BASE_URL + 'librarian/categories',
-    ADD_CATEGORY: BASE_URL + 'librarian/category-management',
-    UPDATE_CATEGORY: BASE_URL + 'librarian/category-management',
-    DELETE_CATEGORY: BASE_URL + 'librarian/category-management', 
-
-    GET_GENRES: BASE_URL + 'librarian/category-management/genres',
-    ADD_GENRE: BASE_URL + 'librarian/category-management/genres',
-    UPDATE_GENRE: BASE_URL + 'librarian/category-management/genres',
-    DELETE_GENRE: BASE_URL + 'librarian/category-management/genres',
-
+   
     // Add other API routes as needed
 };
 
+export const CATEGORY_ROUTES = {
+    ADD_CATEGORY: '/librarian/categories',
+    UPDATE_CATEGORY: '/librarian/categories',
+    DELETE_CATEGORY: '/librarian/categories',
+    CONTENT: '/librarian/category-management/content'
+}
+
+export const GENRE_ROUTES = {
+    GET_GENRES: BASE_URL + 'librarian/genres',
+    ADD_GENRE: BASE_URL + 'librarian/genres',
+    UPDATE_GENRE: BASE_URL + 'librarian/genres',
+    DELETE_GENRE: BASE_URL + 'librarian/genres',
+}
 export const AUTH_ROUTES = {
     NEW_PERSONNEL_ACCOUNT: BASE_URL + 'librarian/section/personnel-account/create',
 }

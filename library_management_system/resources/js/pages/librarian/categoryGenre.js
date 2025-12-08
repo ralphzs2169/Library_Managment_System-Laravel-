@@ -36,7 +36,10 @@ function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId,
     
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        onSubmit();
+        const success = await onSubmit();
+        if (success) {
+            closeModal();
+        }
     });
 
     return { modal, modalContent, form, nameInput, closeModal };
@@ -194,3 +197,93 @@ document.querySelectorAll('.genre-item').forEach(genre => {
         });
     }
 });
+
+// Export function to re-initialize listeners after AJAX reload
+export function initCategoryGenreListeners() {
+    // Genre Section Toggle
+    const showGenresBtns = document.querySelectorAll('.show-genres-btn');
+
+    showGenresBtns.forEach(btn => {
+        const categoryId = btn.getAttribute('data-category-id');
+        const categorySection = document.getElementById(`category-section-${categoryId}`);
+        const genresSection = document.getElementById(`genres-section-${categoryId}`);
+        const dropdownIcon = btn.querySelector('.dropdown-icon');
+        const genreCount = document.getElementById(`genre-count-${categoryId}`);
+        let isExpanded = false;
+
+        const toggleGenreSection = () => {
+            if (isExpanded) {
+                // Collapse
+                genresSection.style.maxHeight = '0';
+                genresSection.style.opacity = '0';
+                dropdownIcon.style.transform = 'rotate(0deg)';
+                categorySection.classList.add('mb-6');
+            } else {
+                // Expand
+                genresSection.style.maxHeight = genresSection.scrollHeight + 'px';
+                genresSection.style.opacity = '1';
+                dropdownIcon.style.transform = 'rotate(180deg)';
+                categorySection.classList.remove('mb-6');
+            }
+            isExpanded = !isExpanded;
+        };
+
+        btn.addEventListener('click', toggleGenreSection);
+        genreCount.addEventListener('click', toggleGenreSection);
+    });
+
+    // Category Edit/Delete Buttons
+    document.querySelectorAll('.category-item').forEach(category => {
+        const categoryId = category.getAttribute('data-category-id');
+        const categoryName = category.querySelector('h2').textContent.trim();
+
+        category.querySelector(`#edit-category-${categoryId}`).addEventListener('click', () => {
+            editCategoryIdInput.value = categoryId;
+            editCategorySetup.nameInput.value = categoryName;
+            openModal(editCategorySetup);
+        });
+
+        category.querySelector(`#delete-category-${categoryId}`).addEventListener('click', async () => {
+            const confirmed = await showDangerConfirmation(
+                'Delete Category?',
+                `This will permanently delete the category "${categoryName}" and cannot be undone!`
+            );
+            if (confirmed) deleteCategoryHandler(categoryId);
+        });
+    });
+
+    // Genre Edit/Delete Buttons
+    document.querySelectorAll('.genre-item').forEach(genre => {
+        const genreId = genre.getAttribute('data-genre-id');
+        const genreName = genre.querySelector('span').textContent.trim();
+        const deleteBtn = genre.querySelector(`#delete-genre-${genreId}`);
+
+        genre.querySelector(`#edit-genre-${genreId}`).addEventListener('click', () => {
+            editGenreIdInput.value = genreId;
+            editGenreSetup.nameInput.value = genreName;
+            openModal(editGenreSetup);
+        });
+
+        if (deleteBtn && deleteBtn.dataset.hasBooks !== 'true') {
+            deleteBtn.addEventListener('click', async () => {
+                const confirmed = await showDangerConfirmation(
+                    'Delete Genre?',
+                    `This will permanently delete the genre "${genreName}" and cannot be undone!`
+                );
+                if (confirmed) deleteGenreHandler(genreId);
+            });
+        }
+    });
+
+    // Re-attach "Add Genre" modal listeners
+    document.querySelectorAll('.open-add-genre-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            addGenreCategoryIdInput.value = btn.getAttribute('data-category-id');
+            addGenreCategoryNameDisplay.textContent = btn.getAttribute('data-category-name');
+            openModal(addGenreSetup);
+        });
+    });
+}
+
+// Initialize on page load
+initCategoryGenreListeners();

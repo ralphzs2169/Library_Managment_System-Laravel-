@@ -15,6 +15,11 @@ class Category extends Model
         return $this->hasMany(Genre::class);
     }
 
+    public function books()
+    {
+        return $this->hasManyThrough(Book::class, Genre::class);
+    }
+
     public function activityLogs()
     {
         return $this->morphMany(ActivityLog::class, 'entity');
@@ -29,6 +34,7 @@ class Category extends Model
     {
         return $this->genres()->withCount('books')->get()->sum('books_count');
     }
+
 
     use HasFactory;
 }

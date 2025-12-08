@@ -1,10 +1,11 @@
-import { API_ROUTES } from "../config.js";
-import { showSuccessWithRedirect, showConfirmation, showInfo, showError } from "../utils/alerts.js";
+import { GENRE_ROUTES } from "../config.js";
+import { showConfirmation, showInfo, showError, showToast } from "../utils/alerts.js";
 import { apiRequest, getJsonHeaders } from "../utils.js";
+import { loadCategoryManagement } from "./categoryHandler.js";
 
 export async function addGenreHandler(categoryId, genreName) {
     // Step 1: Validate only
-    let result = await apiRequest(API_ROUTES.ADD_GENRE, {
+    let result = await apiRequest(GENRE_ROUTES.ADD_GENRE, {
         method: 'POST',
         headers: getJsonHeaders(),
         body: JSON.stringify({ 
@@ -14,7 +15,7 @@ export async function addGenreHandler(categoryId, genreName) {
         })
     });
     
-    if (result?.errorHandled) return;
+    if (result?.errorHandled) return false;
 
     // Step 2: Show confirmation
     const isConfirmed = await showConfirmation(
@@ -23,33 +24,36 @@ export async function addGenreHandler(categoryId, genreName) {
         'Yes, add it!'
     );
 
-    if (!isConfirmed) return;
+    if (!isConfirmed) return false;
 
     // Step 3: Actually add
-    result = await apiRequest(API_ROUTES.ADD_GENRE, {
+    result = await apiRequest(GENRE_ROUTES.ADD_GENRE, {
         method: 'POST',
         headers: getJsonHeaders(),
         body: JSON.stringify({ genre_name: genreName, category_id: categoryId })
     });
     
-    if (result?.errorHandled) return; 
+    if (result?.errorHandled) return false; 
 
-    showSuccessWithRedirect('Success', 'Genre added successfully!', window.location.href);
+    // Reload categories via AJAX
+    await loadCategoryManagement();
+    showToast('Genre added successfully!', 'success');
+    return true;
 }
 
 export async function editGenreHandler(genreId, genreName) {
     // Step 1: Validate only
-    let result = await apiRequest(`${API_ROUTES.UPDATE_GENRE}/${genreId}`, {
+    let result = await apiRequest(`${GENRE_ROUTES.UPDATE_GENRE}/${genreId}`, {
         method: 'PUT',
         headers: getJsonHeaders(),
         body: JSON.stringify({ updated_genre_name: genreName, validate_only: true })
     });
     
-    if (result?.errorHandled) return;
+    if (result?.errorHandled) return false;
 
     if(result.status === 'unchanged') {
-        showInfo('No changes detected', 'You didn’t make any modifications to update.');
-        return;
+        showInfo('No changes detected', 'You didn\'t make any modifications to update.');
+        return false;
     }
 
     // Step 2: Show confirmation
@@ -58,29 +62,35 @@ export async function editGenreHandler(genreId, genreName) {
         `Update genre from "${result.data.old_genre_name}" to "${genreName}"?`,
         'Yes, update it!'
     );
-    if (!isConfirmed) return;
+    if (!isConfirmed) return false;
 
     // Step 3: Actual update
-    result = await apiRequest(`${API_ROUTES.UPDATE_GENRE}/${genreId}`, {
+    result = await apiRequest(`${GENRE_ROUTES.UPDATE_GENRE}/${genreId}`, {
         method: 'PUT',
         headers: getJsonHeaders(),
         body: JSON.stringify({ updated_genre_name: genreName })
     });
     
-    if (result?.errorHandled) return; 
+    if (result?.errorHandled) return false; 
 
-    showSuccessWithRedirect('Success', 'Genre updated successfully!', window.location.href);
+    // Reload categories via AJAX
+    await loadCategoryManagement();
+    showToast('Genre updated successfully!', 'success');
+    return true;
 }
 
 export async function deleteGenreHandler(genreId) {
-    let result = await apiRequest(`${API_ROUTES.DELETE_GENRE}/${genreId}`, {
+    let result = await apiRequest(`${GENRE_ROUTES.DELETE_GENRE}/${genreId}`, {
         method: 'DELETE',
         headers: getJsonHeaders(),
     });
 
-    if (result?.errorHandled) return;
+    if (result?.errorHandled) return false;
     
-    showSuccessWithRedirect('Success', 'Genre deleted successfully!', window.location.href);
+    // Reload categories via AJAX
+    await loadCategoryManagement();
+    showToast('Genre deleted successfully!', 'success');
+    return true;
 }
 
 export async function fetchGenresByCategory(categorySelect, genreSelect, genreLoading, categoryId, selectedId = null) {

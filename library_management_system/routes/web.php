@@ -47,14 +47,14 @@ Route::prefix('librarian')
         Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update');
 
         Route::get('/category-management', [CategoryController::class, 'index'])->name('category-management');
-        Route::post('/category-management', [CategoryController::class, 'store'])->name('category-management.store');
-        Route::put('/category-management/{category}', [CategoryController::class, 'update'])->name('category-management.update');
-        Route::delete('/category-management/{category}', [CategoryController::class, 'destroy'])->name('category-management.destroy');
+        Route::get('/category-management/content', [CategoryController::class, 'getContent'])->name('category-management.content');
+        
+        Route::resource('categories', CategoryController::class)->except(['index', 'create', 'show', 'edit']);
+        Route::resource('genres', GenreController::class)->except(['index', 'create', 'show', 'edit']);
 
-        Route::get('/category-management/genres', [GenreController::class, 'index'])->name('category-management.genres');
-        Route::post('/category-management/genres', [GenreController::class, 'store'])->name('category-management.genres.store');
-        Route::put('/category-management/genres/{genre}', [GenreController::class, 'update'])->name('category-management.genres.update');
-        Route::delete('/category-management/genres/{genre}', [GenreController::class, 'destroy'])->name('category-management.genres.destroy');
+        Route::post('/genres', [GenreController::class, 'store'])->name('category-management.genres.store');
+        Route::put('/genres/{genre}', [GenreController::class, 'update'])->name('category-management.genres.update');
+        Route::delete('/genres/{genre}', [GenreController::class, 'destroy'])->name('category-management.genres.destroy');
 
         Route::get('/section/dashboard', [LibrarianDashboardController::class, 'index'])->name('section.dashboard');
         Route::get('/section/borrowing-records', [LibrarianSectionsController::class, 'borrowingRecords'])->name('section.borrowing-records');
@@ -83,6 +83,9 @@ Route::prefix('librarian')
         // Fixed: Removed 'librarian.' prefix from name to avoid double prefixing
         Route::get('/settings', [SettingsController::class, 'index'])->name('section.settings');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+
+        // Add this route in the librarian section
+        Route::get('/category-management/content', [CategoryController::class, 'getContent'])->name('category-management.content');
 
     });
 
