@@ -73,22 +73,6 @@ class GenreController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Genre $genre)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Genre $genre)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Genre $genre)
@@ -134,6 +118,10 @@ class GenreController extends Controller
      */
     public function destroy(Request $request, Genre $genre)
     {
+        if ($genre->books()->count() > 0) {
+            return $this->jsonResponse('business_rule_violation', 'Cannot delete genre with associated books', 400);
+        }
+
         try {
             $category_name = $genre->category->name;
             DB::transaction(function () use ($genre, $request, $category_name) {

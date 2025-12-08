@@ -1,4 +1,3 @@
-
 import { clearInputError } from "../../helpers.js";
 import { addCategoryHandler, deleteCategoryHandler, editCategoryHandler } from "../../ajax/categoryHandler.js";
 import { addGenreHandler, editGenreHandler, deleteGenreHandler } from "../../ajax/genreHandler.js";
@@ -6,15 +5,24 @@ import { showDangerConfirmation } from "../../utils/alerts.js";
 
 function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId, onSubmit, parentId = null) {
     const modal = document.getElementById(modalId);
+    const modalContent = document.getElementById(`${modalId}-content`);
     const closeBtn = document.getElementById(closeButtonId);
     const cancelBtn = document.getElementById(cancelButtonId);
     const form = document.getElementById(formId);
     const nameInput = document.getElementById(nameInputId);
 
     const closeModal = () => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        form.reset();
+        // Fade out animation
+        modal.classList.remove('bg-opacity-50');
+        modal.classList.add('bg-opacity-0');
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            form.reset();
+        }, 200);
     };
 
     closeBtn.addEventListener('click', closeModal);
@@ -31,12 +39,24 @@ function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId,
         onSubmit();
     });
 
-    return { modal, form, nameInput, closeModal };
+    return { modal, modalContent, form, nameInput, closeModal };
 }
 
-function openModal(modal) {
+function openModal(setup) {
+    const { modal, modalContent } = setup;
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    
+    // Trigger reflow
+    modal.offsetHeight;
+    
+    // Fade in animation
+    setTimeout(() => {
+        modal.classList.remove('bg-opacity-0');
+        modal.classList.add('bg-opacity-50');
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
 }
 
 // Genre Section Toggle
@@ -82,7 +102,7 @@ const addCategorySetup = setupModal(
 );
 
 document.getElementById('open-add-category-modal').addEventListener('click', () => {
-    openModal(addCategorySetup.modal);
+    openModal(addCategorySetup);
 });
 
 // Add Genre Modal
@@ -102,7 +122,7 @@ document.querySelectorAll('.open-add-genre-modal').forEach(btn => {
     btn.addEventListener('click', () => {
         addGenreCategoryIdInput.value = btn.getAttribute('data-category-id');
         addGenreCategoryNameDisplay.textContent = btn.getAttribute('data-category-name');
-        openModal(addGenreSetup.modal);
+        openModal(addGenreSetup);
     });
 });
 
@@ -140,7 +160,7 @@ document.querySelectorAll('.category-item').forEach(category => {
     category.querySelector(`#edit-category-${categoryId}`).addEventListener('click', () => {
         editCategoryIdInput.value = categoryId;
         editCategorySetup.nameInput.value = categoryName;
-        openModal(editCategorySetup.modal);
+        openModal(editCategorySetup);
     });
 
     category.querySelector(`#delete-category-${categoryId}`).addEventListener('click', async () => {
@@ -156,18 +176,21 @@ document.querySelectorAll('.category-item').forEach(category => {
 document.querySelectorAll('.genre-item').forEach(genre => {
     const genreId = genre.getAttribute('data-genre-id');
     const genreName = genre.querySelector('span').textContent.trim();
+    const deleteBtn = genre.querySelector(`#delete-genre-${genreId}`);
 
     genre.querySelector(`#edit-genre-${genreId}`).addEventListener('click', () => {
         editGenreIdInput.value = genreId;
         editGenreSetup.nameInput.value = genreName;
-        openModal(editGenreSetup.modal);
+        openModal(editGenreSetup);
     });
 
-    genre.querySelector(`#delete-genre-${genreId}`).addEventListener('click', async () => {
-        const confirmed = await showDangerConfirmation(
-            'Delete Genre?',
-            `This will permanently delete the genre "${genreName}" and cannot be undone!`
-        );
-        if (confirmed) deleteGenreHandler(genreId);
-    });
+    if (deleteBtn && deleteBtn.dataset.hasBooks !== 'true') {
+        deleteBtn.addEventListener('click', async () => {
+            const confirmed = await showDangerConfirmation(
+                'Delete Genre?',
+                `This will permanently delete the genre "${genreName}" and cannot be undone!`
+            );
+            if (confirmed) deleteGenreHandler(genreId);
+        });
+    }
 });

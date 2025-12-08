@@ -1,4 +1,4 @@
-import { INVALID_INPUT } from "./config.js";
+import { BUSINESS_RULE_VIOLATION, INVALID_INPUT } from "./config.js";
 import { displayInputErrors } from "./helpers.js";
 import { showError } from "./utils/alerts.js";
 
@@ -64,6 +64,9 @@ export async function apiRequest(url, options = {}) {
         if (!response.ok) {
             if (response.status === INVALID_INPUT && result?.errors) {
                 displayInputErrors(result.errors, options.form);
+                return { errorHandled: true };
+            } else if (response.status === BUSINESS_RULE_VIOLATION){
+                showError('Action Not Allowed', result?.message || 'The requested operation violates business rules.');
                 return { errorHandled: true };
             }
 

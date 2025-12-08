@@ -20,5 +20,15 @@ class Category extends Model
         return $this->morphMany(ActivityLog::class, 'entity');
     }
 
+    public function getGenresCountAttribute()
+    {
+        return $this->genres()->count();
+    }
+
+    public function getBooksCountAttribute()
+    {
+        return $this->genres()->withCount('books')->get()->sum('books_count');
+    }
+
     use HasFactory;
 }

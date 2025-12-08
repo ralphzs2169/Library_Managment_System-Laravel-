@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Penalty;
 use App\Models\User;
+use App\Models\Category;
 
 class LibrarianDashboardController extends Controller
 {

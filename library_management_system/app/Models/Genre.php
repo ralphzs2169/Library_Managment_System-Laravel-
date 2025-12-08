@@ -22,4 +22,9 @@ class Genre extends Model
     {
         return $this->morphMany(ActivityLog::class, 'entity');
     }
+
+    public function getBooksCountAttribute()
+    {
+        return $this->books()->count();
+    }
 }

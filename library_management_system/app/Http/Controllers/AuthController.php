@@ -54,7 +54,7 @@ class AuthController extends Controller
 
                 switch ($foundUser->role) {
                     case 'librarian':
-                        $redirectUrl = 'librarian/dashboard';
+                        $redirectUrl = 'librarian/section/dashboard';
                         break;
                     case 'staff':
                         $redirectUrl = 'staff/dashboard';
