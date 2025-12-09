@@ -3,11 +3,12 @@
         <thead>
             <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-12">ID</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider w-60">Borrower</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-10"></th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider w-50">Borrower</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider w-40">Requested By</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-32">Semester</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-40">Semester</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-32">Date Requested</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-24">Status</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-30">Status</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-24">Actions</th>
             </tr>
         </thead>
@@ -53,14 +54,17 @@
             <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100">
                 <td class="py-3 px-4 whitespace-nowrap text-gray-700">{{ $clearance->id }}</td>
 
+                <td>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-teal-600 flex items-center justify-center text-white font-bold text-xs">
+                        {{ strtoupper(substr($clearance->user->firstname,0,1)) }}{{ strtoupper(substr($clearance->user->lastname,0,1)) }}
+                    </div>
+                </td>
                 {{-- Borrower Column --}}
                 <td class="py-3 px-4 whitespace-nowrap">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-teal-600 flex items-center justify-center text-white font-bold text-xs">
-                            {{ strtoupper(substr($clearance->user->firstname,0,1)) }}{{ strtoupper(substr($clearance->user->lastname,0,1)) }}
-                        </div>
+
                         <div>
-                            <div class="font-medium text-gray-700">{{ $clearance->user->full_name }}</div>
+                            <div class="font-medium text-gray-700">{{ $clearance->user->fullname }}</div>
                             <div class="text-gray-500 font-mono text-xs">
                                 @if($clearance->user->role === 'teacher')
                                 {{ $clearance->user->teachers->employee_number ?? 'N/A' }}

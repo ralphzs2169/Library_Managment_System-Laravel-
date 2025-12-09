@@ -131,7 +131,7 @@ class AuthController extends Controller
                 'middle_initial' => $request->middle_initial,
                 'username' => $request->username,
                 'contact_number' => $request->contact_number,
-                'role' => 'staff',
+                'role' => $request->role,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);

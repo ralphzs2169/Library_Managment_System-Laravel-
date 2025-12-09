@@ -79,9 +79,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {{-- Cover Upload --}}
-                <div class="flex flex-col items-center justify-center border-2 border-dashed border-accent/30 rounded-xl bg-accent/5 hover:bg-accent/10 transition relative group">
-                    <input type="file" id="cover-input" name="cover" accept="image/*" class="hidden">
-                    <label for="cover-input" id="cover-drop-area" class="w-full h-full flex flex-col items-center justify-center cursor-pointer p-6 min-h-[280px]">
+                <div id="edit-cover-container" class="flex flex-col items-center justify-center border-2 border-dashed border-accent/30 rounded-xl bg-accent/5 hover:bg-accent/10 transition relative group">
+                    <input type="file" id="edit-cover-input" name="cover" accept="image/*" class="hidden">
+                    <label for="edit-cover-input" id="cover-drop-area" class="w-full h-full flex flex-col items-center justify-center cursor-pointer p-6 min-h-[280px]">
                         <img id="cover-preview" alt="Cover preview" class="w-36 h-48 object-cover rounded-lg mb-3 shadow-md border-2 border-white">
                         <div class="text-center">
                             <div class="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition">
@@ -240,11 +240,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- Classification Card --}}
-        {{-- <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm"> --}}
-
-
 
         {{-- Copies Management Card --}}
         <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">

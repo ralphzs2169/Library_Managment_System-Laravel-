@@ -21,8 +21,10 @@
                     <div>
                         <p class="text-xs text-gray-500 font-medium">Lifting suspension for</p>
                         <p id="lift-suspension-name" class="font-bold text-gray-900">--</p>
+                        <p id="lift-suspension-id-number" class="text-xs text-gray-700 font-mono">User ID: --</p>
                     </div>
                 </div>
+                <span id="lift-suspension-role-badge"></span>
             </div>
 
             <form id="lift-suspension-form">

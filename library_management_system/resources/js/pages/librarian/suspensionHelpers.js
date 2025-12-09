@@ -2,6 +2,7 @@ import { suspendUser, liftSuspension } from '../../ajax/suspensionHandler.js';
 import { fetchBorrowerDetails } from '../../ajax/borrowerHandler.js';
 import { initializeBorrowerProfileUI } from '../staff/borrower/borrowerProfilePopulators.js';
 import { clearInputError } from '../../helpers.js';
+import { populateRoleBadge } from './utils/popupDetailsModal.js';
 
 export function openSuspensionModal(borrower, actionPerformer) {
     const modal = document.getElementById('suspend-user-modal');
@@ -22,7 +23,8 @@ export function openSuspensionModal(borrower, actionPerformer) {
 
     const content = document.getElementById('suspend-user-content');
     const reasonInput = document.getElementById('reason');
-    
+    const idNumberEl = document.getElementById('suspend-user-id-number');
+
     // Populate info
     const initialsEl = document.getElementById('suspend-user-initials');
     if (initialsEl) {
@@ -32,6 +34,14 @@ export function openSuspensionModal(borrower, actionPerformer) {
     const nameEl = document.getElementById('suspend-user-name');
     if (nameEl) {
         nameEl.textContent = borrower.fullname;
+        
+        if (idNumberEl) {
+            idNumberEl.textContent = borrower.role === 'student' 
+                ? borrower.students?.student_number 
+                : borrower.teachers?.employee_number;
+        }
+        
+        populateRoleBadge(modal, '#suspend-user-role-badge', borrower);
     }
 
     if (reasonInput) {
@@ -119,6 +129,7 @@ export function openLiftSuspensionModal(borrower, actionPerformer) {
 
     const content = document.getElementById('lift-suspension-content');
     const reasonInput = document.getElementById('lift-suspension-reason');
+    const idNumberEl = document.getElementById('lift-suspension-id-number');
     
     // Populate info
     const initialsEl = document.getElementById('lift-suspension-initials');
@@ -129,6 +140,14 @@ export function openLiftSuspensionModal(borrower, actionPerformer) {
     const nameEl = document.getElementById('lift-suspension-name');
     if (nameEl) {
         nameEl.textContent = borrower.fullname;
+
+        if (idNumberEl) {
+            idNumberEl.textContent = borrower.role === 'student' 
+                ? borrower.students?.student_number 
+                : borrower.teachers?.employee_number;
+        }
+
+        populateRoleBadge(modal, '#lift-suspension-role-badge', borrower);
     }
 
     if (reasonInput) {

@@ -21,8 +21,10 @@
                     <div>
                         <p class="text-xs text-gray-500 font-medium">Suspending</p>
                         <p id="suspend-user-name" class="font-bold text-gray-900">--</p>
+                        <p id="suspend-user-id-number" class="text-xs text-gray-700 font-mono">User ID: --</p>
                     </div>
                 </div>
+                <span id="suspend-user-role-badge"></span>
             </div>
 
             <form id="suspend-user-form">

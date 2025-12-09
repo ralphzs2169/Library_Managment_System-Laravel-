@@ -655,4 +655,32 @@ class BookService {
             'author_middle_initial' => 'middle_initial',
         };
     }
+
+    public function getNewArrivals($limit = 10)
+    {
+        return Book::with(['author', 'genre.category', 'copies'])
+            ->orderBy('created_at', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    public function searchPublicBooks($search, $limit = 5)
+    {
+        if (empty(trim($search))) {
+            return collect([]);
+        }
+
+        return Book::with(['author', 'genre.category'])
+            ->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('isbn', 'like', "%{$search}%")
+                  ->orWhereHas('author', function ($q) use ($search) {
+                      $q->where('firstname', 'like', "%{$search}%")
+                        ->orWhere('lastname', 'like', "%{$search}%")
+                        ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"]);
+                  });
+            })
+            ->take($limit)
+            ->get();
+    }
 }

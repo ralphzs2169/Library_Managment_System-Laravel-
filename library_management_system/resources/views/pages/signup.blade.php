@@ -53,9 +53,9 @@
                     <label class="block text-sm font-medium text-gray-700 ">Account Information</label>
                     <!-- Username -->
                     <div class="field-container">
-                        <div class="error-placeholder" id="username-error-placeholder"></div>
                         <input type="text" id="username" name="username" placeholder="Username" class="mt-1 block text-sm w-full bg-[#F2F2F2] font-extralight px-4 py-3 border border-[#B1B1B1] rounded-lg
                                             focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                        <div class="error-placeholder" id="username-error-placeholder"></div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 section-grid">
@@ -149,6 +149,6 @@
     @vite('resources/js/utils.js')
     @vite('resources/js/config.js')
     @vite('resources/js/helpers.js')
-    @vite('resources/js/api/authHandler.js')
+    @vite('resources/js/ajax/authHandler.js')
     @vite('resources/js/pages/signup.js')
 </x-layout>

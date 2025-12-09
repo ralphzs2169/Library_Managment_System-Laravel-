@@ -51,8 +51,9 @@ function initializeClearanceRecordDetailsModal(modal, data) {
     let idNumber = 'N/A';
     if (borrower.role === 'student' && borrower.students) idNumber = borrower.students.student_number;
     if (borrower.role === 'teacher' && borrower.teachers) idNumber = borrower.teachers.employee_number;
-    borrowerIdNumber.textContent = `User ID: ${idNumber}`;
+    borrowerIdNumber.textContent = `${idNumber}`;
 
+    populateRoleBadge(modal, '#clearance-borrower-role-badge', borrower);
     // --- Clearance Info ---
     const clearanceStatusBadger = document.getElementById('clearance-record-status-badge');
     clearanceStatusBadger.innerHTML = getClearanceStatusBadge(record.status);

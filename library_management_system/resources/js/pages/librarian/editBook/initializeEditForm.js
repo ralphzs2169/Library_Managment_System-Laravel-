@@ -24,7 +24,7 @@ export async function initializeEditForm(form, book) {
     const editAuthorMiddleInitialField = form.querySelector('#author_middle_initial');
 
     // Cover Image fields
-    const editCoverInputField = form.querySelector('#cover-input');
+    const editCoverInputField = form.querySelector('#edit-cover-input');
     const editCoverImagePreview = form.querySelector('#cover-preview');
     const editCoverPlaceholder = form.querySelector('#cover-placeholder');
     const coverImagePreview = form.querySelector('#cover-preview');
@@ -75,7 +75,14 @@ export async function initializeEditForm(form, book) {
     }
 
     if (editCoverInputField) {
-        initImagePreview(editCoverInputField, editCoverImagePreview, editCoverPlaceholder, editCoverErrorPlaceholder);
+        // Clear previous value to ensure change event fires even if same file is selected
+        editCoverInputField.value = '';
+
+        // Only initialize if not already initialized to prevent duplicate listeners
+        if (!editCoverInputField.dataset.previewInitialized) {
+            initImagePreview(editCoverInputField, editCoverImagePreview, editCoverPlaceholder, editCoverErrorPlaceholder);
+            editCoverInputField.dataset.previewInitialized = 'true';
+        }
     }
     
 

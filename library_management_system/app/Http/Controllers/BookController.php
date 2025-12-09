@@ -192,15 +192,6 @@ class BookController extends Controller
         }
     }
 
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Book $book)
-    {
-        //
-    }
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -226,28 +217,6 @@ class BookController extends Controller
     {
         $result = $this->bookService->updateBook($request, $book);
         
-            //  $copiesInput = $request->input('copies', []);
-
-        // foreach ($copiesInput as $copyId => $newStatus) {
-
-        //     $bookCopy = BookCopy::findOrFail($copyId);
-        //     // If new copy is added, check for reservations and lend this copy to the first reserver
-        //     if ($copyId < 0) {
-        //         $this->reservationService->checkForReservations($bookCopy);
-        //     }
-
-        //     if (!$bookCopy) {
-        //         continue; // Skip if copy not found
-        //     }
-
-        //     // Update status if it has changed
-        // }
-        
-        // // $
-        // // if ($result['status'] === 'success') {
-        // //     $this->reservationService->checkForReservations();
-        // // }
-        
         // Handle invalid status (business rule violations)
         if (isset($result['status']) && $result['status'] === 'invalid') {
             return response()->json($result, 422);
@@ -256,11 +225,12 @@ class BookController extends Controller
         return response()->json($result);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Book $book)
+    public function getNewArrivals(Request $request)
     {
-        //
+        $newArrivals = $this->bookService->getNewArrivals($request->input('limit', 10));
+
+        return response()->json([
+            'data' => $newArrivals,
+        ]);
     }
 }

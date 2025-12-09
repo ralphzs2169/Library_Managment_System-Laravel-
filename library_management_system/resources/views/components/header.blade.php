@@ -20,7 +20,7 @@
             </a>
 
 
-            @can('view-header-links')
+            {{-- @can('view-header-links')
             <!-- Desktop Navigation Links -->
             <nav class="hidden md:flex items-center space-x-12">
                 <a href="/" class="nav-link text-sm font-medium tracking-wide uppercase cursor-pointer">
@@ -33,7 +33,7 @@
                     Catalog
                 </a>
             </nav>
-            @endcan
+            @endcan --}}
 
             @guest
             <!-- Authentication Buttons -->

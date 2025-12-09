@@ -52,7 +52,7 @@ export function initFilter(selector, loadFunction) {
     filter.addEventListener('change', () => loadFunction(1));
 }
 
-export function highlightSearchMatches(searchTerm, containerSelector = '#members-table-container', columnIndexes = [1, 2]) {
+export function highlightSearchMatches(searchTerm, containerSelector = '#members-table-container', targets = [1, 2]) {
   
     if (!searchTerm || searchTerm.trim().length === 0) return;
   
@@ -60,18 +60,23 @@ export function highlightSearchMatches(searchTerm, containerSelector = '#members
     const container = document.querySelector(containerSelector);
     if (!container) return;
     
-    const rows = container.querySelectorAll('tbody tr');
-    
-    rows.forEach(row => {
-        // Skip rows with colspan (empty states)
-        if (row.querySelector('[colspan]')) return;
+    if (Array.isArray(targets)) {
+        const rows = container.querySelectorAll('tbody tr');
         
-        // Highlight specified columns
-        columnIndexes.forEach(index => {
-            const cell = row.cells[index];
-            if (cell) highlightTextInCell(cell, term);
+        rows.forEach(row => {
+            // Skip rows with colspan (empty states)
+            if (row.querySelector('[colspan]')) return;
+            
+            // Highlight specified columns
+            targets.forEach(index => {
+                const cell = row.cells[index];
+                if (cell) highlightTextInCell(cell, term);
+            });
         });
-    });
+    } else if (typeof targets === 'string') {
+        const elements = container.querySelectorAll(targets);
+        elements.forEach(el => highlightTextInCell(el, term));
+    }
 }
 
 

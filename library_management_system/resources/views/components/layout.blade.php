@@ -22,7 +22,10 @@
     @endcan
     @endauth
 
-    {{ $slot }}
+    <div class="bg-background">
+        {{ $slot }}
+    </div>
+
 
     @can('view-footer')
     @include('components/footer')

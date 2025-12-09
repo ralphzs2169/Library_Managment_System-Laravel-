@@ -1,5 +1,5 @@
 import { clearInputError, autoCapitalizeOnBlur, autoCapitalizeWords, blurActiveElement } from '../helpers.js';
-import { signupHandler } from '../api/authHandler.js';
+import { signupHandler } from '../ajax/authHandler.js';
 
 const firstnameField = document.getElementById('firstname');
 const lastnameField = document.getElementById('lastname');

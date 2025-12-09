@@ -141,8 +141,8 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
     if (!button) return;
 
     // Reset button to default state
-    if (type !== 'suspension') {
-    resetButton(button, defaultIcon);
+    if (type !== 'suspension' ) {
+        resetButton(button, defaultIcon);
     }
     button.classList.remove('hidden');
     button.classList.add('inline-flex');
@@ -173,7 +173,9 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
         case 'clearance':
             if (actionPerformer?.role === 'staff') {
                 // Change button text for staff
-                button.innerHTML = `<img src="${defaultIcon}" class="w-5 h-5"> Request Clearance`;
+                button.innerHTML = `   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg> Request Clearance`;
                 
                 if (borrower.can_request_clearance && borrower.can_request_clearance.result === 'success') {
                     isAuthorized = true;
@@ -342,9 +344,9 @@ function populateStatusBadge(modal, borrower) {
     } else if (status === 'suspended') {
         statusBadge.classList.add('bg-red-100', 'text-red-700');
         statusBadge.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                            <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
+                        </svg>
             ${statusText}
         `;
     } else if (status === 'inactive') {

@@ -5,7 +5,9 @@
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-gradient-to-br from-accent to-teal-600 rounded-xl flex items-center justify-center shadow-md">
-                        <img src="{{ asset('build/assets/icons/users.svg') }}" alt="Personnel Icon" class="w-8 h-8 filter brightness-0 invert">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">Personnel Accounts</h1>
@@ -74,7 +76,7 @@
     <!-- Add Personnel Modal -->
     <div id="add-personnel-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <!-- Backdrop -->
-        <div id="add-personnel-backdrop" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity duration-300 ease-out opacity-0 backdrop-blur-sm"></div>
+        <div id="add-personnel-backdrop" class="fixed inset-0 bg-background-unfocused bg-opacity-75 transition-opacity duration-300 ease-out opacity-0 "></div>
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div id="add-personnel-panel" class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all duration-300 ease-out opacity-0 scale-95 sm:my-8 sm:w-full sm:max-w-2xl">
@@ -83,7 +85,14 @@
                     <div class="flex justify-between items-center mb-2">
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-accent/10 rounded-lg">
-                                <img src="{{ asset('build/assets/icons/users.svg') }}" alt="Logo" class="w-6 h-6 filter brightness-0 invert sepia saturate-100 hue-rotate-190">
+                                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#03abb6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="#03abb6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </g>
+                                </svg>
                             </div>
                             <h3 class="text-2xl font-bold text-gray-900">Add New Personnel</h3>
                         </div>
@@ -141,8 +150,8 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Account Information</label>
                             <!-- Username -->
                             <div class="field-container mb-2">
-                                <div class="error-placeholder" id="username-error-placeholder"></div>
                                 <input type="text" id="username" name="username" placeholder="Username" class="block text-sm w-full bg-[#F2F2F2] font-extralight px-4 py-3 border border-[#B1B1B1] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                                <div class="error-placeholder" id="username-error-placeholder"></div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-2">

@@ -124,7 +124,15 @@
             {{-- Activity Log --}}
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3">
                 <a href="{{ route('librarian.section.activity-logs') }}" class="sidebar-link flex items-center">
-                    <img src="{{ asset('build/assets/icons/activity-log.svg') }}" alt="Activity Log Icon" class="inline-block w-5 h-5 mr-3">
+                    <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg">
+
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path d="M4 5V19C4 19.5523 4.44772 20 5 20H19" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M18 9L13 13.9999L10.5 11.4998L7 14.9998" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </g>
+                    </svg>
                     <span>Activity Log</span>
                 </a>
             </li>

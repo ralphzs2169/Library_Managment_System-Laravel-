@@ -19,11 +19,10 @@ use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\LibrarianSectionsController;
 use App\Http\Controllers\LibrarianDashboardController;
+use App\Http\Controllers\WelcomeController;
 
 
-Route::get('/', function () {
-    return view('pages.welcome');
-});
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
