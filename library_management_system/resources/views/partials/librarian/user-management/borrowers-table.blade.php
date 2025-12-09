@@ -1,3 +1,4 @@
+{{-- filepath: c:\Users\Angela\library_management_system\resources\views\partials\librarian\user-management\borrowers-table.blade.php --}}
 <div class="overflow-x-auto rounded-lg border border-gray-200">
 
     <table class="w-full text-sm rounded-lg table-fixed">
@@ -14,47 +15,56 @@
                 <th class="py-3 px-4 text-left text-gray-700 uppercase tracking-wider whitespace-nowrap w-26 ">Actions</th>
             </tr>
         </thead>
-        {{-- <tbody id="members-skeleton-body" class="bg-white divide-y divide-gray-100">
-            <tr>
-                @for ($i = 0; $i < 8; $i++) <tr>
-                    <td class="px-4 py-3">
-                        <div class="h-5 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    </td>
-                    <td class="py-2 text-center">
-                        <div class="w-10 h-10 rounded-full bg-gray-200 animate-pulse mx-auto"></div>
-                    </td>
-                    <td class="py-3 pl-2 pr-4">
-                        <div class="h-5 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
-                        <div class="h-4 w-20 bg-gray-200 rounded animate-pulse mb-1"></div>
-                        <div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
-                    </td>
-                    <td class="pl-2 pr-4 px-4">
-                        <div class="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="h-8 w-24 bg-gray-200 rounded-lg animate-pulse mx-auto"></div>
-                    </td>
-                    @endfor
-            </tr>
-        </tbody> --}}
+        <tbody id="borrowers-skeleton" class="bg-white divide-y divide-gray-100 hidden">
+            @for ($i = 0; $i < 5; $i++) <tr class="{{ $i % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
+                {{-- ID Column --}}
+                <td class="px-4 py-3">
+                    <div class="h-4 w-6 bg-gray-200 rounded animate-pulse"></div>
+                </td>
+                {{-- Initials Icon Column --}}
+                <td class="py-2 text-center">
+                    <div class="w-10 h-10 rounded-full bg-gray-200 animate-pulse mx-auto"></div>
+                </td>
+                {{-- Borrower Name Column --}}
+                <td class="py-3 pl-2 pr-4">
+                    <div class="h-5 w-32 bg-gray-200 rounded animate-pulse mb-1"></div>
+                    <div class="h-3 w-16 bg-gray-200 rounded animate-pulse mb-1"></div>
+                    <div class="h-3 w-10 bg-gray-200 rounded-xl animate-pulse"></div>
+                </td>
+                {{-- Department/Year Level Column --}}
+                <td class="py-3 px-4">
+                    <div class="h-5 w-24 bg-gray-200 rounded animate-pulse mb-1"></div>
+                    <div class="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+                </td>
+                {{-- Status Column --}}
+                <td class="py-3 px-4">
+                    <div class="h-6 w-20 bg-gray-200 rounded-xl animate-pulse"></div>
+                </td>
+                {{-- Active Borrows Column --}}
+                <td class="py-3 px-4">
+                    <div class="h-6 w-24 bg-gray-200 rounded-full animate-pulse"></div>
+                </td>
+                {{-- Reservations Column --}}
+                <td class="py-3 px-4">
+                    <div class="flex flex-col gap-1 min-h-[48px] justify-center">
+                        <div class="h-6 w-24 bg-gray-200 rounded-full animate-pulse"></div>
+                        {{-- <div class="h-6 w-24 bg-gray-200 rounded-full animate-pulse"></div> --}}
+                    </div>
+                </td>
+                {{-- Actions Column --}}
+                <td class="py-3 px-4">
+                    <div class="h-8 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
+                </td>
+                </tr>
+                @endfor
+        </tbody>
 
-        <tbody id="members-real-table-body" class="bg-white divide-y divide-gray-100">
-            </tr>
-
-            @foreach($borrowers as $index => $borrower)
-            <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100">
+        <tbody id="borrowers-real-table-body" class="bg-white divide-y divide-gray-100">
+            @forelse($borrowers as $index => $borrower)
+            @php
+            $hasPendingClearance = $borrower->has_pending_clearance_request;
+            @endphp
+            <tr class="relative {{ $hasPendingClearance ? 'bg-blue-50 border-l-4 border-l-blue-500 hover:bg-blue-100/60' : ($index % 2 === 0 ? 'bg-white' : 'bg-gray-50') . ' hover:bg-gray-100' }}">
                 <td class="px-4 py-3 text-black">
                     {{ $borrower->id}}
                 </td>
@@ -214,6 +224,19 @@
 
                 {{-- Actions Column --}}
                 <td class="py-3 px-4 whitespace-nowrap text-gray-700">
+                    @if($hasPendingClearance)
+                    <div class="absolute top-1 right-1 z-10 group/tooltip cursor-help">
+                        <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-500 text-white rounded-full shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </span>
+                        <div class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none shadow-lg">
+                            Pending Clearance Request
+                            <div class="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
+                        </div>
+                    </div>
+                    @endif
                     <button data-user-id="{{ $borrower->id }}" class="open-borrower-modal cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-xs font-medium transition-all shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -223,7 +246,17 @@
                 </td>
 
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="8" class="py-20 text-center text-gray-500 text-sm">
+                    <div class="flex flex-col items-center justify-center">
+                        <img class="w-24 h-24" src="{{ asset('build/assets/icons/no-results-found.svg') }}" alt="No Results Found">
+                        <p class="text-gray-500 text-lg font-medium mb-2">No borrowers found</p>
+                        <p class="text-gray-400 text-sm">Try adjusting your search or filters</p>
+                    </div>
+                </td>
+            </tr>
+            @endforelse
 
         </tbody>
     </table>
@@ -256,18 +289,3 @@
     </div>
 </div>
 @endif
-
-@include('modals.confirm-reservation')
-@include('modals.borrower-profile')
-@include('modals.confirm-renew')
-@include('modals.confirm-borrow')
-@include('modals.confirm-return')
-@include('modals.confirm-payment')
-
-@vite('resources/js/pages/staff/borrower/borrowerProfileModal.js')
-@vite('resources/js/pages/staff/bookSelection.js')
-@vite('resources/js/pages/staff/confirmBorrow.js')
-@vite('resources/js/pages/staff/confirmReturn.js')
-@vite('resources/js/pages/staff/confirmRenew.js')
-@vite('resources/js/pages/staff/confirmPayment.js')
-@vite('resources/js/pages/staff/transactions/confirmReservation.js')

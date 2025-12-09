@@ -87,6 +87,9 @@ Route::prefix('librarian')
         // Add this route in the librarian section
         Route::get('/category-management/content', [CategoryController::class, 'getContent'])->name('category-management.content');
 
+        Route::post('/users/suspend/{user}', [UserController::class, 'suspendUser'])->name('users.suspend');
+        Route::post('/users/lift-suspension/{user}', [UserController::class, 'liftSuspension'])->name('users.lift-suspension');
+
     });
 
 Route::prefix('staff')

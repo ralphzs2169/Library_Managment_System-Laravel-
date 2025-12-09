@@ -31,6 +31,7 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
         const borrowBtn = modal.querySelector("#borrow-book-btn");
         const reserveBtn = modal.querySelector("#add-reservation-btn");
         const clearanceBtn = modal.querySelector("#clearance-btn");
+        const suspensionBtn = modal.querySelector("#suspension-btn");
         const buttonsContainer = borrowBtn?.parentElement;
 
         // Remove existing message if any (to avoid duplicates on re-render)
@@ -42,6 +43,7 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
              if(borrowBtn) borrowBtn.classList.replace('inline-flex','hidden');
             if(reserveBtn) reserveBtn.classList.replace('inline-flex','hidden');
             if(clearanceBtn) clearanceBtn.classList.replace('inline-flex','hidden');
+            if(suspensionBtn) suspensionBtn.classList.replace('inline-flex','hidden');
 
             // Show message - Clearance Granted (Gray/Neutral)
             if (buttonsContainer) {
@@ -56,11 +58,12 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
                 `;
                 buttonsContainer.appendChild(msgDiv);
             }
-        } else if (borrower.can_request_clearance?.message === 'Borrower already has a pending clearance request.') {
+        } else if (borrower.can_view_clearance_status.result === 'success' && borrower.pending_clearance != null  ) {
             // Hide buttons
             if(borrowBtn) borrowBtn.classList.replace('inline-flex','hidden');
             if(reserveBtn) reserveBtn.classList.replace('inline-flex','hidden');
             if(clearanceBtn) clearanceBtn.classList.replace('inline-flex','hidden');
+            if(suspensionBtn) suspensionBtn.classList.replace('inline-flex','hidden');
 
             // Show message - Clearance Pending (Blue)
             if (buttonsContainer) {
@@ -80,10 +83,12 @@ export async function initializeBorrowerProfileUI(modal, borrower, reloadProfile
             if(borrowBtn) borrowBtn.classList.remove('hidden');
             if(reserveBtn) reserveBtn.classList.remove('hidden');
             if(clearanceBtn) clearanceBtn.classList.remove('hidden');
+            if(suspensionBtn) suspensionBtn.classList.remove('hidden');
 
             setupProfileButton(modal, borrower, 'borrow');
             setupProfileButton(modal, borrower, 'reservation');
             setupProfileButton(modal, borrower, 'clearance', actionPerformer);
+            setupProfileButton(modal, borrower, 'suspension', actionPerformer);
         }
 
         // Borrower Section Tabs/Tables
@@ -121,8 +126,13 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
             break;
         case 'clearance':
             button = modal.querySelector("#clearance-btn");
-            defaultIcon = '/build/assets/icons/clearance-white.svg'; // Ensure this icon exists or use a fallback
+            defaultIcon = '/build/assets/icons/clearance-white.svg'; 
             disabledIcon = '/build/assets/icons/clearance-gray.svg';
+            break;
+        case 'suspension':
+            button = modal.querySelector("#suspension-btn");
+            defaultIcon = ''; 
+            disabledIcon = '';
             break;
         default:
             return; // nothing to do
@@ -131,7 +141,11 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
     if (!button) return;
 
     // Reset button to default state
+    if (type !== 'suspension') {
     resetButton(button, defaultIcon);
+    }
+    button.classList.remove('hidden');
+    button.classList.add('inline-flex');
 
     // Clone the button to remove old event listeners
     const clone = button.cloneNode(true);
@@ -157,7 +171,6 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
             disableMessage = borrower.can_reserve.message;
             break;
         case 'clearance':
-            
             if (actionPerformer?.role === 'staff') {
                 // Change button text for staff
                 button.innerHTML = `<img src="${defaultIcon}" class="w-5 h-5"> Request Clearance`;
@@ -168,14 +181,74 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
                     disableMessage = borrower.can_request_clearance?.message || 'Clearance request not available.';
                 }
             } else {
-                // Logic for librarian or other roles if needed (e.g., Approve Clearance)
-                // For now, disable if not staff based on current requirements
-                disableMessage = 'Only staff can request clearance.';
+               
+                button.classList.add('hidden');
+                button.classList.remove('inline-flex');
+                return;
+            }
+            break;
+        case 'suspension':
+            if (actionPerformer?.role === 'librarian' && borrower.pending_clearance === null) {
+                isAuthorized = true;
+              
+                // Fix: Remove default button classes that might cause it to look gray or blue
+                button.classList.remove('bg-secondary-light', 'hover:bg-secondary-light/90', 'bg-gray-200', 'bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                button.classList.add('text-white', 'cursor-pointer');
+
+                if (borrower.library_status === 'suspended') {
+                    // Lift Suspension
+                    button.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                            <path d="M18 1.5c2.9 0 5.25 2.35 5.25 5.25v3.75a.75.75 0 0 1-1.5 0V6.75a3.75 3.75 0 1 0-7.5 0v3a3 3 0 0 1 3 3v6.75a3 3 0 0 1-3 3H3.75a3 3 0 0 1-3-3v-6.75a3 3 0 0 1 3-3h9v-3c0-2.9 2.35-5.25 5.25-5.25Z" />
+                        </svg>
+                        Lift Suspension`;
+                    button.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    button.classList.add('bg-green-600', 'hover:bg-green-700');
+                    
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        import('../../librarian/suspensionHelpers.js').then(module => {
+                            if (module.openLiftSuspensionModal) {
+                                module.openLiftSuspensionModal(borrower, actionPerformer);
+                            } else {
+                                console.warn('Lift suspension handler not found');
+                            }
+                        });
+                    });
+                } else {
+                    // Suspend User
+                    button.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                            <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
+                        </svg>
+                        Suspend User`;
+                    button.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    button.classList.add('bg-red-600', 'hover:bg-red-700');
+                    
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        import('../../librarian/suspensionHelpers.js').then(module => {
+                            if (module.openSuspensionModal) {
+                                module.openSuspensionModal(borrower, actionPerformer);
+                            } else {
+                                console.warn('Suspension handler not found');
+                            }
+                        });
+                    });
+                }
+                    console.log(button);
+                return; 
+            } else {
+                // Hide for non-librarian
+                button.classList.add('hidden');
+                button.classList.remove('inline-flex');
+                return;
             }
             break;
         default:
             return; 
     }
+
 
     if (isAuthorized) {
         button.addEventListener('click', (e) => {
@@ -183,7 +256,7 @@ function setupProfileButton(modal, borrower, type, actionPerformer = null) {
             if (type === 'clearance') {
                 const requestorId = actionPerformer.id;
                 handleClearanceRequest(borrower.id, requestorId);
-            } else {
+            } else if (type === 'borrow' || type === 'reservation') {
                 showBookSelectionContent(modal, borrower, type, false);
             }
         });
@@ -203,7 +276,6 @@ async function handleClearanceRequest(borrowerId, requestorId) {
        initializeBorrowerProfileUI(modal, borrower, true);
     }
 }
-
 
 function populateProfilePicture(modal, borrower) {
     console.log('Populating profile picture for borrower:', borrower);

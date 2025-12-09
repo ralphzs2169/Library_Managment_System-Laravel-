@@ -71,10 +71,10 @@ class ActivityLogController extends Controller
                 $query->orderBy('created_at', 'desc');
         }
 
-        $activity_logs = $query->paginate(10)->withQueryString();
-        $activity_logs->load('user');
+        $activityLogs = $query->paginate(10)->withQueryString();
+        $activityLogs->load('user');
 
-        return view('pages.librarian.activity-logs', compact('activity_logs'));
+        return view('pages.librarian.activity-logs', compact('activityLogs'));
     }
 
 

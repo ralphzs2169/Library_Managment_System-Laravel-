@@ -49,7 +49,7 @@ export async function populateCurrentlyBorrowedBooks(modal, borrower) {
     if (borrowedBooks.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="py-10 text-center">
+                <td colspan="6" class="py-10 text-center">
                         <p class="text-gray-500 text-md font-medium mb-2">No currently borrowed books</p>
                 </td>
             </tr>

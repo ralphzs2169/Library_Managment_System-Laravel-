@@ -562,15 +562,145 @@ class LibrarianSectionsController extends Controller
         ]);
     }
 
-    public function borrowers(Request $request)
+     public function borrowers(Request $request)
     {
         $query = User::with(['students.department', 'teachers.department'])
             ->whereIn('role', ['student', 'teacher']);
 
+        // Add counts for sorting and filtering
+        $query->withCount(['borrowTransactions as active_borrowings_count' => function ($q) {
+            $q->whereNull('returned_at');
+        }]);
+
+        $query->withCount(['reservations as active_reservations_count' => function ($q) {
+            $q->whereIn('status', ['pending', 'ready_for_pickup']);
+        }]);
+
+        // Subquery for total fines
+        $finesSubquery = \App\Models\Penalty::selectRaw('COALESCE(SUM(amount), 0)')
+            ->whereIn('status', ['unpaid', 'partially_paid'])
+            ->whereHas('borrowTransaction', function ($q) {
+                $q->whereColumn('user_id', 'users.id');
+            });
+        
+        $query->select('users.*')->selectSub($finesSubquery, 'total_fines_amount');
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('firstname', 'like', "%{$search}%")
+                  ->orWhere('lastname', 'like', "%{$search}%")
+                  ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"])
+                  ->orWhereRaw("CONCAT(firstname, ' ', middle_initial, '.', ' ', lastname) LIKE ?", ["%{$search}%"]);
+                
+                // Search by ID
+                $q->orWhereHas('students', function ($sq) use ($search) {
+                    $sq->where('student_number', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('teachers', function ($tq) use ($search) {
+                    $tq->where('employee_number', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Role filter
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('library_status', $request->status);
+        }
+
+        // Active Borrows Filter
+        if ($request->filled('active_borrows')) {
+            if ($request->active_borrows === 'has_borrows') {
+                $query->whereHas('borrowTransactions', function ($q) {
+                    $q->whereNull('returned_at');
+                });
+            } elseif ($request->active_borrows === 'no_borrows') {
+                $query->whereDoesntHave('borrowTransactions', function ($q) {
+                    $q->whereNull('returned_at');
+                });
+            }
+        }
+
+        // Reservation Status Filter
+        if ($request->filled('reservation_status')) {
+            if ($request->reservation_status === 'has_pending') {
+                $query->whereHas('reservations', function ($q) {
+                    $q->where('status', 'pending');
+                });
+            } elseif ($request->reservation_status === 'ready_for_pickup') {
+                $query->whereHas('reservations', function ($q) {
+                    $q->where('status', 'ready_for_pickup');
+                });
+            } elseif ($request->reservation_status === 'no_reservations') {
+                $query->whereDoesntHave('reservations', function ($q) {
+                    $q->whereIn('status', ['pending', 'ready_for_pickup']);
+                });
+            }
+        }
+
+        // Fines Filter
+        if ($request->filled('fines')) {
+            if ($request->fines === 'has_fines') {
+                $query->whereHas('borrowTransactions.penalties', function ($q) {
+                    $q->whereIn('status', ['unpaid', 'partially_paid']);
+                });
+            } elseif ($request->fines === 'no_fines') {
+                $query->whereDoesntHave('borrowTransactions.penalties', function ($q) {
+                    $q->whereIn('status', ['unpaid', 'partially_paid']);
+                });
+            }
+        }
+
+        // Sort
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'name_asc':
+                    $query->orderBy('firstname', 'asc')->orderBy('lastname', 'asc');
+                    break;
+                case 'borrows_desc':
+                    $query->orderBy('active_borrowings_count', 'desc');
+                    break;
+                case 'reservations_desc':
+                    $query->orderBy('active_reservations_count', 'desc');
+                    break;
+                case 'fines_desc':
+                    $query->orderBy('total_fines_amount', 'desc');
+                    break;
+                case 'latest_activity':
+                    $query->orderBy('updated_at', 'desc');
+                    break;
+                default:
+                    $query->orderBy('id', 'desc');
+            }
+        } else {
+            $query->orderBy('id', 'asc');
+        }
+
+        $borrowers = $query->paginate(20)->withQueryString();
+
+        if ($request->ajax()) {
+            $html = view('partials.librarian.user-management.borrowers-table', [
+                'borrowers' => $borrowers,
+            ])->render();
+            
+            return response()->json([
+                'html' => $html,
+                'count' => $borrowers->total()
+            ]);
+        }
+
         return view('pages.librarian.user-management.borrowers', [
-            'borrowers' => $query->paginate(20)->withQueryString()
+            'borrowers' => $borrowers,
+            'totalBorrowersCount' => $borrowers->total()
         ]);
     }
+
 
     public function personnelAccounts(Request $request)
     {

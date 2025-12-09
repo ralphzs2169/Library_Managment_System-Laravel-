@@ -171,16 +171,16 @@ export function attachReservationActions(tbody, borrower) {
     tbody.querySelectorAll('button.cancel-reservation-button').forEach(btn => {
         btn.addEventListener('click', async function (e) {
             e.preventDefault();
-            const reservationId = this.dataset.reservationId;
-            const borrowerId = this.dataset.borrowerId;
+            const reservationId = this.getAttribute('data-reservation-id');
+            const borrowerId = this.getAttribute('data-borrower-id');
            
             const result = await cancelReservation(reservationId);
 
             if (result) {
                 // returnToBorrowerProfile();
                 const modal = document.getElementById('borrower-profile-modal');
-                const freshBorrowerDetails = await fetchBorrowerDetails(borrowerId);
-                await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true, 'reservations-tab');
+                const { borrower }  = await fetchBorrowerDetails(borrowerId);
+                await initializeBorrowerProfileUI(modal, borrower, true, 'reservations-tab');
                 closeConfirmReturnModal();
             }
         });

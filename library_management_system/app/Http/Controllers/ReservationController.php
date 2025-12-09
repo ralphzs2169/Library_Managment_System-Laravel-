@@ -51,7 +51,7 @@ class ReservationController extends Controller
     {
         try {
             $reservation = $this->reservationService->storeReservation($request);
-            return $this->jsonResponse('success', 'Book reserved successfully', 200, ['reservation' => $reservation]);
+            return $this->jsonResponse('success', 'Book reserved successfully', 200, ['reservation' => $reservation, 'action_performer_role' => $request->user()->role]);
         } catch (ModelNotFoundException $e) {
             Log::error($e);
             return $this->jsonResponse('error', 'The book or transaction could not be found.', 404);

@@ -1,6 +1,6 @@
 import { showSkeleton, hideSkeleton } from "../utils";
 import { showError } from "../utils/alerts";
-import { BORROW_RECORDS_FILTERS, RESERVATION_RECORDS_FILTERS, PENALTY_RECORDS_FILTERS } from "../utils/tableFilters";
+import { BORROW_RECORDS_FILTERS, RESERVATION_RECORDS_FILTERS, PENALTY_RECORDS_FILTERS, BORROWER_FILTERS } from "../utils/tableFilters";
 import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters";
 import { LIBRARIAN_SECTION_ROUTES } from "../config";
 import { highlightSearchMatches } from "../tableControls";
@@ -8,12 +8,13 @@ import { highlightSearchMatches } from "../tableControls";
 export async function loadBorrowRecords(page = BORROW_RECORDS_FILTERS.page, scrollUp = true, isFiltered = false) {
     const container = document.getElementById('borrow-records-container');
     const countElement = document.getElementById('header-total-borrow-records');
-    console.log('Loading borrow records...');
+     if (!container) return;
     if (scrollUp) {
         window.scrollTo(0, 0);
     }
 
-    countElement.textContent = '';
+    console.log(container);
+    if (countElement) countElement.textContent = '';
 
     let skeletonTimer = setTimeout(() => {
         showSkeleton(container, '#borrowing-records-skeleton', '#borrowing-records-real-table-body');
@@ -54,10 +55,7 @@ export async function loadBorrowRecords(page = BORROW_RECORDS_FILTERS.page, scro
         const data = await response.json();
         container.innerHTML = data.html;
 
-        countElement.textContent = data.count;
-
-        clearTimeout(skeletonTimer);
-        hideSkeleton(container, '#borrowing-records-skeleton', '#borrowing-records-real-table-body');
+        if (countElement) countElement.textContent = data.count;
 
         // Re-attach borrow record detail listeners after table update (like staff side)
         import('../pages/manage-record-details/borrowRecordDetails.js').then(mod => {
@@ -71,9 +69,11 @@ export async function loadBorrowRecords(page = BORROW_RECORDS_FILTERS.page, scro
             highlightSearchMatches(searchTerm, '#borrow-records-container', SEARCH_COLUMN_INDEXES.BORROW_RECORDS);
         }
 
-
     } catch (error) {
         showError("Something went wrong", "Failed to load borrowing records.");
+    } finally {
+        clearTimeout(skeletonTimer);
+        hideSkeleton(container, '#borrowing-records-skeleton', '#borrowing-records-real-table-body');
     }
 }
 
@@ -81,11 +81,13 @@ export async function loadReservationRecords(page = RESERVATION_RECORDS_FILTERS.
     const container = document.getElementById('reservation-records-container');
     const countElement = document.getElementById('header-total-reservation-records');
 
+     if (!container) return;
+
     if (scrollUp) {
         window.scrollTo(0, 0);
     }
 
-    countElement.textContent = '';
+    if (countElement) countElement.textContent = '';
 
     let skeletonTimer = setTimeout(() => {
         showSkeleton(container, '#reservation-records-skeleton', '#reservation-records-real-table-body');
@@ -126,11 +128,7 @@ export async function loadReservationRecords(page = RESERVATION_RECORDS_FILTERS.
         const data = await response.json();
         container.innerHTML = data.html;
 
-        console.log(data.count);
-        countElement.textContent = data.count;
-
-        clearTimeout(skeletonTimer);
-        hideSkeleton(container, '#reservation-records-skeleton', '#reservation-records-real-table-body');
+        if (countElement) countElement.textContent = data.count;
 
         // Re-attach reservation record detail listeners after table update (like staff side)
         import('../pages/manage-record-details/reservationRecordDetails.js').then(mod => {
@@ -144,9 +142,11 @@ export async function loadReservationRecords(page = RESERVATION_RECORDS_FILTERS.
             highlightSearchMatches(searchTerm, '#reservation-records-container', SEARCH_COLUMN_INDEXES.RESERVATION_RECORDS);
         }
 
-
     } catch (error) {
         showError("Something went wrong", "Failed to load reservation records.");
+    } finally {
+        clearTimeout(skeletonTimer);
+        hideSkeleton(container, '#reservation-records-skeleton', '#reservation-records-real-table-body');
     }
 }
 
@@ -154,11 +154,13 @@ export async function loadPenaltyRecords(page = PENALTY_RECORDS_FILTERS.page, sc
     const container = document.getElementById('penalty-records-container');
     const countElement = document.getElementById('header-total-penalty-records');
 
+    if (!container) return;
+
     if (scrollUp) {
         window.scrollTo(0, 0);
     }
 
-    countElement.textContent = '';
+    if (countElement) countElement.textContent = '';
 
     let skeletonTimer = setTimeout(() => {
         showSkeleton(container, '#penalty-records-skeleton', '#penalty-records-real-table-body');
@@ -202,10 +204,7 @@ export async function loadPenaltyRecords(page = PENALTY_RECORDS_FILTERS.page, sc
         const data = await response.json();
         container.innerHTML = data.html;
 
-        countElement.textContent = data.count;
-
-        clearTimeout(skeletonTimer);
-        hideSkeleton(container, '#penalty-records-skeleton', '#penalty-records-real-table-body');
+        if (countElement) countElement.textContent = data.count;
 
         // Re-attach penalty record detail listeners after table update
         import('../pages/manage-record-details/penaltyRecordDetails.js').then(mod => {
@@ -221,5 +220,93 @@ export async function loadPenaltyRecords(page = PENALTY_RECORDS_FILTERS.page, sc
 
     } catch (error) {
         showError("Something went wrong", "Failed to load penalty records.");
+    } finally {
+        clearTimeout(skeletonTimer);
+        hideSkeleton(container, '#penalty-records-skeleton', '#penalty-records-real-table-body');
+    }
+
+}
+
+export async function loadBorrowersLibrarianSection(page = BORROWER_FILTERS.page, scrollUp = true, isFiltered = false) {
+    const container = document.getElementById('borrowers-container');
+    const countElement = document.getElementById('header-total-borrowers');
+
+     if (!container) return;
+     
+    if (scrollUp) {
+        window.scrollTo(0, 0);
+    }
+
+    if (countElement) countElement.textContent = '';
+
+    let skeletonTimer = setTimeout(() => {
+   
+        showSkeleton(container, '#borrowers-skeleton', '#borrowers-real-table-body');
+    }, 200);
+
+    try {
+        BORROWER_FILTERS.page = page;
+        const searchInput = document.getElementById('borrowers-search');
+        const roleFilter = document.getElementById('borrowers-role-filter');
+        const statusFilter = document.getElementById('borrowers-status-filter');
+        const sortFilter = document.getElementById('borrowers-sort-filter');
+        
+        const activeBorrowsFilter = document.getElementById('borrowers-active-borrows-filter');
+        const reservationFilter = document.getElementById('borrowers-reservation-filter');
+        const finesFilter = document.getElementById('borrowers-fines-filter');
+
+        if (searchInput) BORROWER_FILTERS.search = searchInput.value || '';
+        if (roleFilter) BORROWER_FILTERS.role = roleFilter.value || '';
+        if (statusFilter) BORROWER_FILTERS.status = statusFilter.value || '';
+        if (sortFilter) BORROWER_FILTERS.sort = sortFilter.value || '';
+        
+        if (activeBorrowsFilter) BORROWER_FILTERS.active_borrows = activeBorrowsFilter.value || '';
+        if (reservationFilter) BORROWER_FILTERS.reservation_status = reservationFilter.value || '';
+        if (finesFilter) BORROWER_FILTERS.fines = finesFilter.value || '';
+
+        const params = new URLSearchParams({
+            page: BORROWER_FILTERS.page,
+            search: BORROWER_FILTERS.search,
+            role: BORROWER_FILTERS.role,
+            status: BORROWER_FILTERS.status,
+            sort: BORROWER_FILTERS.sort,
+            active_borrows: BORROWER_FILTERS.active_borrows,
+            reservation_status: BORROWER_FILTERS.reservation_status,
+            fines: BORROWER_FILTERS.fines
+        });
+
+        const response = await fetch(`${LIBRARIAN_SECTION_ROUTES.BORROWERS}?${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        container.innerHTML = data.html;
+
+        if (countElement) countElement.textContent = data.count;
+
+        // Re-attach listeners for "Manage" buttons (Borrower Profile Modal)
+        import('../pages/staff/borrower/borrowerProfileModal.js').then(mod => {
+            if (mod.initBorrowerProfileModalListeners) {
+                mod.initBorrowerProfileModalListeners();
+            }
+        });
+
+        const searchTerm = searchInput?.value?.trim();
+        if (searchTerm) {
+            // Highlight matches in columns 2 (Name)
+            highlightSearchMatches(searchTerm, SEARCH_COLUMN_INDEXES.BORROWERS, [2]);
+        }
+
+    } catch (error) {
+        console.error(error);
+        showError("Something went wrong", "Failed to load borrowers.");
+    } finally {
+        clearTimeout(skeletonTimer);
+        hideSkeleton(container, '#borrowers-skeleton', '#borrowers-real-table-body');
     }
 }

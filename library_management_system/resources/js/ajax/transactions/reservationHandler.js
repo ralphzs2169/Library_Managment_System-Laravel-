@@ -4,6 +4,7 @@ import { showError, showConfirmation, showWarning, showToast, showDangerConfirma
 import { loadReservationRecords } from "../librarianSectionsHandler.js";
 import { closeConfirmBorrowModal } from "../../pages/staff/confirmBorrow.js";
 import { TRANSACTION_ROUTES } from "../../config.js";
+import { loadBorrowersLibrarianSection } from "../librarianSectionsHandler.js";
 
 export async function addReservation(reservationData) {
     // Add CSRF token
@@ -20,7 +21,7 @@ export async function addReservation(reservationData) {
         body: reservationData
     });
 
-    const result = await response.json();
+    let result = await response.json();
 
     if (!response.ok) {
         if (response.status === BUSINESS_RULE_VIOLATION) {
@@ -55,14 +56,20 @@ export async function addReservation(reservationData) {
         body: reservationData
     });
 
-    const data = await response.json(); 
+    result = await response.json(); 
 
     if (!response.ok) {
-        showError('Something went wrong', data.message || 'Please try again.');
+        showError('Something went wrong', result.message || 'Please try again.');
         return false;
     }
 
-    reloadStaffDashboardData();
+    const performerRole = result.data.action_performer_role;
+   
+    if (performerRole === 'staff') {
+        reloadStaffDashboardData();
+    } else if (performerRole === 'librarian') {
+        loadBorrowersLibrarianSection(undefined, false);
+    }
 
     showToast('Reservation Successful!', 'success');
     return true;
@@ -101,6 +108,7 @@ export async function cancelReservation(reservationId) {
         reloadStaffDashboardData();
     } else {
         loadReservationRecords(undefined, false);
+        loadBorrowersLibrarianSection(undefined, false);
     }
 
     showToast('Reservation Cancelled!', 'success');

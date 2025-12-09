@@ -22,9 +22,9 @@ return new class extends Migration
             $table->enum('created_by', ['borrower', 'staff']);
             $table->timestamps();
                 
-            $table->timestamp('completed_at')->nullable()->after('updated_at');
+            $table->timestamp('completed_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
-                        $table->foreignId('semester_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('semester_id')->nullable()->constrained()->nullOnDelete();
 
             $table->index(['borrower_id', 'status']);
             $table->index(['book_id', 'status']);

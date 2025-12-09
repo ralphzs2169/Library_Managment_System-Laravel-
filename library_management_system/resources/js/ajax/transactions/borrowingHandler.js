@@ -6,7 +6,7 @@ import { closeConfirmBorrowModal } from "../../pages/staff/confirmBorrow.js";
 import { closeConfirmRenewModal } from "../../pages/staff/confirmRenew.js";
 import { closeConfirmReturnModal } from "../../pages/staff/confirmReturn.js";
 import { reloadStaffDashboardData } from "../staffDashboardHandler.js";
-import { loadReservationRecords, loadBorrowRecords } from "../librarianSectionsHandler.js";
+import { loadReservationRecords, loadBorrowRecords, loadBorrowersLibrarianSection } from "../librarianSectionsHandler.js";
 
 export async function borrowBook(borrowData) {
     // Add CSRF token
@@ -74,7 +74,11 @@ export async function borrowBook(borrowData) {
     if (performerRole === 'staff') {
         reloadStaffDashboardData();
     } else if (performerRole === 'librarian') {
-        loadReservationRecords();
+        if (borrowData.get('is_from_reservation') === 'true') {
+            loadReservationRecords(undefined, false);
+        } else {
+            loadBorrowersLibrarianSection(undefined, false);
+        }
     }
 
     showToast(`Book ${borrowData.get('is_from_reservation') === 'true' ? 'Checked out' : 'Borrowed'} Successfully!`, 'success');
@@ -164,7 +168,9 @@ export async function returnBook(returnData) {
         reloadStaffDashboardData();
     } else if(performedBy === 'librarian') {
         loadBorrowRecords(undefined, false);
+        loadBorrowersLibrarianSection(undefined, false);
     }
+    
     showToast('Book Returned Successfully!', 'success');
     return true;
 }
@@ -236,6 +242,7 @@ export async function renewBook(renewData) {
         reloadStaffDashboardData();
     } else if (performedBy === 'librarian') {
         loadBorrowRecords(undefined, false);
+         loadBorrowersLibrarianSection(undefined, false);
     }
 
     showToast('Renewal Successful!', 'success');

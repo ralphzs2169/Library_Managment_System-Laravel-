@@ -93,4 +93,14 @@ class ClearancePolicy
         // If student/teacher, they are requesting for themselves
         return self::canBeCleared($requestor);
     }
+
+    public static function canViewClearanceStatus($userId) {
+        $user = User::find($userId);
+        if (!$user) {
+            return ['result' => 'not_found', 'message' => 'User not found.'];
+        }
+
+        return ['result' => 'success'];
+    }
 }
+

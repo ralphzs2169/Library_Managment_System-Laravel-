@@ -5,6 +5,8 @@ import { showDangerConfirmation } from "../../utils/alerts.js";
 
 function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId, onSubmit, parentId = null) {
     const modal = document.getElementById(modalId);
+    if (!modal) return null;
+
     const modalContent = document.getElementById(`${modalId}-content`);
     const closeBtn = document.getElementById(closeButtonId);
     const cancelBtn = document.getElementById(cancelButtonId);
@@ -15,37 +17,42 @@ function setupModal(modalId, closeButtonId, cancelButtonId, formId, nameInputId,
         // Fade out animation
         modal.classList.remove('bg-opacity-50');
         modal.classList.add('bg-opacity-0');
-        modalContent.classList.remove('scale-100', 'opacity-100');
-        modalContent.classList.add('scale-95', 'opacity-0');
+        if (modalContent) {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+        }
         
         setTimeout(() => {
             modal.classList.remove('flex');
             modal.classList.add('hidden');
-            form.reset();
+            if (form) form.reset();
         }, 200);
     };
 
-    closeBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
     
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
 
-    nameInput.addEventListener('focus', () => clearInputError(nameInput));
+    if (nameInput) nameInput.addEventListener('focus', () => clearInputError(nameInput));
     
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const success = await onSubmit();
-        if (success) {
-            closeModal();
-        }
-    });
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const success = await onSubmit();
+            if (success) {
+                closeModal();
+            }
+        });
+    }
 
     return { modal, modalContent, form, nameInput, closeModal };
 }
 
 function openModal(setup) {
+    if (!setup) return;
     const { modal, modalContent } = setup;
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -57,8 +64,10 @@ function openModal(setup) {
     setTimeout(() => {
         modal.classList.remove('bg-opacity-0');
         modal.classList.add('bg-opacity-50');
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
+        if (modalContent) {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }
     }, 10);
 }
 
@@ -71,6 +80,9 @@ showGenresBtns.forEach(btn => {
     const genresSection = document.getElementById(`genres-section-${categoryId}`);
     const dropdownIcon = btn.querySelector('.dropdown-icon');
     const genreCount = document.getElementById(`genre-count-${categoryId}`);
+    
+    if (!categorySection || !genresSection || !dropdownIcon || !genreCount) return;
+
     let isExpanded = false;
 
     const toggleGenreSection = () => {
@@ -104,9 +116,12 @@ const addCategorySetup = setupModal(
     () => addCategoryHandler(addCategorySetup.nameInput.value.trim()) // call handler directly
 );
 
-document.getElementById('open-add-category-modal').addEventListener('click', () => {
-    openModal(addCategorySetup);
-});
+const openAddCategoryBtn = document.getElementById('open-add-category-modal');
+if (openAddCategoryBtn && addCategorySetup) {
+    openAddCategoryBtn.addEventListener('click', () => {
+        openModal(addCategorySetup);
+    });
+}
 
 // Add Genre Modal
 const addGenreCategoryIdInput = document.getElementById('add-genre-category-id');
@@ -123,9 +138,11 @@ const addGenreSetup = setupModal(
 
 document.querySelectorAll('.open-add-genre-modal').forEach(btn => {
     btn.addEventListener('click', () => {
-        addGenreCategoryIdInput.value = btn.getAttribute('data-category-id');
-        addGenreCategoryNameDisplay.textContent = btn.getAttribute('data-category-name');
-        openModal(addGenreSetup);
+        if (addGenreCategoryIdInput && addGenreCategoryNameDisplay && addGenreSetup) {
+            addGenreCategoryIdInput.value = btn.getAttribute('data-category-id');
+            addGenreCategoryNameDisplay.textContent = btn.getAttribute('data-category-name');
+            openModal(addGenreSetup);
+        }
     });
 });
 
@@ -158,34 +175,43 @@ const editGenreSetup = setupModal(
 //Category Edit/Delete Buttons
 document.querySelectorAll('.category-item').forEach(category => {
     const categoryId = category.getAttribute('data-category-id');
-    const categoryName = category.querySelector('h2').textContent.trim();
+    const categoryName = category.querySelector('h2')?.textContent.trim();
+    
+    const editBtn = category.querySelector(`#edit-category-${categoryId}`);
+    if (editBtn && editCategorySetup && editCategoryIdInput) {
+        editBtn.addEventListener('click', () => {
+            editCategoryIdInput.value = categoryId;
+            editCategorySetup.nameInput.value = categoryName;
+            openModal(editCategorySetup);
+        });
+    }
 
-    category.querySelector(`#edit-category-${categoryId}`).addEventListener('click', () => {
-        editCategoryIdInput.value = categoryId;
-        editCategorySetup.nameInput.value = categoryName;
-        openModal(editCategorySetup);
-    });
-
-    category.querySelector(`#delete-category-${categoryId}`).addEventListener('click', async () => {
-        const confirmed = await showDangerConfirmation(
-            'Delete Category?',
-            `This will permanently delete the category "${categoryName}" and cannot be undone!`
-        );
-        if (confirmed) deleteCategoryHandler(categoryId);
-    });
+    const deleteBtn = category.querySelector(`#delete-category-${categoryId}`);
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async () => {
+            const confirmed = await showDangerConfirmation(
+                'Delete Category?',
+                `This will permanently delete the category "${categoryName}" and cannot be undone!`
+            );
+            if (confirmed) deleteCategoryHandler(categoryId);
+        });
+    }
 });
 
 //Genre Edit/Delete Buttons
 document.querySelectorAll('.genre-item').forEach(genre => {
     const genreId = genre.getAttribute('data-genre-id');
-    const genreName = genre.querySelector('span').textContent.trim();
+    const genreName = genre.querySelector('span')?.textContent.trim();
     const deleteBtn = genre.querySelector(`#delete-genre-${genreId}`);
 
-    genre.querySelector(`#edit-genre-${genreId}`).addEventListener('click', () => {
-        editGenreIdInput.value = genreId;
-        editGenreSetup.nameInput.value = genreName;
-        openModal(editGenreSetup);
-    });
+    const editBtn = genre.querySelector(`#edit-genre-${genreId}`);
+    if (editBtn && editGenreSetup && editGenreIdInput) {
+        editBtn.addEventListener('click', () => {
+            editGenreIdInput.value = genreId;
+            editGenreSetup.nameInput.value = genreName;
+            openModal(editGenreSetup);
+        });
+    }
 
     if (deleteBtn && deleteBtn.dataset.hasBooks !== 'true') {
         deleteBtn.addEventListener('click', async () => {
@@ -209,6 +235,9 @@ export function initCategoryGenreListeners() {
         const genresSection = document.getElementById(`genres-section-${categoryId}`);
         const dropdownIcon = btn.querySelector('.dropdown-icon');
         const genreCount = document.getElementById(`genre-count-${categoryId}`);
+        
+        if (!categorySection || !genresSection || !dropdownIcon || !genreCount) return;
+
         let isExpanded = false;
 
         const toggleGenreSection = () => {
@@ -235,34 +264,43 @@ export function initCategoryGenreListeners() {
     // Category Edit/Delete Buttons
     document.querySelectorAll('.category-item').forEach(category => {
         const categoryId = category.getAttribute('data-category-id');
-        const categoryName = category.querySelector('h2').textContent.trim();
+        const categoryName = category.querySelector('h2')?.textContent.trim();
 
-        category.querySelector(`#edit-category-${categoryId}`).addEventListener('click', () => {
-            editCategoryIdInput.value = categoryId;
-            editCategorySetup.nameInput.value = categoryName;
-            openModal(editCategorySetup);
-        });
+        const editBtn = category.querySelector(`#edit-category-${categoryId}`);
+        if (editBtn && editCategorySetup && editCategoryIdInput) {
+            editBtn.addEventListener('click', () => {
+                editCategoryIdInput.value = categoryId;
+                editCategorySetup.nameInput.value = categoryName;
+                openModal(editCategorySetup);
+            });
+        }
 
-        category.querySelector(`#delete-category-${categoryId}`).addEventListener('click', async () => {
-            const confirmed = await showDangerConfirmation(
-                'Delete Category?',
-                `This will permanently delete the category "${categoryName}" and cannot be undone!`
-            );
-            if (confirmed) deleteCategoryHandler(categoryId);
-        });
+        const deleteBtn = category.querySelector(`#delete-category-${categoryId}`);
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+                const confirmed = await showDangerConfirmation(
+                    'Delete Category?',
+                    `This will permanently delete the category "${categoryName}" and cannot be undone!`
+                );
+                if (confirmed) deleteCategoryHandler(categoryId);
+            });
+        }
     });
 
     // Genre Edit/Delete Buttons
     document.querySelectorAll('.genre-item').forEach(genre => {
         const genreId = genre.getAttribute('data-genre-id');
-        const genreName = genre.querySelector('span').textContent.trim();
+        const genreName = genre.querySelector('span')?.textContent.trim();
         const deleteBtn = genre.querySelector(`#delete-genre-${genreId}`);
 
-        genre.querySelector(`#edit-genre-${genreId}`).addEventListener('click', () => {
-            editGenreIdInput.value = genreId;
-            editGenreSetup.nameInput.value = genreName;
-            openModal(editGenreSetup);
-        });
+        const editBtn = genre.querySelector(`#edit-genre-${genreId}`);
+        if (editBtn && editGenreSetup && editGenreIdInput) {
+            editBtn.addEventListener('click', () => {
+                editGenreIdInput.value = genreId;
+                editGenreSetup.nameInput.value = genreName;
+                openModal(editGenreSetup);
+            });
+        }
 
         if (deleteBtn && deleteBtn.dataset.hasBooks !== 'true') {
             deleteBtn.addEventListener('click', async () => {
@@ -278,9 +316,11 @@ export function initCategoryGenreListeners() {
     // Re-attach "Add Genre" modal listeners
     document.querySelectorAll('.open-add-genre-modal').forEach(btn => {
         btn.addEventListener('click', () => {
-            addGenreCategoryIdInput.value = btn.getAttribute('data-category-id');
-            addGenreCategoryNameDisplay.textContent = btn.getAttribute('data-category-name');
-            openModal(addGenreSetup);
+            if (addGenreCategoryIdInput && addGenreCategoryNameDisplay && addGenreSetup) {
+                addGenreCategoryIdInput.value = btn.getAttribute('data-category-id');
+                addGenreCategoryNameDisplay.textContent = btn.getAttribute('data-category-name');
+                openModal(addGenreSetup);
+            }
         });
     });
 }

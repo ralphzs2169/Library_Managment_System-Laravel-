@@ -2,7 +2,7 @@ import { INVALID_INPUT, TRANSACTION_ROUTES } from "../config";
 import { reloadStaffDashboardData } from "./staffDashboardHandler";
 import { showWarning, showToast, showError, showConfirmation, showDangerConfirmation } from "../utils/alerts";
 import { displayInputErrors } from "../helpers";
-import { loadPenaltyRecords } from "./librarianSectionsHandler";
+import { loadPenaltyRecords, loadBorrowersLibrarianSection } from "./librarianSectionsHandler";
 
 
 export async function processPenalty(paymentDetails, form, isStaff = true) {
@@ -78,6 +78,7 @@ export async function processPenalty(paymentDetails, form, isStaff = true) {
         reloadStaffDashboardData();
     } else {
         loadPenaltyRecords(undefined, false);
+        loadBorrowersLibrarianSection(undefined, false);
     }
 
     return performedBy;
@@ -116,6 +117,7 @@ export async function cancelPenalty(penaltyId, borrowerId, isStaff = true) {
         reloadStaffDashboardData();
     } else {
         loadPenaltyRecords(undefined, false);
+        loadBorrowersLibrarianSection(undefined, false);
     }
 
     showToast('Penalty Cancelled!', 'success');

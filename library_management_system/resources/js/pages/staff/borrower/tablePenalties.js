@@ -161,8 +161,8 @@ function attachPaymentActions(tbody, borrower) {
             if (result) {
                 // returnToBorrowerProfile();
                 const modal = document.getElementById('borrower-profile-modal');
-                const freshBorrowerDetails = await fetchBorrowerDetails(borrowerId);
-                await initializeBorrowerProfileUI(modal, freshBorrowerDetails, true, 'penalties-tab');
+                const { borrower }  = await fetchBorrowerDetails(borrowerId);
+                await initializeBorrowerProfileUI(modal, borrower, true, 'penalties-tab');
                 closePaymentModal();
             }
         });

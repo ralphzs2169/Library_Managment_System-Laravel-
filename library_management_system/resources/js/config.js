@@ -56,7 +56,9 @@ export const STAFF_DASHBOARD_ROUTES = {
 export const LIBRARIAN_SECTION_ROUTES = {
     BORROW_RECORDS: '/librarian/section/borrowing-records',
     RESERVATION_RECORDS: '/librarian/section/reservation-records',
-    PENALTY_RECORDS: '/librarian/section/penalty-records'
+    PENALTY_RECORDS: '/librarian/section/penalty-records',
+
+    BORROWERS: '/librarian/section/borrowers',
 };
 
 export const TRANSACTION_ROUTES = {
@@ -94,6 +96,7 @@ export const CLEARANCE_ROUTES = {
     APPROVE_CLEARANCE: (clearanceId) => `/transaction/clearance/${clearanceId}/approve`,
     REJECT_CLEARANCE: (clearanceId) => `/transaction/clearance/${clearanceId}/reject`,
 };
+
 
 
 export const INVALID_INPUT = 422;      // Input format or missing fields

@@ -13,7 +13,7 @@ use App\Models\BookCopy;
 use App\Models\Penalty;
 use App\Models\Semester;
 use Illuminate\Support\Facades\Validator;
-use App\Enums\BookCopyStatus;
+use App\Enums\ClearanceStatus;
 use App\Enums\LibraryStatus;
 use App\Enums\PenaltyStatus;
 use App\Models\Payment;
@@ -27,6 +27,12 @@ use App\Policies\ClearancePolicy;
 class UserService
 {
 
+    protected $activityLogger;
+
+    public function __construct(ActivityLogger $activityLogger)
+    {
+        $this->activityLogger = $activityLogger;
+    }
 public function getBorrowerDetails($targetUserId, $requestorId)
 {
     // Load user with student/teacher relationships
@@ -131,6 +137,11 @@ public function getBorrowerDetails($targetUserId, $requestorId)
         $borrower->can_borrow = BorrowPolicy::canBorrow(false, ['borrower_id' => $targetUserId]);
         $borrower->can_reserve = ReservationPolicy::canReserve($borrower, null, false );
         $borrower->can_request_clearance = ClearancePolicy::canRequestClearance($requestorId, $targetUserId);
+        $borrower->can_view_clearance_status = ClearancePolicy::canViewClearanceStatus($requestorId);
+        $borrower->pending_clearance = $borrower->clearances()
+            ->where('status', ClearanceStatus::PENDING)
+            ->latest()
+            ->first();
         $borrower->transactions_with_penalties = $transactionsWithActivePenalties->values();
         $borrower->active_reservations = $activeReservations;
 
@@ -248,6 +259,13 @@ public function getBorrowerDetails($targetUserId, $requestorId)
             $user->library_status = LibraryStatus::ACTIVE;
             $user->save();
         }
+    }
+
+    public function suspendUser(User $user, $reason){
+        $user->library_status = 'suspended';
+        $user->save();
+
+        $this->activityLogger->logSuspension($user, $reason);
     }
 
 }
