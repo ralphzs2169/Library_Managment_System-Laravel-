@@ -49,7 +49,7 @@ class RenewalService
 
             // Log activity
             ActivityLog::create([
-                'action' => ActivityLogActions::RENEWED,
+                'action' => 'Renewed a Book',
                 'details' => $renewer->full_name . ' renewed "' . $book->title . '" (Copy #' . $bookCopy->copy_number . ') to new due date ' . Carbon::parse($newDueDate)->toDateString(),
                 'entity_type' => 'Borrow Transaction',
                 'entity_id' => $transaction->id,

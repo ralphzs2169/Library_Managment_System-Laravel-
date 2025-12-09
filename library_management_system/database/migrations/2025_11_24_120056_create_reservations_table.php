@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dateTime('pickup_start_date')->nullable();
             $table->foreignId('book_copy_id')->nullable()->constrained('book_copies')->nullOnDelete();
             $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->enum('created_by', ['borrower', 'staff']);
+            $table->enum('created_by', ['borrower', 'staff', 'librarian'])->default('borrower');
             $table->timestamps();
                 
             $table->timestamp('completed_at')->nullable();

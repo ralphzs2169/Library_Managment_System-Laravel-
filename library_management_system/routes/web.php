@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\BookCatalogController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\ClearanceController;
@@ -32,6 +33,15 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
     Route::post('/signup', [AuthController::class, 'signup'])->name('signup');
 });
 
+Route::prefix('borrowers')
+    ->middleware(['auth'], 'role:student,teacher')
+    ->name('borrowers.')
+    ->group(function(){
+
+        Route::get('/book-catalog', [BookCatalogController::class, 'index'])->name('book-catalog');
+        Route::get('/book-catalog/{book}', [BookCatalogController::class, 'show'])->name('book-info');
+
+    });
 
 Route::prefix('librarian')
     ->middleware(['auth', 'role:librarian'])
@@ -117,11 +127,6 @@ Route::prefix('transaction')
         Route::post('/renewal/validate', [RenewalController::class, 'validateRenewal']);
         Route::post('/renewal/perform', [RenewalController::class, 'performRenewal']);
 
-        Route::post('/reservation/validate', [ReservationController::class, 'validateReservation']);
-        Route::post('/reservation/perform', [ReservationController::class, 'performReservation']);
-        Route::get('/reservation/{user}/book/{book}/available-copies', [ReservationController::class, 'availableCopiesForReservation']);
-        Route::post('/reservation/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
-
         Route::put('/penalty/{penalty}', [PenaltyController::class, 'processPenalty']);
         Route::post('/{borrower}/penalty/{penalty}/cancel', [PenaltyController::class, 'cancelPenalty']);
 
@@ -130,6 +135,14 @@ Route::prefix('transaction')
         Route::get('/borrower/{user}', [UserController::class, 'borrowerDetails']);
         Route::get('/check-active-semester', [SemesterController::class, 'checkActiveSemester']);
     });
+
+Route::prefix('transaction/reservation')->group(function () {
+   
+    Route::post('/validate', [ReservationController::class, 'validateReservation']);
+    Route::post('/perform', [ReservationController::class, 'performReservation']);
+    Route::get('/{user}/book/{book}/available-copies', [ReservationController::class, 'availableCopiesForReservation']);
+    Route::post('/{reservation}/cancel', [ReservationController::class, 'cancelReservation']);
+});
 
 Route::prefix('transaction/clearance')
     ->middleware(['auth', 'role:librarian,staff,student,teacher'])
@@ -149,3 +162,12 @@ Route::middleware('auth')->get('/settings', [SettingsController::class, 'allSett
 
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::prefix('users')
+    ->middleware(['auth'], 'role:student,teacher')
+    ->name('users.')
+    ->group(function(){
+
+        Route::get('/book-catalog', [BookCatalogController::class, 'index'])->name('book-catalog');
+        Route::get('/book/{book}', [BookCatalogController::class, 'show'])->name('book.show');
+    });

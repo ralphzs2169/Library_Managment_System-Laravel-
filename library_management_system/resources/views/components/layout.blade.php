@@ -18,9 +18,10 @@
 
     @auth
     @can('view-admin-sidebar')
-    @include('components/sidebar')
+    @include('components/admin-sidebar')
     @endcan
     @endauth
+
 
     <div class="bg-background">
         {{ $slot }}

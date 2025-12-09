@@ -151,7 +151,7 @@
             </div>
 
             <div class="flex justify-end gap-3">
-                <button type="button" id="cancel-edit-genre" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-all shadow-sm">
+                <button type="button" id="cancel-edit-genre" class="px-6 py-2.5 border cursor-pointer border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-all shadow-sm">
                     Cancel
                 </button>
                 <button type="submit" class="px-5 py-2.5 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg cursor-pointer transition shadow-sm">

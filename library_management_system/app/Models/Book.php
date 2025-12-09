@@ -54,6 +54,13 @@ class Book extends Model
     {
         return $this->hasManyThrough(BorrowTransaction::class, BookCopy::class);
     }
-    /** @use HasFactory<\Database\Factories\BookFactory> */
+    
+    public function getNewArrivalsAttribute()
+    {
+        return $this->whereYear('created_at', now()->year)
+                    ->orderBy('created_at', 'desc')
+                    ->take(5)
+                    ->get();
+    }
     use HasFactory;
 }

@@ -295,11 +295,10 @@ export async function loadBorrowersLibrarianSection(page = BORROWER_FILTERS.page
                 mod.initBorrowerProfileModalListeners();
             }
         });
-
+        
         const searchTerm = searchInput?.value?.trim();
         if (searchTerm) {
-            // Highlight matches in columns 2 (Name)
-            highlightSearchMatches(searchTerm, SEARCH_COLUMN_INDEXES.BORROWERS, [2]);
+            highlightSearchMatches(searchTerm, '#borrowers-container' ,SEARCH_COLUMN_INDEXES.BORROWERS);
         }
 
     } catch (error) {

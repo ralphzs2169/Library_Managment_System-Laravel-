@@ -236,7 +236,7 @@ public function getBorrowerDetails($targetUserId, $requestorId)
 
             // Log activity
             ActivityLog::create([
-                'action' => 'paid',
+                'action' => 'Paid Penalty',
                 'details' => "Updated penalty ID: {$penalty->id} to {$penalty->status} with paid amount {$request->amount}",
                 'entity_type' => 'Penalty',
                 'entity_id' => $penalty->id,

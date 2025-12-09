@@ -76,6 +76,7 @@ class StaffDashboardController extends Controller
 
         $users = $query->paginate(20)->withQueryString();
 
+
         // If AJAX request, return only the table partial
         if ($request->ajax()) {
             $html = view('partials.staff.members.table', compact('users'))->render();

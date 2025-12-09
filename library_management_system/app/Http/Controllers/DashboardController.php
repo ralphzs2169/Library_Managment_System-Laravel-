@@ -54,7 +54,8 @@ class DashboardController extends Controller
         ")->orderBy('firstname', 'asc');
 
         $users = $query->paginate(20)->withQueryString();
-
+        
+    
         // If AJAX request, return only the table partial
         if ($request->ajax()) {
             return view('partials.staff.members-table', compact('users'))->render();

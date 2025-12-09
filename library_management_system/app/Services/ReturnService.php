@@ -126,7 +126,7 @@ class ReturnService
             $damagedText = $reportDamaged ? ' (reported as damaged)' : '';
             $lateText = $isLate && !$reportDamaged ? ' (returned late)' : '';
             ActivityLog::create([
-                'action' => 'returned',
+                'action' => 'Returned a Book',
                 'details' => $borrower->full_name . ' returned "' . $book->title . '" (Copy #' . $bookCopy->copy_number . ')' . $damagedText . $lateText,
                 'entity_type' => 'Borrow Transaction',
                 'entity_id' => $transaction->id,

@@ -44,5 +44,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view-footer', function ($user) {
             return in_array($user->role, ['student', 'teacher']);
         });
+
+        Gate::define('view-user-sidebar', function ($user) {
+            return in_array($user->role, ['student', 'teacher']);
+        });
     }
 }

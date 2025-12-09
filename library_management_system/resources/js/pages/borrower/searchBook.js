@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         `;
 
                         // Optional: Add click handler to navigate to book details if you have a route
-                        // item.addEventListener('click', () => window.location.href = `/books/${book.id}`);
+                        item.addEventListener('click', () => window.location.href = `borrowers/book-catalog/${book.id}`);
 
                         resultsList.appendChild(item);
                     });

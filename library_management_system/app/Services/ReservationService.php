@@ -33,17 +33,26 @@ class ReservationService
                 throw new \Exception('No active semester found. Cannot proceed with borrowing.');
             }
 
+           $userRole = $request->user()->role;
+
+            $role = match($userRole) {
+                'staff' => 'staff',
+                'librarian' => 'librarian',
+                'student', 'teacher' => 'borrower',
+                default => 'borrower', // fallback for any unexpected role
+            };
+
             $reservation = Reservation::create([
                 'borrower_id' => $reserver->id,
                 'book_id' => $book->id,
                 'status' => ReservationStatus::PENDING,
                 'created_by_id' => $request->user()->id,
-                'created_by' => $request->user()->role,
+                'created_by' => $role,
                 'semester_id' => $activeSemester->id
             ]);
 
             // Log activity
-            $createdBy = $request->user()->role === 'staff' ? 'staff' : 'borrower';
+            $createdBy = $role;
 
             $details = $reserver->full_name . ' reserved "' . $book->title . '"';
 

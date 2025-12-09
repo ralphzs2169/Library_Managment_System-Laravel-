@@ -5,7 +5,17 @@
             {{-- Dashboard --}}
             <li class="rounded-md cursor-pointer transition-colors duration-100 hover:bg-secondary-light py-2 px-3">
                 <a href="{{ route('librarian.section.dashboard') }}" class="sidebar-link flex items-center">
-                    <img src="{{ asset('build/assets/icons/dashboard.svg') }}" alt="Dashboard Icon" class="inline-block w-5 h-5 mr-3">
+                    <svg version="1.0" id="Layer_1" class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve" fill="#ffffff">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <g>
+                                <path fill="#ffffff" d="M40,64V4c0-2.211-1.789-4-4-4h-8c-2.211,0-4,1.789-4,4v60H40z"></path>
+                                <path fill="#ffffff" d="M20,64V20c0-2.211-1.789-4-4-4H8c-2.211,0-4,1.789-4,4v44H20z"></path>
+                                <path fill="#ffffff" d="M60,36c0-2.211-1.789-4-4-4h-8c-2.211,0-4,1.789-4,4v28h16V36z"></path>
+                            </g>
+                        </g>
+                    </svg>
                     <span>Dashboard</span>
                 </a>
             </li>

@@ -63,7 +63,7 @@ class AuthController extends Controller
                         $redirectUrl = 'teacher/dashboard';
                         break;
                     case 'student':
-                        $redirectUrl = 'student/dashboard';
+                        $redirectUrl = '/';
                         break;
                     default:
                         $redirectUrl = '/';

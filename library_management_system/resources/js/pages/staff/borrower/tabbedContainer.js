@@ -89,3 +89,4 @@ export function initializeBorrowerTabs(initialActiveTab = 'currently-borrowed-ta
 
     return { resetTabsToDefault };
 }
+

@@ -9,10 +9,9 @@ let currentReserver = null;
 let currentBook = null;
 
 export async function initializeConfirmReservationModal(modal, reserver, book) {
-    console.log('Initializing Confirm Reservation Modal with:', reserver, book, modal);
+
     currentReserver = reserver;
     currentBook = book;
-
 
     // Reserver info
     if (reserver) {
@@ -49,7 +48,7 @@ export async function initializeConfirmReservationModal(modal, reserver, book) {
         const queuePosition = book.next_queue_position;
         const reserverName = reserver.fullname || 'the user';
         let queueText = '';
-
+        
         if (queuePosition === 1) {
             queueText = `${reserverName} will be first in line for this reservation.`;
         } else {
@@ -83,6 +82,7 @@ export async function initializeConfirmReservationModal(modal, reserver, book) {
 
     // Back button
     const backBtn = modal.querySelector('#back-to-reserve-book-button');
+    
     if (backBtn) {
         backBtn.onclick = () => returnToBookSelection('reservation', currentReserver);
     }

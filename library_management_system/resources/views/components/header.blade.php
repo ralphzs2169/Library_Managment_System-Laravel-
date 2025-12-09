@@ -11,7 +11,7 @@
         <div class="flex justify-between items-center h-16">
 
             <!-- Logo Section -->
-            <a href="" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-300 cursor-pointer">
+            <a href="/" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-300 cursor-pointer">
                 <img src="{{ asset('build/assets/images/logo.png') }}" width="42" height="42" alt="Logo" class="rounded-full">
                 <div class="leading-tight space-y-0">
                     <h1 class="text-md font-bold leading-tight">Smart Library</h1>

@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
+use App\Models\Category;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Share categories with the user sidebar component
+        View::composer('components.user-sidebar', function ($view) {
+            $view->with('categories', Category::with('genres')->orderBy('name')->get());
+        });
     }
 }

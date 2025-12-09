@@ -77,6 +77,6 @@ export const SEARCH_COLUMN_INDEXES = {
     BORROW_RECORDS: [1, 4], // Borrower Name, Book Title, Staff Name
     RESERVATION_RECORDS: [2, 3], // Borrower Name, Book Title, Staff Name
     PENALTY_RECORDS: [2, 3], // Borrower Name, Book Title, Staff Name
-    BORROWERS: [2], // Borrower Name
+    BORROWERS: [2, 2], // Borrower Name
 }
 
