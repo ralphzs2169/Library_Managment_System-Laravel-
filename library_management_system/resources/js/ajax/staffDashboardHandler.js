@@ -5,7 +5,7 @@ import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters.js";
 import { initStaffDashboardPagination } from "../tableControls.js";
 import { CIRCULATION_DESK_ROUTES } from "../config.js";
 import { showSkeleton, hideSkeleton } from "../utils.js";
-import { activeBorrowsSkeletonLoader, unpaidPenaltiesSkeletonLoader, queueReservationsSkeletonLoader } from "../pages/staff/skeleton-loader/skeletonMainTabs.js";
+import { activeBorrowsSkeletonLoader, unpaidPenaltiesSkeletonLoader, queueReservationsSkeletonLoader, borrowersSkeletonLoader } from "../pages/staff/skeleton-loader/skeletonMainTabs.js";
 import { initReservationRecordDetailListeners } from "../pages/manage-record-details/reservationRecordDetails.js";
 import { initBorrowRecordDetailListeners } from "../pages/manage-record-details/borrowRecordDetails.js";
 import { initPenaltyRecordsListeners } from "../pages/manage-record-details/penaltyRecordDetails.js";
@@ -13,7 +13,7 @@ import { initPenaltyRecordsListeners } from "../pages/manage-record-details/pena
 export async function loadMembers(page = BORROWER_FILTERS.page, scrollUp = true, isFiltered = false) {
     const container = document.getElementById('members-table-container');
     const countElement = document.getElementById('header-total-members');
-
+    console.log("Loading members, isFiltered:");
     if (scrollUp) {
         window.scrollTo(0, 100);
     }
@@ -23,6 +23,7 @@ export async function loadMembers(page = BORROWER_FILTERS.page, scrollUp = true,
     let skeletonTimer = setTimeout(() => {
         showSkeleton(container, '#members-skeleton-body', '#members-real-table-body');
     }, 200); 
+    container.innerHTML = borrowersSkeletonLoader();
 
     try {
         BORROWER_FILTERS.page = page;

@@ -22,6 +22,12 @@ return new class extends Migration
             $table->enum('status', ['borrowed', 'returned', 'overdue'])->default('borrowed');
             $table->unsignedSmallInteger('times_renewed')->default(0);
             $table->timestamps();
+
+            // Indexes
+            $table->index('user_id');
+            $table->index('status');
+            $table->index('returned_at');
+            $table->index('due_at');
         });
     }
 

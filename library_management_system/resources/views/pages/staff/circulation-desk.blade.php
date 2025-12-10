@@ -174,7 +174,7 @@
                     @include ('partials.staff.members.table-controls')
 
                     <div id="members-table-container">
-                        @include('partials.staff.members-table', ['users' => $users])
+
                     </div>
                 </div>
                 <div id="tab-active-borrows-content" class="hidden">
