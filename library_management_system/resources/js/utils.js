@@ -187,7 +187,7 @@ export function resetButton(button, defaultIcon) {
 
 export function disableButton(button, tooltipMsg = '', icon) {
     button.disabled = true;
-    button.classList.remove('cursor-pointer', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow', 'bg-secondary-light', 'hover:bg-secondary-light/90');
+    button.classList.remove('cursor-pointer', 'hover:bg-blue-700', 'text-white', 'bg-secondary', 'hover:bg-secondary/90', 'shadow-sm', 'hover:shadow', 'bg-secondary-light', 'hover:bg-secondary-light/90');
     button.classList.add(
         'cursor-not-allowed',
         'opacity-50',

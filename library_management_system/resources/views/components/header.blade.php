@@ -19,22 +19,6 @@
                 </div>
             </a>
 
-
-            {{-- @can('view-header-links')
-            <!-- Desktop Navigation Links -->
-            <nav class="hidden md:flex items-center space-x-12">
-                <a href="/" class="nav-link text-sm font-medium tracking-wide uppercase cursor-pointer">
-                    Home
-                </a>
-                <a href="about.php" class="nav-link text-sm font-medium tracking-wide uppercase cursor-pointer">
-                    About
-                </a>
-                <a href="catalog.php" class="nav-link text-sm font-medium tracking-wide uppercase cursor-pointer">
-                    Catalog
-                </a>
-            </nav>
-            @endcan --}}
-
             @guest
             <!-- Authentication Buttons -->
             <div class="hidden md:flex items-center space-x-4">
@@ -82,7 +66,9 @@
 
             <!-- Profile Menu Dropdown for Logged in users  -->
             <div class="absolute top-12 right-0 p-3 w-64 bg-white text-black text-sm rounded-md shadow-lg z-10 hidden" id="dropdownMenu">
-                <h2 class="font-semibold text-xs text-gray-600 mb-2">1st Semester 2025-2026</h2>
+                <h2 class="font-semibold text-xs text-gray-600 mb-2">
+                    {{ optional($activeSemester)->name ?? 'No active semester' }}
+                </h2>
                 <hr class="my-2 border-gray-200">
 
                 <div class="flex flex-col space-y-1">
@@ -96,6 +82,7 @@
                     </a>
                 </div>
 
+                @can('view-borrower-features')
                 <hr class="my-2 border-gray-200">
 
                 <div class="flex flex-col space-y-1">
@@ -116,6 +103,7 @@
                         <span>Fines & Payments</span>
                     </a>
                 </div>
+                @endcan
 
                 <hr class="my-2 border-gray-200">
 
@@ -153,22 +141,9 @@
     <div id="mobile-menu" class="hidden lg:hidden bg-primary border-t border-white border-opacity-10 absolute left-0 right-0 shadow-xl">
         <div class="container mx-auto px-4 py-6 space-y-4">
 
-            <a href="/" class="block py-3 px-4 text-center rounded-lg transition-all duration-300 hover:bg-gray-700 hover:text-accent cursor-pointer">
-                Home
-            </a>
-            <a href="about.php" class="block py-3 px-4 text-center rounded-lg transition-all duration-300 hover:bg-gray-700 hover:text-accent cursor-pointer">
-                About
-            </a>
-            <a href="catalog.php" class="block py-3 px-4 text-center rounded-lg transition-all duration-300 hover:bg-gray-700 hover:text-accent cursor-pointer">
-                Catalog
-            </a>
 
 
-            {{-- IF --}}
-            {{-- <div class="pt-4 space-y-3 border-t border-white border-opacity-30 mt-6">
-        <!-- Removed the simple text, profile menu is now in header -->
-      </div> --}}
-            {{-- ELSE --}}
+
             <div class="pt-4 space-y-3 border-t border-white border-opacity-30 mt-6">
                 <a href="/signup" class="transition-all duration-300 hover:bg-gray-700 hover:text-accent w-full py-3.5 px-4 text-center rounded-lg font-semibold tracking-wide shadow-sm block">
                     Sign Up

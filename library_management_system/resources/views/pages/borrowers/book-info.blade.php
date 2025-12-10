@@ -1,5 +1,4 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\borrowers\book-info.blade.php --}}
-<x-layout>
+<x-layout :title="'Book Information'">
     <div class="flex">
         <x-user-sidebar />
 
@@ -311,10 +310,8 @@
                                 <span>Available for borrowing at the library</span>
                             </div>
                             @else
-                            <button id="reserve-book-button" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-5 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-sm font-semibold shadow-md hover:shadow-lg" data-book='@json($book)' data-reserver='@json($user)' data-queue-position='{{ $queuePosition ?? null }}'>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                            <button id="reserve-book-button" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-5 py-2 bg-yellow-500 cursor-pointer text-white rounded-lg hover:bg-yellow-600 transition text-sm font-semibold shadow-md hover:shadow-lg" data-book='@json($book)' data-reserver='@json($user)' data-queue-position='{{ $queuePosition ?? null }}'>
+                                <img src={{ asset('/build/assets/icons/reservation-white.svg')}} alt="Reserve Book Icon" class="w-5 h-5">
                                 Reserve This Book
                             </button>
                             @endif

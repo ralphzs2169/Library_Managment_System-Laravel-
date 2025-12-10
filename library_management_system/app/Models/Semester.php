@@ -26,4 +26,9 @@ class Semester extends Model
     {
         return $this->hasMany(Clearance::class);
     }
+
+    public function getActiveSemesterAttribute()
+    {
+        return Semester::where('status', 'active')->first();
+    }
 }

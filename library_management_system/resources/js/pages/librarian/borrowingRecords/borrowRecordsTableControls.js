@@ -32,6 +32,25 @@ export function initBorrowRecordsTableControls() {
     initFilter('#borrow-records-sort-filter', loadBorrowRecords);
     initFilter('#borrow-records-semester-filter', loadBorrowRecords); // NEW
 
+    // Sync filters with current DOM values (handles pre-filled values from URL)
+    const searchInput = document.getElementById('borrow-records-search');
+    const roleFilter = document.getElementById('borrow-records-role-filter');
+    const statusFilter = document.getElementById('borrow-records-status-filter');
+    const sortFilter = document.getElementById('borrow-records-sort-filter');
+    const semesterFilter = document.getElementById('borrow-records-semester-filter');
+
+    if (searchInput) BORROW_RECORDS_FILTERS.search = searchInput.value;
+    if (roleFilter) BORROW_RECORDS_FILTERS.role = roleFilter.value;
+    if (statusFilter) BORROW_RECORDS_FILTERS.status = statusFilter.value;
+    if (sortFilter) BORROW_RECORDS_FILTERS.sort = sortFilter.value;
+    if (semesterFilter) BORROW_RECORDS_FILTERS.semester = semesterFilter.value;
+
+    // If URL has search or semester params, trigger load to ensure results match filters
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('search') || urlParams.has('semester')) {
+        loadBorrowRecords(1);
+    }
+
     // Reset button
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {

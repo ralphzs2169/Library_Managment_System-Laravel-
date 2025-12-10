@@ -61,7 +61,7 @@ class ReservationService
             }
 
             ActivityLog::create([
-                'action' => ActivityLogActions::CREATE_RESERVATION,
+                'action' => 'Created a Book Reservation',
                 'details' => $details,
                 'entity_type' => 'Reservation',
                 'entity_id' => $reservation->id,
@@ -98,9 +98,9 @@ class ReservationService
             $reservation->save();
 
             $actionType = match ($newStatus) {
-                ReservationStatus::CANCELLED => ActivityLog::ACTION_CANCELLED,
-                ReservationStatus::READY_FOR_PICKUP => ActivityLog::ACTION_READY_FOR_PICKUP,
-                ReservationStatus::COMPLETED => ActivityLog::ACTION_COMPLETED,
+                ReservationStatus::CANCELLED => 'Cancellation of Reservation',
+                ReservationStatus::READY_FOR_PICKUP => 'Ready for Pickup',
+                ReservationStatus::COMPLETED => 'Completed Reservation',
                 default => null,
             };
 

@@ -3,7 +3,7 @@ import { ACTIVE_BORROW_FILTERS, BORROWER_FILTERS, UNPAID_PENALTIES_FILTERS, QUEU
 import { highlightSearchMatches } from "../tableControls.js";
 import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters.js";
 import { initStaffDashboardPagination } from "../tableControls.js";
-import { STAFF_DASHBOARD_ROUTES } from "../config.js";
+import { CIRCULATION_DESK_ROUTES } from "../config.js";
 import { showSkeleton, hideSkeleton } from "../utils.js";
 import { activeBorrowsSkeletonLoader, unpaidPenaltiesSkeletonLoader, queueReservationsSkeletonLoader } from "../pages/staff/skeleton-loader/skeletonMainTabs.js";
 import { initReservationRecordDetailListeners } from "../pages/manage-record-details/reservationRecordDetails.js";
@@ -44,7 +44,7 @@ export async function loadMembers(page = BORROWER_FILTERS.page, scrollUp = true,
             sort: BORROWER_FILTERS.sort
         });
 
-        const response = await fetch(`${STAFF_DASHBOARD_ROUTES.MEMBERS}?${params.toString()}`, {
+        const response = await fetch(`${CIRCULATION_DESK_ROUTES.MEMBERS}?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'text/html'
@@ -114,7 +114,7 @@ export async function loadActiveBorrows(page = ACTIVE_BORROW_FILTERS.page, scrol
             sort: ACTIVE_BORROW_FILTERS.sort
         });
 
-        const response = await fetch(`${STAFF_DASHBOARD_ROUTES.ACTIVE_BORROWS}?${params.toString()}`, {
+        const response = await fetch(`${CIRCULATION_DESK_ROUTES.ACTIVE_BORROWS}?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'text/html'
@@ -190,7 +190,7 @@ export async function loadUnpaidPenalties(page = UNPAID_PENALTIES_FILTERS.page, 
             sort: UNPAID_PENALTIES_FILTERS.sort
         });
 
-        const response = await fetch(`${STAFF_DASHBOARD_ROUTES.UNPAID_PENALTIES}?${params.toString()}`, {
+        const response = await fetch(`${CIRCULATION_DESK_ROUTES.UNPAID_PENALTIES}?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'text/html'
@@ -260,7 +260,7 @@ export async function loadQueueReservations(page = QUEUE_RESERVATIONS_FILTERS.pa
             sort: QUEUE_RESERVATIONS_FILTERS.sort
         });
 
-        const response = await fetch(`${STAFF_DASHBOARD_ROUTES.QUEUE_RESERVATIONS}?${params.toString()}`, {
+        const response = await fetch(`${CIRCULATION_DESK_ROUTES.QUEUE_RESERVATIONS}?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'text/html'

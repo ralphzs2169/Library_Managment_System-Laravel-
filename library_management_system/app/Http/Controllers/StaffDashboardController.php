@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\Reservation;
 use App\Models\Semester;
+use App\Models\Book;
+use App\Models\BookCopy;
+use App\Models\Penalty;
+use App\Enums\BookCopyStatus;
 
 class StaffDashboardController extends Controller
 {
@@ -76,6 +80,26 @@ class StaffDashboardController extends Controller
 
         $users = $query->paginate(20)->withQueryString();
 
+          // Get total books (titles)
+        $totalBooks = Book::count();
+
+        $totalCopies = BookCopy::count();
+        // Get total active borrowers with currently borrowed books
+        $totalActiveBorrowers = User::whereIn('role', ['student', 'teacher'])
+            ->whereHas('borrowTransactions', function ($query) {
+                $query->whereNull('returned_at');
+            })
+            ->count();
+
+        // Get currently borrowed copies count
+        $totalBorrowedCopies = BookCopy::where('status', BookCopyStatus::BORROWED)->count();
+
+        // get total unpaid fines
+        $totalUnpaidFines = Penalty::where('status', 'unpaid')
+            ->whereHas('borrowTransaction.user', function ($query) {
+                $query->whereIn('role', ['student', 'teacher']);
+            })
+            ->sum('amount');
 
         // If AJAX request, return only the table partial
         if ($request->ajax()) {
@@ -86,7 +110,13 @@ class StaffDashboardController extends Controller
             ]);
         }
 
-        return view('pages.staff.dashboard', compact('users'));
+        return view('pages.staff.circulation-desk', compact('users',
+            'totalBooks',
+            'totalCopies',
+            'totalActiveBorrowers',
+            'totalBorrowedCopies',
+            'totalUnpaidFines'
+        ));
     }
 
     public function activeBorrowsList(Request $request)

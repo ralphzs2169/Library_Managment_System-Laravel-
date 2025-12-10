@@ -1,5 +1,4 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\librarian\books-list.blade.php --}}
-<x-layout>
+<x-layout :title="'Reservation Management'">
     <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
         <div class="bg-white shadow-sm rounded-xl p-5 mb-3">
@@ -13,7 +12,7 @@
                         <img src="{{ asset('build/assets/icons/reservation-white.svg ')}}" alt="Book Catalog Icon" class="w-8 h-8">
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Reservation Records</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">Reservation Management</h1>
                         <p class="text-sm text-gray-500 mt-0.5">Review the complete archive of reservation requests, current queues, and cancellation history.</p>
                     </div>
                 </div>

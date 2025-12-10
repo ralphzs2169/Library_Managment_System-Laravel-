@@ -46,11 +46,11 @@ export const SEMESTER_ROUTES = {
 
 };
 
-export const STAFF_DASHBOARD_ROUTES = {
-    MEMBERS: '/staff/dashboard/members',
-    ACTIVE_BORROWS: '/staff/dashboard/active-borrows',
-    UNPAID_PENALTIES: '/staff/dashboard/unpaid-penalties',
-    QUEUE_RESERVATIONS: '/staff/dashboard/queue-reservations',
+export const CIRCULATION_DESK_ROUTES = {
+    MEMBERS: '/staff/circulation-desk/',
+    ACTIVE_BORROWS: '/staff/circulation-desk/active-borrows',
+    UNPAID_PENALTIES: '/staff/circulation-desk/unpaid-penalties',
+    QUEUE_RESERVATIONS: '/staff/circulation-desk/queue-reservations',
 };
 
 export const LIBRARIAN_SECTION_ROUTES = {
@@ -59,6 +59,7 @@ export const LIBRARIAN_SECTION_ROUTES = {
     PENALTY_RECORDS: '/librarian/section/penalty-records',
 
     BORROWERS: '/librarian/section/borrowers',
+    CLEARANCE_RECORDS: '/librarian/section/clearance-management',
 };
 
 export const TRANSACTION_ROUTES = {

@@ -63,7 +63,7 @@
                 <td class="py-3 px-4 text-gray-700 flex items-center gap-3">
                     <img src="{{ $reservation->book->cover_image ? asset('storage/' . $reservation->book->cover_image) : asset('images/no-cover.png') }}" alt="{{ $reservation->book->title }}" class="w-12 h-16 rounded-md object-cover shadow-sm border border-gray-200">
                     <div>
-                        <div class="font-semibold text-gray-800 truncate max-w-xs">{{ $reservation->book->title }}</div>
+                        <div class="font-semibold text-gray-800 line-clamp-2 max-w-xs">{{ $reservation->book->title }}</div>
                         <div class="text-xs text-gray-500 mt-1">by {{ $reservation->book->author->fullname ?? '' }}</div>
                     </div>
                 </td>

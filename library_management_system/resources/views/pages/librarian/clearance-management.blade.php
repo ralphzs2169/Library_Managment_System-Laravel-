@@ -1,5 +1,4 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\librarian\books-list.blade.php --}}
-<x-layout>
+<x-layout :title="'Clearance Management'">
     <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
         <div class="bg-white shadow-sm rounded-xl p-5 mb-3">
@@ -22,7 +21,7 @@
 
                 <div class="flex items-center gap-2">
                     <span class="text-gray-500 text-sm">Total Records (Filtered)</span>
-                    <span id="header-total-reservation-records" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm"></span>
+                    <span id="header-total-clearance-records" class="bg-accent/10 text-accent font-bold px-3 py-1 rounded-full text-sm">{{ $totalClearanceRequests}}</span>
                 </div>
             </div>
         </div>
@@ -36,36 +35,35 @@
                     <div class="flex-1 max-w-lg">
                         <div class="relative">
                             <img src="{{ asset('build/assets/icons/search.svg') }}" alt="Search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                            <input id="reservation-records-search" type="text" placeholder="Search by Borrower name, Book title, or ID number..." class="w-full pl-12 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" name="search" value="{{ request('search') }}">
+                            <input id="clearance-records-search" type="text" placeholder="Search by Borrower name or ID number..." class="w-full pl-12 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition" name="search" value="{{ request('search') }}">
                         </div>
                     </div>
                     <div class="flex-shrink-0 w-full sm:w-auto">
-                        <select id="reservation-records-sort-filter" name="sort" class="cursor-pointer w-full sm:w-auto px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
-                            <option value="deadline_asc" {{ request('sort') === 'deadline_asc' || !request('sort') ? 'selected' : '' }}>Sort By: Pickup Deadline (Soonest)</option>
-                            <option value="position_asc" {{ request('sort') === 'position_asc' ? 'selected' : '' }}>Sort By: Queue Position (1st)</option>
-                            <option value="date_desc" {{ request('sort') === 'date_desc' ? 'selected' : '' }}>Sort By: Reserved Date (Newest)</option>
-                            <option value="date_asc" {{ request('sort') === 'date_asc' ? 'selected' : '' }}>Sort By: Reserved Date (Oldest)</option>
+                        <select id="clearance-records-sort-filter" name="sort" class="cursor-pointer w-full sm:w-auto px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
+                            <option value="date_desc" {{ request('sort') === 'date_desc' || !request('sort') ? 'selected' : '' }}>Sort By: Date Requested (Newest)</option>
+                            <option value="date_asc" {{ request('sort') === 'date_asc' ? 'selected' : '' }}>Sort By: Date Requested (Oldest)</option>
+                            <option value="name_asc" {{ request('sort') === 'name_asc' ? 'selected' : '' }}>Sort By: Name (A-Z)</option>
+                            <option value="name_desc" {{ request('sort') === 'name_desc' ? 'selected' : '' }}>Sort By: Name (Z-A)</option>
                         </select>
                     </div>
                 </div>
                 {{-- Second Row: Filters --}}
                 <div class="flex flex-wrap gap-3">
                     {{-- Role Filter --}}
-                    <select id="reservation-records-role-filter" name="role" class="cursor-pointer px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
+                    <select id="clearance-records-role-filter" name="role" class="cursor-pointer px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
                         <option value="">Role: All</option>
                         <option value="student" {{ request('role') === 'student' ? 'selected' : '' }}>Role: Students</option>
                         <option value="teacher" {{ request('role') === 'teacher' ? 'selected' : '' }}>Role: Teachers</option>
                     </select>
                     {{-- Status Filter --}}
-                    <select id="reservation-records-status-filter" name="status" class="cursor-pointer px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
+                    <select id="clearance-records-status-filter" name="status" class="cursor-pointer px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
                         <option value="">Status: All</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Status: Pending</option>
-                        <option value="ready_for_pickup" {{ request('status') === 'ready_for_pickup' ? 'selected' : '' }}>Status: Ready for Pickup</option>
-                        <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Status: Cancelled</option>
-                        <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>Status: Expired</option>
+                        <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Status: Approved</option>
+                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Status: Rejected</option>
                     </select>
                     {{-- Semester Filter --}}
-                    <select id="reservation-records-semester-filter" name="semester" class="cursor-pointer px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
+                    <select id="clearance-records-semester-filter" name="semester" class="cursor-pointer px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
                         <option value="all">Semester: All</option>
                         @foreach($semesters as $semester)
                         <option value="{{ $semester->id }}" {{ request('semester') == $semester->id ? 'selected' : '' }} {{ $semester->id == $activeSemesterId ? 'selected' : '' }}>
@@ -74,7 +72,7 @@
                         @endforeach
                     </select>
                     {{-- Reset Button --}}
-                    <button type="button" id="reset-reservation-records-filters" class="cursor-pointer ml-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition whitespace-nowrap">
+                    <button type="button" id="reset-clearance-records-filters" class="cursor-pointer ml-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition whitespace-nowrap">
                         Reset Filters
                     </button>
                 </div>
@@ -90,5 +88,6 @@
         </div>
 
         @vite('resources/js/pages/manage-record-details/clearanceRecordDetails.js')
+        @vite('resources/js/pages/librarian/tableControls/clearanceControls.js')
     </section>
 </x-layout>

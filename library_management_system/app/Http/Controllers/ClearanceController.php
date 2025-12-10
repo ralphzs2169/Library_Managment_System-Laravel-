@@ -25,14 +25,75 @@ class ClearanceController extends Controller
 
     public function index(Request $request)
     {
-        $semesters = Semester::orderBy('start_date', 'desc')->get();
-        $activeSemesterId = Semester::where('status', 'active')?->value('id');
+        $query = Clearance::with(['user', 'requestedBy', 'approvedBy']);
 
-        // Eager load 'approvedBy' along with user and requestedBy
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+             $query->where(function ($q) use ($search) {
+                // A. Search by Borrower Name 
+                $q->whereHas('user', function ($uq) use ($search) {
+                    $uq->where('firstname', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("CONCAT(firstname, ' ', middle_initial, '.', ' ', lastname) LIKE ?", ["%{$search}%"]);
+                });
+             }  );
+            }
+
+
+        // Role Filter
+        if ($request->filled('role')) {
+            $role = $request->input('role');
+            $query->whereHas('user', function ($q) use ($role) {
+                $q->where('role', $role);
+            });
+        }
+
+        // Status Filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        // Sorting
+        $sort = $request->input('sort', 'date_desc');
+        switch ($sort) {
+            case 'date_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'name_asc':
+                $query->join('users', 'clearances.user_id', '=', 'users.id')
+                      ->orderBy('users.lastname', 'asc')
+                      ->orderBy('users.firstname', 'asc')
+                      ->select('clearances.*');
+                break;
+            case 'name_desc':
+                $query->join('users', 'clearances.user_id', '=', 'users.id')
+                      ->orderBy('users.lastname', 'desc')
+                      ->orderBy('users.firstname', 'desc')
+                      ->select('clearances.*');
+                break;
+            case 'date_desc':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $clearances = $query->paginate(10);
+
+        if ($request->ajax()) {
+            $html = view('partials.librarian.clearance-management-table', compact('clearances'))->render();
+            return response()->json([
+                'html' => $html,
+                'count' => $clearances->total()
+            ]);
+        }
+
         return view('pages.librarian.clearance-management', [
-            'clearances' => Clearance::with(['user', 'requestedBy', 'approvedBy', 'semester'])->get(), 
-            'semesters' => $semesters,
-            'activeSemesterId' => $activeSemesterId,
+            'clearances' => $clearances,
+            'semesters' => collect([]),
+            'activeSemesterId' => null,
+            'totalClearanceRequests' => $clearances->total(),
         ]);
     }
 

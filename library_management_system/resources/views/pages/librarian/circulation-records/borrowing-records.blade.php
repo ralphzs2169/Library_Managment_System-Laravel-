@@ -1,5 +1,4 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\librarian\books-list.blade.php --}}
-<x-layout>
+<x-layout :title="'Borrowing Management'">
     <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
         <div class="bg-white shadow-sm rounded-xl p-5 mb-3">
@@ -9,7 +8,7 @@
                         <img src="{{ asset('build/assets/icons/currently-borrowed-white.svg') }}" alt="Book Catalog Icon" class="w-8 h-8">
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Borrowing Records</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">Borrowing Management</h1>
                         <p class="text-sm text-gray-500 mt-0.5">Review the complete history of all book borrowing and return transactions.</p>
                     </div>
                 </div>
@@ -61,9 +60,9 @@
                     </select>
                     {{-- Semester Filter --}}
                     <select id="borrow-records-semester-filter" name="semester" class="cursor-pointer px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
-                        <option value="">Semester: All</option>
+                        <option value="" {{ request('semester') === 'all' ? 'selected' : '' }}>Semester: All</option>
                         @foreach($semesters as $semester)
-                        <option value="{{ $semester->id }}" {{ request('semester') == $semester->id ? 'selected' : '' }} {{ $semester->id == $activeSemesterId ? 'selected' : '' }}>
+                        <option value="{{ $semester->id }}" {{ (request()->has('semester') && request('semester') == $semester->id) || (!request()->has('semester') && $semester->id == $activeSemesterId) ? 'selected' : '' }}>
                             {{ $semester->name }}{{ $semester->id == $activeSemesterId ? ' (active)' : '' }}
                         </option>
                         @endforeach

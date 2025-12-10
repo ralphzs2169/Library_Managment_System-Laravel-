@@ -265,13 +265,13 @@
             </div>
 
             <div class="overflow-x-auto rounded-lg border border-gray-200">
-                <table class="w-full text-sm rounded-lg ">
+                <table class="w-full text-sm rounded-lg table-fixed">
                     <thead>
                         <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Copy No.</th>
-                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Current Status</th>
-                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Change Status</th>
-                            <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap">Actions</th>
+                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-60">Copy No.</th>
+                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-50">Current Status</th>
+                            <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-70">Change Status</th>
+                            <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-70">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="copies-table-body" class="bg-white divide-y divide-gray-100">

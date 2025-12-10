@@ -336,21 +336,19 @@ function renderActionsColumn(isPendingReview, reviewAction, isNew, copyId) {
                     </svg>
                     Approve
                 </button>
-                <button type="button" class="reject-issue-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs text-white bg-red-400 hover:bg-red-300 rounded-md cursor-pointer transition font-medium" data-copy-id="${copyId}">
+                <button type="button" class="reject-issue-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs text-white bg-red-500 hover:bg-red-400 rounded-md cursor-pointer transition font-medium" data-copy-id="${copyId}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     Reject
                 </button>
-                <!-- Improved View Details icon-only button -->
+            
                 <button type="button"
-                        class="view-issue-details-btn group relative inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 text-gray-600 hover:text-gray-800 transition"
+                        class="view-issue-details-btn cursor-pointer group relative inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-200 bg-secondary-light hover:bg-secondary-light/90 text-white transition"
                         aria-label="View issue details"
                         title="View Details"
                         data-copy-id="${copyId}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z" />
-                    </svg>
+                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 472 384"><path fill="#ffffff" d="M235 32q79 0 142.5 44.5T469 192q-28 71-91.5 115.5T235 352T92 307.5T0 192q28-71 92-115.5T235 32zm0 267q44 0 75-31.5t31-75.5t-31-75.5T235 85t-75.5 31.5T128 192t31.5 75.5T235 299zm-.5-171q26.5 0 45.5 18.5t19 45.5t-19 45.5t-45.5 18.5t-45-18.5T171 192t18.5-45.5t45-18.5z"/></svg>
                     <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-900 text-white text-[10px] font-medium opacity-0 group-hover:opacity-100 transition">
                         View details
                         <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></span>

@@ -1,5 +1,4 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\users\book-catalog.blade.php --}}
-<x-layout>
+<x-layout :title="'Book Catalog'">
     <div class="flex">
         <x-user-sidebar />
 
@@ -9,9 +8,10 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 bg-gradient-to-br from-accent to-teal-600 rounded-xl flex items-center justify-center shadow-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" viewBox="0 0 18 16">
+                                <path fill="#ffffff" d="M3.5 2h-3c-.275 0-.5.225-.5.5v11c0 .275.225.5.5.5h3c.275 0 .5-.225.5-.5v-11c0-.275-.225-.5-.5-.5zM3 5H1V4h2v1zm5.5-3h-3c-.275 0-.5.225-.5.5v11c0 .275.225.5.5.5h3c.275 0 .5-.225.5-.5v-11c0-.275-.225-.5-.5-.5zM8 5H6V4h2v1z" />
+                                <path fill="#ffffff" d="m11.954 2.773l-2.679 1.35a.502.502 0 0 0-.222.671l4.5 8.93a.502.502 0 0 0 .671.222l2.679-1.35a.502.502 0 0 0 .222-.671l-4.5-8.93a.502.502 0 0 0-.671-.222z" />
+                                <path fill="#ffffff" d="M14.5 13.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0z" /></svg>
                         </div>
                         <div>
                             <h1 class="text-2xl font-bold text-gray-900">Book Catalog</h1>

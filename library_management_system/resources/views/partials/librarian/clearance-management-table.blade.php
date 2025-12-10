@@ -6,7 +6,6 @@
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-10"></th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider w-50">Borrower</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider w-40">Requested By</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-40">Semester</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-32">Date Requested</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-30">Status</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-24">Actions</th>
@@ -107,11 +106,6 @@
                     @else
                     <span class="text-gray-400 text-xs">N/A</span>
                     @endif
-                </td>
-
-                {{-- Semester Column --}}
-                <td class="py-3 px-4 whitespace-nowrap text-gray-700">
-                    {{ $clearance->semester ? $clearance->semester->name : 'N/A' }}
                 </td>
 
                 {{-- Date Requested Column --}}

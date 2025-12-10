@@ -127,6 +127,8 @@ class BookCatalogController extends Controller
         }]);
 
         $user = auth()->user();
+
+        $user->load('students', 'teachers');
         
         // Check for active borrow
         $activeBorrow = $user->borrowTransactions()

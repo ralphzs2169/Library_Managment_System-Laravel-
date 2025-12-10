@@ -1,5 +1,4 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\librarian\semester-management.blade.php --}}
-<x-layout>
+<x-layout :title="'Semester Management'">
     <section class="md:pl-72 p-4 sm:p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
         <div class="bg-white shadow-sm rounded-xl p-4 sm:p-5 mb-2 sm:mb-6">

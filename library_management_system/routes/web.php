@@ -101,15 +101,15 @@ Route::prefix('librarian')
 
     });
 
-Route::prefix('staff')
+Route::prefix('staff/circulation-desk')
     ->middleware(['auth', 'role:staff'])
     ->name('staff.')
     ->group(function () {
 
-        Route::get('/dashboard/members', [StaffDashboardController::class, 'membersList']);
-        Route::get('/dashboard/active-borrows', [StaffDashboardController::class, 'activeBorrowsList']);
-        Route::get('/dashboard/unpaid-penalties', [StaffDashboardController::class, 'unpaidPenaltiesList']);
-        Route::get('/dashboard/queue-reservations', [StaffDashboardController::class, 'queueReservationsList']);
+        Route::get('/', [StaffDashboardController::class, 'membersList']);
+        Route::get('/active-borrows', [StaffDashboardController::class, 'activeBorrowsList']);
+        Route::get('/unpaid-penalties', [StaffDashboardController::class, 'unpaidPenaltiesList']);
+        Route::get('/queue-reservations', [StaffDashboardController::class, 'queueReservationsList']);
 
     });
 

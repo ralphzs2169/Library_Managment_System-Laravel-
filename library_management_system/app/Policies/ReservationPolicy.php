@@ -11,6 +11,7 @@ class ReservationPolicy
 {
     public static function canReserve($user, $book, $checkWithBookPolicy = true)
     {   
+       
         // 1. Check active semester
         $hasActive = Semester::where('status', 'active')->exists();
         if (!$hasActive) {
@@ -41,7 +42,7 @@ class ReservationPolicy
 
         // 5. Check if suspended
         if ($user->library_status === 'suspended') {
-            return ['result' => 'business_rule_violation', 'message' => 'User\'s library privileges are suspended.'];
+            return ['result' => 'business_rule_violation', 'message' => 'Borrower\'s library privileges are suspended.'];
         }
         
         // 6. Check user max pending reservations

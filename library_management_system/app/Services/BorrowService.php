@@ -50,8 +50,8 @@ class BorrowService
 
             // Create activity log
             ActivityLog::create([
-                'action' => 'borrowed',
-                'details' => $borrower->full_name . ' borrowed "' . $book->title . '" (Copy #' . $bookCopy->copy_number . ')',
+                'action' => 'Book Issued',
+                'details' => $borrower->full_name . ' borrowed "' . $book->title . '" (Copy #' . $bookCopy->copy_number . ') issued by ' . $request->user()->full_name,
                 'entity_type' => 'BorrowTransaction',
                 'entity_id' => $transaction->id,
                 'user_id' => $request->user()->id,

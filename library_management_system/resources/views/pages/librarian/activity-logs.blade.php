@@ -1,5 +1,4 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\librarian\activity-logs.blade.php --}}
-<x-layout>
+<x-layout :title="'Activity Logs'">
     <section class="md:pl-72 p-4 sm:p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
         <div class="bg-white shadow-sm rounded-xl p-4 sm:p-5 mb-4 sm:mb-6">

@@ -1,6 +1,6 @@
 import { showSkeleton, hideSkeleton } from "../utils";
 import { showError } from "../utils/alerts";
-import { BORROW_RECORDS_FILTERS, RESERVATION_RECORDS_FILTERS, PENALTY_RECORDS_FILTERS, BORROWER_FILTERS } from "../utils/tableFilters";
+import { BORROW_RECORDS_FILTERS, RESERVATION_RECORDS_FILTERS, PENALTY_RECORDS_FILTERS, BORROWER_FILTERS, CLEARANCE_RECORDS_FILTERS } from "../utils/tableFilters";
 import { SEARCH_COLUMN_INDEXES } from "../utils/tableFilters";
 import { LIBRARIAN_SECTION_ROUTES } from "../config";
 import { highlightSearchMatches } from "../tableControls";
@@ -74,6 +74,76 @@ export async function loadBorrowRecords(page = BORROW_RECORDS_FILTERS.page, scro
     } finally {
         clearTimeout(skeletonTimer);
         hideSkeleton(container, '#borrowing-records-skeleton', '#borrowing-records-real-table-body');
+    }
+}
+
+export async function loadClearanceRecords(page = CLEARANCE_RECORDS_FILTERS.page, scrollUp = true, isFiltered = false) {
+    const container = document.getElementById('clearance-records-container');
+    const countElement = document.getElementById('header-total-clearance-records');
+
+    if (!container) return;
+
+    if (scrollUp) {
+        window.scrollTo(0, 0);
+    }
+
+    if (countElement) countElement.textContent = '';
+
+    let skeletonTimer = setTimeout(() => {
+        showSkeleton(container, '#clearance-records-skeleton', '#clearance-records-real-table-body');
+    }, 200);
+
+    try {
+        CLEARANCE_RECORDS_FILTERS.page = page;
+        const searchInput = document.getElementById('clearance-records-search');
+        const roleFilter = document.getElementById('clearance-records-role-filter');
+        const statusFilter = document.getElementById('clearance-records-status-filter');
+        const sortFilter = document.getElementById('clearance-records-sort-filter');
+
+        if (searchInput) CLEARANCE_RECORDS_FILTERS.search = searchInput.value || '';
+        if (roleFilter) CLEARANCE_RECORDS_FILTERS.role = roleFilter.value || '';
+        CLEARANCE_RECORDS_FILTERS.status = statusFilter ? statusFilter.value : '';
+        if (sortFilter) CLEARANCE_RECORDS_FILTERS.sort = sortFilter.value || 'date_desc';
+
+        const params = new URLSearchParams({
+            page: CLEARANCE_RECORDS_FILTERS.page,
+            search: CLEARANCE_RECORDS_FILTERS.search,
+            role: CLEARANCE_RECORDS_FILTERS.role,
+            status: CLEARANCE_RECORDS_FILTERS.status,
+            sort: CLEARANCE_RECORDS_FILTERS.sort
+        });
+
+        const response = await fetch(`${LIBRARIAN_SECTION_ROUTES.CLEARANCE_RECORDS}?${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        container.innerHTML = data.html;
+
+        if (countElement) countElement.textContent = data.count;
+
+        // Re-attach clearance record detail listeners after table update
+        import('../pages/manage-record-details/clearanceRecordDetails.js').then(mod => {
+            if (mod.initClearanceRecordDetailListeners) {
+                mod.initClearanceRecordDetailListeners();
+            }
+        });
+
+        const searchTerm = searchInput?.value?.trim();
+        if (searchTerm) {
+            highlightSearchMatches(searchTerm, '#clearance-records-container', SEARCH_COLUMN_INDEXES.CLEARANCE_RECORDS);
+        }
+
+    } catch (error) {
+        showError("Something went wrong", "Failed to load clearance records.");
+    } finally {
+        clearTimeout(skeletonTimer);
+        hideSkeleton(container, '#clearance-records-skeleton', '#clearance-records-real-table-body');
     }
 }
 

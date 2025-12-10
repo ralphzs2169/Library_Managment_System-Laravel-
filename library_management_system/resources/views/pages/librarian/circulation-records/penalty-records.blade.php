@@ -1,5 +1,4 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\pages\librarian\books-list.blade.php --}}
-<x-layout>
+<x-layout :title="'Penalty Management'">
     <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
         <div class="bg-white shadow-sm rounded-xl p-5 mb-3">
@@ -9,7 +8,7 @@
                         <img src="{{ asset('build/assets/icons/unpaid-white.svg ')}}" alt="Book Catalog Icon" class="w-8 h-8">
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Penalty Records</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">Penalty Management</h1>
                         <p class="text-sm text-gray-500 mt-0.5">Audit and track all overdue fines, book replacement fees, and payment history.</p>
                     </div>
                 </div>

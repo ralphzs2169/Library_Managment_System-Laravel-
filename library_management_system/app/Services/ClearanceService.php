@@ -38,8 +38,8 @@ class ClearanceService
             ]);
 
             ActivityLog::create([
-                'action' => ActivityLogActions::CLEARANCE_APPROVED,
-                'details' => 'User ID ' . $clearance->user_id . ' marked as cleared by Librarian ID ' . $librarianId,
+                'action' => 'Clearance Approved',
+                'details' => 'Borrower: ' . $clearance->user->fullname . ' marked as cleared by Librarian ' . $clearance->approvedBy->fullname,
                 'entity_type' => 'Clearance',
                 'entity_id' => $clearance->id,
                 'user_id' => $librarianId,
@@ -65,8 +65,8 @@ class ClearanceService
             ]);
 
             ActivityLog::create([
-                'action' => ActivityLogActions::CLEARANCE_REJECTED,
-                'details' => 'Clearance for User ID ' . $clearance->user_id . ' rejected by Librarian ID ' . $librarianId . '. Remarks: ' . $remarks,
+                'action' => 'Clearance Rejected',
+                'details' => 'Clearance for Borrower: ' . $clearance->user->fullname . ' rejected by Librarian ' . $clearance->approvedBy->fullname . '. Remarks: ' . $remarks,
                 'entity_type' => 'Clearance',
                 'entity_id' => $clearance->id,
                 'user_id' => $librarianId,
@@ -97,8 +97,8 @@ class ClearanceService
                 $requestorText = '';
             }
             ActivityLog::create([
-                'action' => ActivityLogActions::CLEARANCE_REQUESTED,
-                'details' => 'Clearance requested' . $requestorText . ' for User ID ' . $userId,
+                'action' => 'Clearance Requested',
+                'details' => 'Clearance requested' . $requestorText . ' for Borrower: ' . $clearance->user->fullname,
                 'entity_type' => 'Clearance',
                 'entity_id' => $clearance->id,
                 'user_id' => $userId,

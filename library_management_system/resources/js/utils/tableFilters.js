@@ -64,6 +64,12 @@ export const QUEUE_RESERVATIONS_FILTERS = {
     sort: 'deadline_asc',
 }
 
+export const CLEARANCE_RECORDS_FILTERS = {
+    page: 1,
+    search: '',
+    sort: 'newest',
+    status: 'active'
+}
 // Columns to search in for different tables
 // -Used for highlight search 
 export const SEARCH_COLUMN_INDEXES = {
@@ -74,7 +80,7 @@ export const SEARCH_COLUMN_INDEXES = {
     UNPAID_PENALTIES: [2, 7], // Borrower Name, ID Number, Book Title
     QUEUE_RESERVATIONS: [2, 3],  // Borrower Name, Book Title
 
-    BORROW_RECORDS: [1, 4], // Borrower Name, Book Title, Staff Name
+    BORROW_RECORDS: [1, 3], // Borrower Name, Book Title, Staff Name
     RESERVATION_RECORDS: [2, 3], // Borrower Name, Book Title, Staff Name
     PENALTY_RECORDS: [2, 3], // Borrower Name, Book Title, Staff Name
     BORROWERS: [2, 2], // Borrower Name

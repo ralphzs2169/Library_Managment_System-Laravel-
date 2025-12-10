@@ -57,10 +57,12 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
             initQueueReservationsTableControls();
             loadQueueReservations();
         }
+       
         tab.btn.classList.add('border-accent', 'text-accent', 'bg-white');
         tab.btn.style.borderBottom = 'none';
         tab.btn.style.marginBottom = '1.5rem';
 
+        tab.btn.querySelector('.tab-title')?.classList.add('font-semibold');
         // Remove any previous custom underline
         let underline = tab.btn.querySelector('.tab-underline');
         if (underline) underline.remove();
@@ -78,6 +80,7 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
         tab.btn.classList.remove('border-accent', 'text-accent', 'bg-white');
         tab.btn.style.borderBottom = '';
         tab.btn.style.marginBottom = '';
+        tab.btn.querySelector('.tab-title')?.classList.remove('font-semibold');
         // Remove custom underline if present
         const underline = tab.btn.querySelector('.tab-underline-accent');
         if (underline) underline.remove();
@@ -97,6 +100,7 @@ export function initializeStaffDashboardTabs(initialActiveTab = 'members-table-t
             } else {
                 deactivateTab(tab);
                 tab.content.classList.add('hidden');
+
             }
         });
     }

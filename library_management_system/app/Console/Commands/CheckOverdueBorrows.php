@@ -44,7 +44,7 @@ class CheckOverdueBorrows extends Command
                     ActivityLog::create([
                         'entity_type' => 'Borrow Transaction',
                         'entity_id' => $borrow->id,
-                        'action' => 'marked overdue',
+                        'action' => 'Marked as Overdue',
                         'details' => "Borrow transaction ID {$borrow->id} marked as overdue on {$today->toDateString()}.",
                         'user_id' => null, // system action
                     ]);

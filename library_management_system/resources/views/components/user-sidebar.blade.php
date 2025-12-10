@@ -5,9 +5,10 @@
             {{-- All Books --}}
             <li class="rounded-md cursor-pointer transition-colors duration-100 py-2 px-3 {{ request()->routeIs('borrowers.book-catalog') && !request()->has('genre') ? 'bg-accent' : 'hover:bg-secondary-light' }}">
                 <a href="{{ route('borrowers.book-catalog') }}" class="sidebar-link flex items-center {{ request()->routeIs('borrowers.book-catalog') && !request()->has('genre') ? 'text-white' : '' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" viewBox="0 0 18 16">
+                        <path fill="#ffffff" d="M3.5 2h-3c-.275 0-.5.225-.5.5v11c0 .275.225.5.5.5h3c.275 0 .5-.225.5-.5v-11c0-.275-.225-.5-.5-.5zM3 5H1V4h2v1zm5.5-3h-3c-.275 0-.5.225-.5.5v11c0 .275.225.5.5.5h3c.275 0 .5-.225.5-.5v-11c0-.275-.225-.5-.5-.5zM8 5H6V4h2v1z" />
+                        <path fill="#ffffff" d="m11.954 2.773l-2.679 1.35a.502.502 0 0 0-.222.671l4.5 8.93a.502.502 0 0 0 .671.222l2.679-1.35a.502.502 0 0 0 .222-.671l-4.5-8.93a.502.502 0 0 0-.671-.222z" />
+                        <path fill="#ffffff" d="M14.5 13.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0z" /></svg>
                     <span>All Books</span>
                 </a>
             </li>

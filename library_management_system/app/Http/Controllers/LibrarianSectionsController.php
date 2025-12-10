@@ -85,21 +85,18 @@ class LibrarianSectionsController extends Controller
         }
 
 
-        if ($request->filled('semester')) {
-            $query->where('semester_id', $request->input('semester'));
-        }
-
-        // Semester filter (default to active semester if not set)
-        $semesterId = $request->input('semester');
-        if ($semesterId === null || $semesterId === '') {
+        // Semester filter
+        if ($request->has('semester')) {
+            $semester = $request->input('semester');
+            if ($semester && $semester !== 'all') {
+                $query->where('borrow_transactions.semester_id', $semester);
+            }
+        } else {
+            // Default to active semester
             $activeSemester = \App\Models\Semester::where('status', 'active')->first();
             if ($activeSemester) {
-                $semesterId = $activeSemester->id;
+                $query->where('borrow_transactions.semester_id', $activeSemester->id);
             }
-        }
-        // FIX: Use whereRaw to avoid join ambiguity and always filter correctly
-        if ($semesterId) {
-            $query->whereRaw('borrow_transactions.semester_id = ?', [$semesterId]);
         }
 
         // Sort filter with default priority order
@@ -230,20 +227,17 @@ class LibrarianSectionsController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Semester filter (default to active semester if not set)
-        $requestedSemesterId = $request->input('semester');
-        $applySemesterFilter = false;
-        if ($requestedSemesterId !== null && $requestedSemesterId !== '' && $requestedSemesterId !== 'all') {
-            $applySemesterFilter = true;
-        } else if ($requestedSemesterId === null || $requestedSemesterId === '') {
+        // Semester filter
+        if ($request->has('semester')) {
+            $semester = $request->input('semester');
+            if ($semester && $semester !== 'all') {
+                $query->where('reservations.semester_id', $semester);
+            }
+        } else {
             $activeSemester = Semester::where('status', 'active')->first();
             if ($activeSemester) {
-                $requestedSemesterId = $activeSemester->id;
-                $applySemesterFilter = true;
+                $query->where('reservations.semester_id', $activeSemester->id);
             }
-        }
-        if ($applySemesterFilter && $requestedSemesterId) {
-            $query->where('semester_id', $requestedSemesterId);
         }
 
 
@@ -382,20 +376,17 @@ class LibrarianSectionsController extends Controller
             });
         }
 
-        // Semester filter (default to active semester if not set)
-        $requestedSemesterId = $request->input('semester');
-        $applySemesterFilter = false;
-        if ($requestedSemesterId !== null && $requestedSemesterId !== '' && $requestedSemesterId !== 'all') {
-            $applySemesterFilter = true;
-        } else if ($requestedSemesterId === null || $requestedSemesterId === '') {
+        // Semester filter
+        if ($request->has('semester')) {
+            $semester = $request->input('semester');
+            if ($semester && $semester !== 'all') {
+                $query->where('borrow_transactions.semester_id', $semester);
+            }
+        } else {
             $activeSemester = Semester::where('status', 'active')->first();
             if ($activeSemester) {
-                $requestedSemesterId = $activeSemester->id;
-                $applySemesterFilter = true;
+                $query->where('borrow_transactions.semester_id', $activeSemester->id);
             }
-        }
-        if ($applySemesterFilter && $requestedSemesterId) {
-            $query->whereRaw('borrow_transactions.semester_id = ?', [$requestedSemesterId]);
         }
 
         // Get all transactions and flatten penalties

@@ -1,5 +1,5 @@
-<x-layout>
-    <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
+<x-layout :title="'Add New Book'">
+    <section class="md:pl-72 p-4 pt-4 min-h-screen bg-background">
 
         <!-- Book Summary Header (matches edit page) -->
         <!-- Header -->
@@ -20,7 +20,7 @@
 
 
         <!-- Main Content Area -->
-        <div class="bg-white shadow-sm rounded-xl p-6 mt-5">
+        <div class="bg-white shadow-sm rounded-xl p-6">
             <form id="add-book-form" action="{{ route('librarian.books.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
                 <!-- Book Information Card -->

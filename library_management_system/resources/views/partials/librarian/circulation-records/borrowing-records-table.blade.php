@@ -109,11 +109,11 @@
 
                 </td>
                 {{-- <td class="py-3 px-4 whitespace-nowrap text-gray-700">{{ $transaction->borrowed_at->format('M d, Y') }}</td> --}}
-                <td class="py-3 px-4 whitespace-nowrap text-gray-700">{{ $transaction->due_at->format('M d, Y') }}</td>
+                <td class="py-3 px-4 whitespace-nowrap text-gray-700">{{ \Carbon\Carbon::parse($transaction->due_at)->format('M d, Y') }}</td>
                 <td class="py-3 px-4 whitespace-nowrap text-gray-700">
                     {{-- REFACTORED STATUS LOGIC --}}
                     @if ($transaction->returned_at)
-                    @if ($transaction->returned_at->lte($transaction->due_at))
+                    @if (\Carbon\Carbon::parse($transaction->returned_at)->lte($transaction->due_at))
                     {{-- Returned On Time --}}
                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700 border border-green-100">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

@@ -1,4 +1,4 @@
-<x-layout>
+<x-layout :title="'Library Settings'">
     <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
         <div class="bg-white shadow-sm rounded-xl p-5 mb-6">
