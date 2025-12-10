@@ -33,6 +33,12 @@ export function showBookSelectionContent(modal, member, transactionType, restore
     
     // Mark modal view state as "borrow"
     modal.dataset.view = transactionType;
+    let exclusiveRow = null;
+    if (transactionType === 'borrow'){
+        exclusiveRow = '<th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-30">Copies</th>'
+    } else if (transactionType === 'reservation'){
+         exclusiveRow = '<th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-30">Waitlist</th>'
+    }
 
     // Replace content with borrow book interface
     const modalIcon = transactionType === 'borrow' ? 'borrow-book-accent.svg' : 'reservation-accent.svg';
@@ -90,7 +96,7 @@ export function showBookSelectionContent(modal, member, transactionType, restore
                             <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-80">Book Info</th>
                             <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-40">ISBN</th>
                             <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-40">Publication Year</th>
-                            <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs w-20">Copies</th>
+                                ${exclusiveRow}
                             <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider text-xs w-36">Action</th>
                         </tr>
                     </thead>
@@ -143,10 +149,11 @@ export function showBookSelectionContent(modal, member, transactionType, restore
     loadBookSelectionContent(member, currentState, transactionType);
 }
 
-function renderCopiesBadge(eligibleCopies, transactionType) {
+function renderExclusivesBadge(exclusives, transactionType) {
     let badgeHTML = '';
     switch (transactionType) {
         case 'borrow':
+            const eligibleCopies = exclusives;
             badgeHTML = `
                 <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-700 whitespace-nowrap">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -156,11 +163,26 @@ function renderCopiesBadge(eligibleCopies, transactionType) {
             `;
             break;
         case 'reservation':
+            const nextQueuePosition = exclusives;
+            let badgeClass = '';
+            let svgClass = '';
+            if (nextQueuePosition === '1st in line') {
+                badgeClass = 'bg-green-200 text-green-700';
+                svgClass = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                            </svg>
+                            `
+            } else {
+                badgeClass = 'bg-blue-200 text-blue-700';
+                svgClass = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 384 512">
+                    <path fill="#1D4ED8" d="M368 48h4c6.627 0 12-5.373 12-12V12c0-6.627-5.373-12-12-12H12C5.373 0 0 5.373 0 12v24c0 6.627 5.373 12 12 12h4c0 80.564 32.188 165.807 97.18 208C47.899 298.381 16 383.9 16 464h-4c-6.627 0-12 5.373-12 12v24c0 6.627 5.373 12 12 12h360c6.627 0 12-5.373 12-12v-24c0-6.627-5.373-12-12-12h-4c0-80.564-32.188-165.807-97.18-208C336.102 213.619 368 128.1 368 48zM64 48h256c0 101.62-57.307 184-128 184S64 149.621 64 48zm256 416H64c0-101.62 57.308-184 128-184s128 82.38 128 184z" />
+                </svg>`
+            }
             badgeHTML = `
-                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-yellow-200 text-yellow-700 whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    ${eligibleCopies} Reservable
+                <span class="w-full inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${badgeClass} whitespace-nowrap">
+                    ${svgClass}
+                    ${nextQueuePosition} 
                 </span>
             `;
             break;
@@ -186,63 +208,67 @@ async function loadBookSelectionContent(member, { search = '', sort = 'title_asc
 
     try {
 
-       // --- Client-side JavaScript Update ---
+        const { data, meta } = await fetchBooksSelectionContent({ search, sort, page }, transactionType, member.id);
 
-const { data, meta } = await fetchBooksSelectionContent({ search, sort, page }, transactionType, member.id);
+        const books = Object.values(data); 
 
-// 1. Convert the 'data' object into an array of book objects
-const books = Object.values(data); 
+        if (!books || books.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-gray-500">No books found</td></tr>`;
+            return;
+        }
 
-// 2. The rest of the logic can remain mostly the same (since the ineligible book check was already removed)
+        // meta.from handles the case where total number of filtered books is less than per_page
+        const startIndex = meta.from || (meta.per_page * (meta.current_page - 1)) + 1;
 
-if (!books || books.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-gray-500">No books found</td></tr>`;
-    return;
-}
+        tbody.innerHTML = books
+        .map((book, index) => {
+            console.log(book)
+            let exclusiveRow = null;
+            if (transactionType === 'borrow'){
+                exclusiveRow = `${renderExclusivesBadge(book.eligible_copies, transactionType)}`
+            } else  {
+                const nextQueuePosition = Number(book.next_queue_position) - 1 === 0 ? "1st in line" : `${Number(book.next_queue_position) - 1} waiting`;
+                exclusiveRow = `${renderExclusivesBadge(nextQueuePosition, transactionType)}`
 
-// meta.from handles the case where total number of filtered books is less than per_page
-const startIndex = meta.from || (meta.per_page * (meta.current_page - 1)) + 1;
+            }
 
-tbody.innerHTML = books
-.map((book, index) => {
-    // ... (Your mapping logic goes here, no need for the eligible_copies check)
-    return `
-        <tr class="hover:bg-gray-50 transition">
-            <td class="px-4 py-3 text-gray-700">${startIndex + index}</td>
-            <td class="px-4 py-3">
-                <img src="${book.cover_image ? '/storage/' + book.cover_image : '/images/no-cover.png'}" alt="${book.title || 'Book'}" class="w-12 h-16 rounded-md object-cover shadow-sm">
-            </td>
-            <td class="px-4 py-3">
-                <p class="font-semibold text-gray-800 line-clamp-2" title="${book.title || 'Untitled'}">${book.title || 'Untitled'}</p>
-                <div class="flex flex-wrap gap-1.5 mt-1.5 mb-2">
-                    <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                        ${book.genre?.category?.name || 'N/A'}
-                    </span>
-                    <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
-                        ${book.genre?.name || 'N/A'}
-                    </span>
-                </div>
-                <p class="text-xs text-gray-600 mt-1.5 mb-2">by ${formatLastNameFirst(book.author?.firstname, book.author?.lastname, book.author?.middle_initial)}</p>
-            </td>
-            <td class="px-4 py-3 text-gray-700">
-                <p class="text-xs text-gray-900">${book.isbn || 'N/A'}</p>
-            </td>
+            return `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 text-gray-700">${startIndex + index}</td>
+                    <td class="px-4 py-3">
+                        <img src="${book.cover_image ? '/storage/' + book.cover_image : '/images/no-cover.png'}" alt="${book.title || 'Book'}" class="w-12 h-16 rounded-md object-cover shadow-sm">
+                    </td>
+                    <td class="px-4 py-3">
+                        <p class="font-semibold text-gray-800 line-clamp-2" title="${book.title || 'Untitled'}">${book.title || 'Untitled'}</p>
+                        <div class="flex flex-wrap gap-1.5 mt-1.5 mb-2">
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                ${book.genre?.category?.name || 'N/A'}
+                            </span>
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                                ${book.genre?.name || 'N/A'}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1.5 mb-2">by ${formatLastNameFirst(book.author?.firstname, book.author?.lastname, book.author?.middle_initial)}</p>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700">
+                        <p class="text-xs text-gray-900">${book.isbn || 'N/A'}</p>
+                    </td>
 
-            <td class="px-4 py-3 text-gray-700">${book.publication_year || 'N/A'}</td>
-            <td class="px-4 py-3">
-                ${renderCopiesBadge(book.eligible_copies, transactionType)}
-            </td>
-            <td class="px-4 py-3 text-center">
-                <button class="borrow-book-btn cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg text-xs transition-all shadow-sm hover:shadow" 
-                        data-book="${encodeURIComponent(JSON.stringify(book))}">
-                    <img src="${window.location.origin}/build/assets/icons/${buttonIcon}.svg" alt="Select Book" class="w-4 h-4">
-                    <span class="font-medium tracking-wider">Select Book</span>
-                </button>
-            </td>
-        </tr>
-    `;
-})
-.join('');
+                    <td class="px-4 py-3 text-gray-700">${book.publication_year || 'N/A'}</td>
+                    <td class="px-4 py-3">
+                        ${exclusiveRow}
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <button class="borrow-book-btn cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg text-xs transition-all shadow-sm hover:shadow" 
+                                data-book="${encodeURIComponent(JSON.stringify(book))}">
+                            <img src="${window.location.origin}/build/assets/icons/${buttonIcon}.svg" alt="Select Book" class="w-4 h-4">
+                            <span class="font-medium tracking-wider">Select Book</span>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        })
+        .join('');
 
         tbody.querySelectorAll('.borrow-book-btn').forEach(btn => {
             btn.addEventListener('click', function() {

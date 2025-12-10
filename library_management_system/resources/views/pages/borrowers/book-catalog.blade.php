@@ -22,7 +22,7 @@
                     <!-- Search Bar in Header -->
                     <div class="w-full md:w-96">
                         <div class="relative">
-                            <input type="text" id="book-search" placeholder="Search by title, author, or ISBN..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <input type="text" id="book-search" placeholder="Search by title, author, or ISBN..." class="w-full pl-10 pr-4 py-2.5 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:ring-offset-0 focus:border-accent text-sm" />
                             <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
@@ -35,118 +35,113 @@
                 {{-- Filters Section --}}
                 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
 
-                    <div class="mb-4 pb-2 border-b border-gray-200 flex justify-between items-center">
+                    <div class="mb-4 pb-2 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <h3 class="text-xl font-bold text-gray-800">Filter Options</h3>
-                        <p class="text-xs text-white font-medium bg-accent px-3 py-1 rounded-full border border-gray-100">
+                        <p class="text-xs text-white font-medium bg-accent px-3 py-1.5 rounded-full border border-gray-100">
                             Click 'Apply Filters' to update the results
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
                         {{-- Availability Status --}}
-                        <div>
+                        <div class="flex flex-col">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Availability Status</label>
-                            {{-- ADJUSTMENT HERE: Use flex-wrap to flow horizontally, with horizontal and vertical gaps --}}
-                            <div class="flex flex-wrap gap-x-6 gap-y-2">
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="available" class="availability-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
+                            <div class="flex flex-col space-y-2.5">
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="available" class="availability-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
                                     <span class="flex items-center gap-1.5 text-sm text-gray-700 group-hover:text-accent transition">
-                                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                                        Available
+                                        <span class="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
+                                        Available (any copy)
                                     </span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="borrowed" class="availability-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="borrowed" class="availability-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
                                     <span class="flex items-center gap-1.5 text-sm text-gray-700 group-hover:text-accent transition">
-                                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-                                        Borrowed
+                                        <span class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
+                                        Borrowed (any copy)
                                     </span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="archived" class="availability-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="archived" class="availability-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
                                     <span class="flex items-center gap-1.5 text-sm text-gray-700 group-hover:text-accent transition">
-                                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
-                                        Archived
+                                        <span class="w-2 h-2 bg-gray-500 rounded-full flex-shrink-0"></span>
+                                        Archived (any copy)
                                     </span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="reserved" class="availability-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="reserved" class="availability-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
                                     <span class="flex items-center gap-1.5 text-sm text-gray-700 group-hover:text-accent transition">
-                                        <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                        Reserved
+                                        <span class="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></span>
+                                        Reserved (any copy)
                                     </span>
                                 </label>
                             </div>
                         </div>
 
                         {{-- Publication Year --}}
-                        <div>
+                        <div class="flex flex-col">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Publication Year</label>
-                            <div class="flex gap-2 mb-2">
-                                <button type="button" class="year-preset-btn px-3 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 transition" data-years="5">Last 5 Years</button>
-                                <button type="button" class="year-preset-btn px-3 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 transition" data-years="10">Last 10 Years</button>
-                                <button type="button" class="year-preset-btn px-3 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 transition" data-years="all">Classic</button>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <button type="button" class="year-preset-btn px-3 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 transition whitespace-nowrap" data-years="5">Last 5 Years</button>
+                                <button type="button" class="year-preset-btn px-3 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 transition whitespace-nowrap" data-years="10">Last 10 Years</button>
+                                <button type="button" class="year-preset-btn px-3 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 transition whitespace-nowrap" data-years="all">Classic</button>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-xs text-gray-600 mb-1">From</label>
+                                    <label class="block text-xs text-gray-600 mb-1.5">From</label>
                                     <input type="number" id="year-from" placeholder="1900" min="1900" max="{{ date('Y') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-600 mb-1">To</label>
+                                    <label class="block text-xs text-gray-600 mb-1.5">To</label>
                                     <input type="number" id="year-to" placeholder="{{ date('Y') }}" min="1900" max="{{ date('Y') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
                                 </div>
                             </div>
                         </div>
 
                         {{-- Language --}}
-                        <div>
+                        <div class="flex flex-col">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Language</label>
-                            {{-- ADJUSTMENT HERE: Use flex-wrap to flow horizontally, with horizontal and vertical gaps --}}
-                            <div class="flex flex-wrap gap-x-6 gap-y-2">
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="English" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-2.5">
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="English" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
                                     <span class="text-sm text-gray-700 group-hover:text-accent transition">English</span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="Filipino" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
-                                    <span class="text-sm text-gray-700 group-hover:text-accent transition">Filipino</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="Spanish" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
-                                    <span class="text-sm text-gray-700 group-hover:text-accent transition">Spanish</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="Chinese" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="Chinese" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
                                     <span class="text-sm text-gray-700 group-hover:text-accent transition">Chinese</span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" value="Others" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent">
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="Filipino" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
+                                    <span class="text-sm text-gray-700 group-hover:text-accent transition">Filipino</span>
+                                </label>
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="Others" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
                                     <span class="text-sm text-gray-700 group-hover:text-accent transition">Others</span>
+                                </label>
+                                <label class="flex items-center gap-2.5 cursor-pointer group">
+                                    <input type="checkbox" value="Spanish" class="language-checkbox w-4 h-4 text-accent border-gray-300 rounded focus:ring-2 focus:ring-accent flex-shrink-0">
+                                    <span class="text-sm text-gray-700 group-hover:text-accent transition">Spanish</span>
                                 </label>
                             </div>
                         </div>
 
                         {{-- Sort By --}}
-                        <div>
+                        <div class="flex flex-col">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Sort By</label>
-                            <select id="book-sort" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <select id="book-sort" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm bg-white">
                                 <option value="title_asc">Title (A - Z)</option>
                                 <option value="title_desc">Title (Z - A)</option>
                                 <option value="year_asc">Year (Oldest)</option>
                                 <option value="year_desc">Year (Newest)</option>
                             </select>
-
-
                         </div>
-
 
                     </div>
 
                     {{-- Active Filters Display --}}
-                    <div id="active-filters" class="mt-4 pt-4 border-t border-gray-200 hidden">
-                        <div class="flex items-center justify-between">
+                    <div id="active-filters" class="mt-6 pt-4 border-t border-gray-200 hidden">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-sm font-medium text-gray-700">Active Filters:</span>
                                 <div id="filter-tags" class="flex gap-2 flex-wrap"></div>
@@ -155,14 +150,14 @@
                     </div>
 
                     {{-- Action Buttons --}}
-                    <div class="mt-6 flex justify-between items-center">
-                        <button id="clear-filters-btn" class="inline-flex cursor-pointer items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
+                    <div class="mt-6 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                        <button id="clear-filters-btn" class="inline-flex justify-center cursor-pointer items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                             Clear Filters
                         </button>
-                        <button id="apply-filters-btn" class="inline-flex cursor-pointer items-center gap-2 px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition text-sm font-semibold shadow-sm">
+                        <button id="apply-filters-btn" class="inline-flex justify-center cursor-pointer items-center gap-2 px-6 py-2.5 bg-accent text-white rounded-lg hover:bg-accent/90 transition text-sm font-semibold shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                             </svg>

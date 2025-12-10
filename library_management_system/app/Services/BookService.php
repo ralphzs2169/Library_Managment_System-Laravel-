@@ -154,9 +154,15 @@ class BookService {
         });
 
         // 4. Transform the remaining, eligible books (calculate final properties)
-        $transformedCollection = $filteredCollection->map(function ($book) {
+        $transformedCollection = $filteredCollection->map(function ($book) use ($statusToCheck) {
             // These properties are now set ONLY for eligible books
-            $book->eligible_copies = $book->copies->count();
+            $book->eligible_copies = $book->copies->filter(function ($copy) use ($statusToCheck) {
+                if (is_array($statusToCheck)) {
+                    return in_array($copy->status, $statusToCheck);
+                }
+                return $copy->status === $statusToCheck;
+            })->count();
+
             $book->category_name = optional($book->genre->category)->name ?? 'N/A';
             $book->next_queue_position = $book->reservations->where('status', ReservationStatus::PENDING)->count() + 1;
 

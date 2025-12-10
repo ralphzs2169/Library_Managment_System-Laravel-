@@ -1,4 +1,3 @@
-{{-- filepath: c:\Users\Angela\library_management_system\resources\views\partials\borrowers\book-grid.blade.php --}}
 @if(count($books) > 0)
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
     @foreach($books as $book)
@@ -46,7 +45,7 @@
                 @endif
                 @elseif($availableCopies > 0)
                 <span class="px-2 py-1 bg-green-500 text-white text-xs font-semibold rounded-full shadow-lg">
-                    Available
+                    {{ $availableCopies }} Available
                 </span>
                 @else
                 <span class="px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded-full shadow-lg">

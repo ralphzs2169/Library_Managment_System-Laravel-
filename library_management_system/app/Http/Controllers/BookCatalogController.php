@@ -90,17 +90,55 @@ class BookCatalogController extends Controller
         if ($request->has('availability') && $request->availability) {
             $statuses = explode(',', $request->availability);
             
-            if (in_array('available', $statuses)) {
-                $query->whereHas('copies', function($q) {
-                    $q->where('status', 'available');
-                });
-            }
-            
-            if (in_array('borrowed', $statuses)) {
-                $query->orWhereHas('copies', function($q) {
-                    $q->where('status', 'borrowed');
-                });
-            }
+            $query->where(function($q) use ($statuses) {
+                $hasCondition = false;
+
+                if (in_array('available', $statuses)) {
+                    $q->whereHas('copies', function($subQ) {
+                        $subQ->where('status', 'available');
+                    });
+                    $hasCondition = true;
+                }
+                
+                if (in_array('borrowed', $statuses)) {
+                    if ($hasCondition) {
+                        $q->orWhereHas('copies', function($subQ) {
+                            $subQ->where('status', 'borrowed');
+                        });
+                    } else {
+                        $q->whereHas('copies', function($subQ) {
+                            $subQ->where('status', 'borrowed');
+                        });
+                        $hasCondition = true;
+                    }
+                }
+
+                if (in_array('archived', $statuses)) {
+                    if ($hasCondition) {
+                        $q->orWhereHas('copies', function($subQ) {
+                            $subQ->whereIn('status', ['lost', 'damaged', 'withdrawn']);
+                        });
+                    } else {
+                        $q->whereHas('copies', function($subQ) {
+                            $subQ->whereIn('status', ['lost', 'damaged', 'withdrawn']);
+                        });
+                        $hasCondition = true;
+                    }
+                }
+
+                if (in_array('reserved', $statuses)) {
+                    if ($hasCondition) {
+                        $q->orWhereHas('reservations', function($subQ) {
+                            $subQ->whereIn('status', [ReservationStatus::PENDING, ReservationStatus::READY_FOR_PICKUP]);
+                        });
+                    } else {
+                        $q->whereHas('reservations', function($subQ) {
+                            $subQ->whereIn('status', [ReservationStatus::PENDING, ReservationStatus::READY_FOR_PICKUP]);
+                        });
+                    }
+                }
+
+            });
         }
 
 

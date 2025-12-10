@@ -1,6 +1,9 @@
 import { debounce } from "../../utils";
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Restore filters from URL on page load
+    restoreFiltersFromURL();
+    
     const searchInput = document.getElementById('book-search');
     const sortSelect = document.getElementById('book-sort');
     const yearFrom = document.getElementById('year-from');
@@ -288,5 +291,111 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadMoreSpinner.classList.add('hidden');
             }
         }
+    }
+
+    function restoreFiltersFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Restore availability checkboxes
+        const availabilityParam = urlParams.get('availability');
+        if (availabilityParam) {
+            const statuses = availabilityParam.split(',');
+            document.querySelectorAll('.availability-checkbox').forEach(checkbox => {
+                if (statuses.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+        
+        // Restore language checkboxes
+        const languagesParam = urlParams.get('languages');
+        if (languagesParam) {
+            const languages = languagesParam.split(',');
+            document.querySelectorAll('.language-checkbox').forEach(checkbox => {
+                if (languages.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+        
+        // Restore year filters
+        const yearFrom = urlParams.get('year_from');
+        const yearTo = urlParams.get('year_to');
+        if (yearFrom) document.getElementById('year-from').value = yearFrom;
+        if (yearTo) document.getElementById('year-to').value = yearTo;
+        
+        // Restore sort
+        const sort = urlParams.get('sort');
+        if (sort) document.getElementById('book-sort').value = sort;
+        
+        // Restore search
+        const search = urlParams.get('search');
+        if (search) document.getElementById('book-search').value = search;
+        
+        // Update active filters display if any filters are active
+        updateActiveFiltersDisplay();
+    }
+
+    function updateActiveFiltersDisplay() {
+        const activeFiltersContainer = document.getElementById('active-filters');
+        const filterTagsContainer = document.getElementById('filter-tags');
+        
+        if (!activeFiltersContainer || !filterTagsContainer) return;
+        
+        filterTagsContainer.innerHTML = '';
+        let hasActiveFilters = false;
+        
+        // Check availability filters
+        const checkedAvailability = Array.from(document.querySelectorAll('.availability-checkbox:checked')).map(cb => cb.value);
+        checkedAvailability.forEach(status => {
+            hasActiveFilters = true;
+            const tag = createFilterTag(`Availability: ${status}`, () => {
+                document.querySelector(`.availability-checkbox[value="${status}"]`).checked = false;
+                updateActiveFiltersDisplay();
+            });
+            filterTagsContainer.appendChild(tag);
+        });
+        
+        // Check language filters
+        const checkedLanguages = Array.from(document.querySelectorAll('.language-checkbox:checked')).map(cb => cb.value);
+        checkedLanguages.forEach(lang => {
+            hasActiveFilters = true;
+            const tag = createFilterTag(`Language: ${lang}`, () => {
+                document.querySelector(`.language-checkbox[value="${lang}"]`).checked = false;
+                updateActiveFiltersDisplay();
+            });
+            filterTagsContainer.appendChild(tag);
+        });
+        
+        // Check year filters
+        const yearFrom = document.getElementById('year-from')?.value;
+        const yearTo = document.getElementById('year-to')?.value;
+        if (yearFrom || yearTo) {
+            hasActiveFilters = true;
+            const yearText = yearFrom && yearTo ? `${yearFrom} - ${yearTo}` : yearFrom ? `From ${yearFrom}` : `Until ${yearTo}`;
+            const tag = createFilterTag(`Year: ${yearText}`, () => {
+                document.getElementById('year-from').value = '';
+                document.getElementById('year-to').value = '';
+                updateActiveFiltersDisplay();
+            });
+            filterTagsContainer.appendChild(tag);
+        }
+        
+        activeFiltersContainer.classList.toggle('hidden', !hasActiveFilters);
+    }
+
+    function createFilterTag(text, onRemove) {
+        const tag = document.createElement('div');
+        tag.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/10 text-accent rounded-md text-xs font-medium';
+        tag.innerHTML = `
+            <span>${text}</span>
+            <button type="button" class="hover:bg-accent/20 rounded-full p-0.5 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        `;
+        tag.querySelector('button').addEventListener('click', onRemove);
+        return tag;
     }
 });

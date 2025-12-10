@@ -58,12 +58,14 @@ export async function addBookHandler(bookData, form) {
 }
 
 //
-export async function fetchBooksSelectionContent({ search = '' , sort = 'title_asc', page = 1 } = {}, transactionType = 'borrow', memberId) {
+export async function fetchBooksSelectionContent({ search = '' , sort = 'title_asc', page = 1, genre = '', category = '' } = {}, transactionType = 'borrow', memberId) {
     try {
          const params = new URLSearchParams({
             search,
             sort,
-            page
+            page,
+            genre,
+            category
         });
         
         const response = await fetch(TRANSACTION_ROUTES.BOOK_SELECTION(transactionType, memberId, params.toString()), {
@@ -200,12 +202,46 @@ export async function loadBooks(page = BOOK_FILTERS.page, scrollUp = true) {
         const searchInput = document.querySelector('#books-search');
         const sortSelect = document.querySelector('#books-sort');
         const categoryFilter = document.querySelector('#books-category-filter');
+        const genreFilter = document.querySelector('#books-genre-filter');
         const statusFilter = document.querySelector('#books-status-filter');
 
-        if (searchInput) BOOK_FILTERS.search = searchInput?.value || '';
-        if (sortSelect) BOOK_FILTERS.sort = sortSelect?.value || BOOK_FILTERS.sort;
-        if (categoryFilter) BOOK_FILTERS.category = categoryFilter?.value || BOOK_FILTERS.category;
-        if (statusFilter) BOOK_FILTERS.status = statusFilter?.value || BOOK_FILTERS.status;
+        // Sync filters with URL parameters on load if inputs are empty
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (searchInput) {
+            if (!searchInput.value && urlParams.has('search')) {
+                searchInput.value = urlParams.get('search');
+            }
+            BOOK_FILTERS.search = searchInput.value;
+        }
+
+        if (sortSelect) {
+            if (urlParams.has('sort') && !sortSelect.value) {
+                sortSelect.value = urlParams.get('sort');
+            }
+            BOOK_FILTERS.sort = sortSelect.value;
+        }
+
+        if (categoryFilter) {
+            if (!categoryFilter.value && urlParams.has('category')) {
+                categoryFilter.value = urlParams.get('category');
+            }
+            BOOK_FILTERS.category = categoryFilter.value;
+        }
+
+        if (genreFilter) {
+            if (!genreFilter.value && urlParams.has('genre')) {
+                genreFilter.value = urlParams.get('genre');
+            }
+            BOOK_FILTERS.genre = genreFilter.value;
+        }
+
+        if (statusFilter) {
+            if (!statusFilter.value && urlParams.has('status')) {
+                statusFilter.value = urlParams.get('status');
+            }
+            BOOK_FILTERS.status = statusFilter.value;
+        }
         
         const params = new URLSearchParams(BOOK_FILTERS);
         
