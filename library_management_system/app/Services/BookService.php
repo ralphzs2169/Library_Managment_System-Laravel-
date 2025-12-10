@@ -250,8 +250,8 @@ class BookService {
                 $this->updateBookRecord($request, $book);
                 $this->updateCopies($request, $book);
                 ActivityLog::create([
-                    'action' => 'updated',
-                    'details' => 'Updated book: ' . $book->title,
+                    'action' => 'Edited a Book',
+                    'details' => 'Edited book: ' . $book->title,
                     'entity_type' => 'Book',
                     'entity_id' => $book->id,
                     'user_id' => $request->user()->id,
@@ -273,7 +273,7 @@ class BookService {
             'title' => 'sometimes|required|string|max:255',
             'isbn' => 'sometimes|required|string|unique:books,isbn,' . $book->id . '|max:17',
             'description' => 'sometimes|nullable|string',
-            'cover' => 'sometimes|nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'cover' => 'sometimes|nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'publisher' => 'sometimes|nullable|string|max:255',
             'publication_year' => 'sometimes|nullable|digits:4|integer|min:1901|max:' . date('Y'),
             'language' => 'sometimes|required|in:English,Filipino,Spanish,Chinese,Others',

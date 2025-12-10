@@ -1,11 +1,14 @@
 <x-layout :title="'Library Settings'">
     <section class="md:pl-72 p-6 pt-4 min-h-screen bg-background">
         <!-- Header -->
-        <div class="bg-white shadow-sm rounded-xl p-5 mb-6">
+        <div class="bg-white shadow-sm rounded-xl p-5 mb-3">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-gradient-to-br from-accent to-teal-600 rounded-xl flex items-center justify-center shadow-md">
-                        <img src="{{ asset('build/assets/icons/settings.svg') }}" alt="Settings Icon" class="w-8 h-8 invert brightness-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">Library Settings</h1>
@@ -24,7 +27,9 @@
             <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
                 <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
                     <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                        <img src="{{ asset('build/assets/icons/borrowing.svg') }}" alt="Borrowing Icon" class="w-5 h-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
                     </div>
                     <span>Borrowing Rules</span>
                 </h2>
@@ -33,8 +38,8 @@
                     <!-- Student Borrowing Config -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <div class="p-1.5 bg-purple-50 rounded-lg">
-                                <img src="{{ asset('build/assets/icons/student.svg') }}" alt="Student Icon" class="w-5 h-5">
+                            <div class="p-1.5 bg-blue-100 rounded-lg">
+                                <img src="/build/assets/icons/student-role-badge.svg" alt="Student Badge" class="w-5 h-5">
                             </div>
                             <h3 class="text-base font-bold text-gray-800">Student Borrowing</h3>
                         </div>
@@ -43,14 +48,14 @@
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Max Books per Student</label>
                                 <div class="error-placeholder flex-1 text-sm" id="max_books_per_student-error-placeholder"></div>
-                                <input id="max_books_per_student" type="number" name="max_books_per_student" value="{{ $settings['borrowing.max_books_per_student'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="10">
+                                <input id="max_books_per_student" type="number" name="max_books_per_student" value="{{ $settings['borrowing.max_books_per_student'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="10">
                                 <p class="mt-1 text-xs text-gray-500">Maximum number of books a student can borrow</p>
                             </div>
                             <!-- Borrow Duration (Student) -->
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Borrow Duration (Days)</label>
                                 <div class="error-placeholder flex-1 text-sm" id="student_duration-error-placeholder"></div>
-                                <input id="student_duration" type="number" name="student_duration" value="{{ $settings['borrowing.student_duration'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="90">
+                                <input id="student_duration" type="number" name="student_duration" value="{{ $settings['borrowing.student_duration'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="90">
                                 <p class="mt-1 text-xs text-gray-500">Default number of days for student borrowing</p>
                             </div>
                         </div>
@@ -58,8 +63,8 @@
                     <!-- Teacher Borrowing Config -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <div class="p-1.5 bg-blue-50 rounded-lg">
-                                <img src="{{ asset('build/assets/icons/teacher.svg') }}" alt="Teacher Icon" class="w-5 h-5">
+                            <div class="p-1.5 bg-green-100 rounded-lg">
+                                <img src="/build/assets/icons/teacher-role-badge.svg" alt="Teacher Badge" class="w-5 h-5">
                             </div>
                             <h3 class="text-base font-bold text-gray-800">Teacher Borrowing</h3>
                         </div>
@@ -68,14 +73,14 @@
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Max Books per Teacher</label>
                                 <div class="error-placeholder flex-1 text-sm" id="max_books_per_teacher-error-placeholder"></div>
-                                <input id="max_books_per_teacher" type="number" name="max_books_per_teacher" value="{{ $settings['borrowing.max_books_per_teacher'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="20">
+                                <input id="max_books_per_teacher" type="number" name="max_books_per_teacher" value="{{ $settings['borrowing.max_books_per_teacher'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="20">
                                 <p class="mt-1 text-xs text-gray-500">Maximum number of books a teacher can borrow</p>
                             </div>
                             <!-- Borrow Duration (Teacher) -->
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Borrow Duration (Days)</label>
                                 <div class="error-placeholder flex-1 text-sm" id="teacher_duration-error-placeholder"></div>
-                                <input id="teacher_duration" type="number" name="teacher_duration" value="{{ $settings['borrowing.teacher_duration'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="90">
+                                <input id="teacher_duration" type="number" name="teacher_duration" value="{{ $settings['borrowing.teacher_duration'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="90">
                                 <p class="mt-1 text-xs text-gray-500">Default number of days for teacher borrowing</p>
                             </div>
                         </div>
@@ -87,7 +92,9 @@
             <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
                 <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
                     <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                        <img src="{{ asset('build/assets/icons/renewing.svg') }}" alt="Renewing Icon" class="w-5 h-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
                     </div>
                     <span>Renewing Rules</span>
                 </h2>
@@ -96,8 +103,8 @@
                     <!-- Student Renewal Config -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <div class="p-1.5 bg-purple-50 rounded-lg">
-                                <img src="{{ asset('build/assets/icons/student.svg') }}" alt="Student Icon" class="w-5 h-5">
+                            <div class="p-1.5 bg-blue-100 rounded-lg">
+                                <img src="/build/assets/icons/student-role-badge.svg" alt="Student Badge" class="w-5 h-5">
                             </div>
                             <h3 class="text-base font-bold text-gray-800">Student Renewal</h3>
                         </div>
@@ -106,21 +113,21 @@
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Max Renewals</label>
                                 <div class="error-placeholder flex-1 text-sm" id="student_renewal_limit-error-placeholder"></div>
-                                <input id="student_renewal_limit" type="number" name="student_renewal_limit" value="{{ $settings['renewing.student_renewal_limit'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="10">
+                                <input id="student_renewal_limit" type="number" name="student_renewal_limit" value="{{ $settings['renewing.student_renewal_limit'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="10">
                                 <p class="mt-1 text-xs text-gray-500">Maximum renewals allowed per borrow cycle.</p>
                             </div>
                             <!-- Renewal Duration (Student) -->
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Renewal Duration (Days)</label>
                                 <div class="error-placeholder flex-1 text-sm" id="renewing_student_duration-error-placeholder"></div>
-                                <input id="renewing_student_duration" type="number" name="renewing_student_duration" value="{{ $settings['renewing.student_duration'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="90">
+                                <input id="renewing_student_duration" type="number" name="renewing_student_duration" value="{{ $settings['renewing.student_duration'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="90">
                                 <p class="mt-1 text-xs text-gray-500">Days added to due date per renewal.</p>
                             </div>
                             <!-- Min Days Before Renewal (Student) -->
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Min Days Before Renewal</label>
                                 <div class="error-placeholder flex-1 text-sm" id="student_min_days_before_renewal-error-placeholder"></div>
-                                <input id="student_min_days_before_renewal" type="number" name="student_min_days_before_renewal" value="{{ $settings['renewing.student_min_days_before_renewal'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="90">
+                                <input id="student_min_days_before_renewal" type="number" name="student_min_days_before_renewal" value="{{ $settings['renewing.student_min_days_before_renewal'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="90">
                                 <p class="mt-1 text-xs text-gray-500">Minimum days after borrowing before renewal is allowed.</p>
                             </div>
                         </div>
@@ -128,8 +135,8 @@
                     <!-- Teacher Renewal Config -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <div class="p-1.5 bg-blue-50 rounded-lg">
-                                <img src="{{ asset('build/assets/icons/teacher.svg') }}" alt="Teacher Icon" class="w-5 h-5">
+                            <div class="p-1.5 bg-green-100 rounded-lg">
+                                <img src="/build/assets/icons/teacher-role-badge.svg" alt="Teacher Badge" class="w-5 h-5">
                             </div>
                             <h3 class="text-base font-bold text-gray-800">Teacher Renewal</h3>
                         </div>
@@ -138,21 +145,21 @@
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Max Renewals</label>
                                 <div class="error-placeholder flex-1 text-sm" id="teacher_renewal_limit-error-placeholder"></div>
-                                <input id="teacher_renewal_limit" type="number" name="teacher_renewal_limit" value="{{ $settings['renewing.teacher_renewal_limit'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="10">
+                                <input id="teacher_renewal_limit" type="number" name="teacher_renewal_limit" value="{{ $settings['renewing.teacher_renewal_limit'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="10">
                                 <p class="mt-1 text-xs text-gray-500">Maximum renewals allowed per borrow cycle.</p>
                             </div>
                             <!-- Renewal Duration (Teacher) -->
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Renewal Duration (Days)</label>
                                 <div class="error-placeholder flex-1 text-sm" id="renewing_teacher_duration-error-placeholder"></div>
-                                <input id="renewing_teacher_duration" type="number" name="renewing_teacher_duration" value="{{ $settings['renewing.teacher_duration'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="90">
+                                <input id="renewing_teacher_duration" type="number" name="renewing_teacher_duration" value="{{ $settings['renewing.teacher_duration'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="90">
                                 <p class="mt-1 text-xs text-gray-500">Days added to due date per renewal.</p>
                             </div>
                             <!-- Min Days Before Renewal (Teacher) -->
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Min Days Before Renewal</label>
                                 <div class="error-placeholder flex-1 text-sm" id="teacher_min_days_before_renewal-error-placeholder"></div>
-                                <input id="teacher_min_days_before_renewal" type="number" name="teacher_min_days_before_renewal" value="{{ $settings['renewing.teacher_min_days_before_renewal'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="90">
+                                <input id="teacher_min_days_before_renewal" type="number" name="teacher_min_days_before_renewal" value="{{ $settings['renewing.teacher_min_days_before_renewal'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="90">
                                 <p class="mt-1 text-xs text-gray-500">Minimum days after borrowing before renewal is allowed.</p>
                             </div>
                         </div>
@@ -164,7 +171,7 @@
             <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
                 <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
                     <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                        <img src="{{ asset('build/assets/icons/reservation.svg') }}" alt="Reservation Icon" class="w-5 h-5">
+                        <img src="/build/assets/icons/reservation-accent.svg" alt="Reservation Rules" class="w-5 h-5">
                     </div>
                     <span>Reservation Rules</span>
                 </h2>
@@ -173,8 +180,8 @@
                     <!-- Student Reservation Config -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <div class="p-1.5 bg-purple-50 rounded-lg">
-                                <img src="{{ asset('build/assets/icons/student.svg') }}" alt="Student Icon" class="w-5 h-5">
+                            <div class="p-1.5 bg-blue-100 rounded-lg">
+                                <img src="/build/assets/icons/student-role-badge.svg" alt="Student Badge" class="w-5 h-5">
                             </div>
                             <h3 class="text-base font-bold text-gray-800">Student Reservation</h3>
                         </div>
@@ -183,14 +190,14 @@
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Pickup Window (Days)</label>
                                 <div class="error-placeholder flex-1 text-sm" id="reservation_student_pickup_window_days-error-placeholder"></div>
-                                <input id="reservation_student_pickup_window_days" type="number" name="reservation_student_pickup_window_days" value="{{ $settings['reservation.student_pickup_window_days'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="14">
+                                <input id="reservation_student_pickup_window_days" type="number" name="reservation_student_pickup_window_days" value="{{ $settings['reservation.student_pickup_window_days'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="14">
                                 <p class="mt-1 text-xs text-gray-500">Days allowed for student to pick up reserved book</p>
                             </div>
                             <!-- Max Pending Reservations (Student) -->
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Max Pending Reservations</label>
                                 <div class="error-placeholder flex-1 text-sm" id="reservation_student_max_pending_reservations-error-placeholder"></div>
-                                <input id="reservation_student_max_pending_reservations" type="number" name="reservation_student_max_pending_reservations" value="{{ $settings['reservation.student_max_pending_reservations'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="20">
+                                <input id="reservation_student_max_pending_reservations" type="number" name="reservation_student_max_pending_reservations" value="{{ $settings['reservation.student_max_pending_reservations'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="20">
                                 <p class="mt-1 text-xs text-gray-500">Maximum pending reservations allowed for a student</p>
                             </div>
                         </div>
@@ -198,8 +205,8 @@
                     <!-- Teacher Reservation Config -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <div class="p-1.5 bg-blue-50 rounded-lg">
-                                <img src="{{ asset('build/assets/icons/teacher.svg') }}" alt="Teacher Icon" class="w-5 h-5">
+                            <div class="p-1.5 bg-green-100 rounded-lg">
+                                <img src="/build/assets/icons/teacher-role-badge.svg" alt="Teacher Badge" class="w-5 h-5">
                             </div>
                             <h3 class="text-base font-bold text-gray-800">Teacher Reservation</h3>
                         </div>
@@ -208,14 +215,14 @@
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Pickup Window (Days)</label>
                                 <div class="error-placeholder flex-1 text-sm" id="reservation_teacher_pickup_window_days-error-placeholder"></div>
-                                <input id="reservation_teacher_pickup_window_days" type="number" name="reservation_teacher_pickup_window_days" value="{{ $settings['reservation.teacher_pickup_window_days'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="14">
+                                <input id="reservation_teacher_pickup_window_days" type="number" name="reservation_teacher_pickup_window_days" value="{{ $settings['reservation.teacher_pickup_window_days'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="14">
                                 <p class="mt-1 text-xs text-gray-500">Days allowed for teacher to pick up reserved book</p>
                             </div>
                             <!-- Max Pending Reservations (Teacher) -->
                             <div class="field-container flex flex-col">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Max Pending Reservations</label>
                                 <div class="error-placeholder flex-1 text-sm" id="reservation_teacher_max_pending_reservations-error-placeholder"></div>
-                                <input id="reservation_teacher_max_pending_reservations" type="number" name="reservation_teacher_max_pending_reservations" value="{{ $settings['reservation.teacher_max_pending_reservations'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="20">
+                                <input id="reservation_teacher_max_pending_reservations" type="number" name="reservation_teacher_max_pending_reservations" value="{{ $settings['reservation.teacher_max_pending_reservations'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="20">
                                 <p class="mt-1 text-xs text-gray-500">Maximum pending reservations allowed for a teacher</p>
                             </div>
                         </div>
@@ -226,7 +233,7 @@
                     <div class="field-container flex flex-col max-w-md">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Reservation Queue Max Length</label>
                         <div class="error-placeholder flex-1 text-sm" id="reservation_queue_max_length-error-placeholder"></div>
-                        <input id="reservation_queue_max_length" type="number" name="reservation_queue_max_length" value="{{ $settings['reservation.queue_max_length'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="50">
+                        <input id="reservation_queue_max_length" type="number" name="reservation_queue_max_length" value="{{ $settings['reservation.queue_max_length'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="50">
                         <p class="mt-1 text-xs text-gray-500">Maximum number of reservations allowed in queue per book</p>
                     </div>
                 </div>
@@ -236,7 +243,9 @@
             <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 shadow-sm">
                 <h2 class="flex items-center gap-2 font-bold text-lg mb-5 text-gray-900 pb-3 border-b border-gray-200">
                     <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                        <img src="{{ asset('build/assets/icons/total-fines.svg') }}" alt="Penalty Icon" class="w-5 h-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
                     <span>Penalty & Fine Settings</span>
                 </h2>
@@ -248,7 +257,7 @@
                         <div class="error-placeholder flex-1  text-sm" id="rate_per_day-error-placeholder"></div>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₱</span>
-                            <input id="rate_per_day" type="number" step="0.01" name="rate_per_day" value="{{ $settings['penalty.rate_per_day'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="0" max="100">
+                            <input id="rate_per_day" type="number" step="0.01" name="rate_per_day" value="{{ $settings['penalty.rate_per_day'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="0" max="100">
                         </div>
                         <p class="mt-1 text-xs text-gray-500">Penalty charged per day overdue</p>
                     </div>
@@ -259,7 +268,7 @@
                         <div class="error-placeholder flex-1  text-sm" id="max_amount-error-placeholder"></div>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₱</span>
-                            <input id="max_amount" type="number" step="0.01" name="max_amount" value="{{ $settings['penalty.max_amount'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="0">
+                            <input id="max_amount" type="number" step="0.01" name="max_amount" value="{{ $settings['penalty.max_amount'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="0">
                         </div>
                         <p class="mt-1 text-xs text-gray-500">Maximum penalty amount cap</p>
                     </div>
@@ -270,7 +279,7 @@
                         <div class="error-placeholder flex-1  text-sm" id="lost_fee_multiplier-error-placeholder"></div>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">×</span>
-                            <input id="lost_fee_multiplier" type="number" step="0.01" name="lost_fee_multiplier" value="{{ $settings['penalty.lost_fee_multiplier'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="0" max="5">
+                            <input id="lost_fee_multiplier" type="number" step="0.01" name="lost_fee_multiplier" value="{{ $settings['penalty.lost_fee_multiplier'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="0" max="5">
                         </div>
                         <p class="mt-1 text-xs text-gray-500">Multiply book price for lost items</p>
                     </div>
@@ -281,7 +290,7 @@
                         <div class="error-placeholder flex-1  text-sm" id="damaged_fee_multiplier-error-placeholder"></div>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">×</span>
-                            <input id="damaged_fee_multiplier" type="number" step="0.01" name="damaged_fee_multiplier" value="{{ $settings['penalty.damaged_fee_multiplier'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="0" max="5">
+                            <input id="damaged_fee_multiplier" type="number" step="0.01" name="damaged_fee_multiplier" value="{{ $settings['penalty.damaged_fee_multiplier'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 pl-8 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="0" max="5">
                         </div>
                         <p class="mt-1 text-xs text-gray-500">Multiply book price for damaged items</p>
                     </div>
@@ -304,7 +313,7 @@
                     <div class="field-container">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Reminder Days Before Due</label>
                         <div class="error-placeholder mb-1" id="reminder_days_before_due-error-placeholder"></div>
-                        <input id="reminder_days_before_due" type="number" name="reminder_days_before_due" value="{{ $settings['notifications.reminder_days_before_due'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm" min="1" max="14">
+                        <input id="reminder_days_before_due" type="number" name="reminder_days_before_due" value="{{ $settings['notifications.reminder_days_before_due'] ?? '' }}" class="w-full bg-white border border-[#B1B1B1] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed" min="1" max="14">
                         <p class="mt-1 text-xs text-gray-500">Days before due date to send reminder</p>
                     </div>
 

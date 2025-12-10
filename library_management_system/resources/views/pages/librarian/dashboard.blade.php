@@ -366,10 +366,10 @@
                                 </div>
 
                                 {{-- Activity Content --}}
-                                <div class="flex-1 pb-4 min-w-0">
+                                <div class="flex-1 pb-4 min-w-0" title="{{ $activity->details}}">
                                     <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                                         <h4 class="text-sm font-bold text-gray-900 mb-1">{{ $activity->action }}</h4>
-                                        <p class="text-xs text-gray-600 leading-relaxed mb-2 line-clamp-">{!! $activity->details !!}</p>
+                                        <p class="text-xs text-gray-600 leading-relaxed mb-2 line-clamp-1">{!! $activity->details !!}</p>
                                         <div class="flex items-center gap-2 text-xs text-gray-400">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

@@ -62,5 +62,11 @@ class Book extends Model
                     ->take(5)
                     ->get();
     }
+
+    public function getBorrowCountAttribute()
+    {
+        return $this->borrowTransactions()->count();
+    }
+
     use HasFactory;
 }

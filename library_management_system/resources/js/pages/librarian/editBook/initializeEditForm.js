@@ -3,7 +3,13 @@ import { initImagePreview } from "../imagePreview.js";
 import { showError } from "../../../utils/alerts.js";
 import { clearInputError } from "../../../helpers.js";
 import { handleCategoryChange } from "../addNewBook.js";
-import { updatePendingIssueResolvedFlag, resetAllCopiesToOriginal } from "./editBookHelpers.js";
+import { 
+    updatePendingIssueResolvedFlag, 
+    resetAllCopiesToOriginal, 
+    renderCopiesTable, 
+    populateSummaryHeader, 
+    addNewCopy 
+} from "./editBookHelpers.js";
 
 export async function initializeEditForm(form, book) {
 
@@ -11,6 +17,9 @@ export async function initializeEditForm(form, book) {
     const hiddenBookId = form.querySelector('#edit-book-id');
     if (hiddenBookId) hiddenBookId.value = book.id ?? '';
     form.setAttribute('data-book-id', book.id ?? '');
+
+    // Populate summary header
+    populateSummaryHeader(book, form);
 
     // Grab fields
     const editTitleField = form.querySelector('#title');
@@ -27,7 +36,6 @@ export async function initializeEditForm(form, book) {
     const editCoverInputField = form.querySelector('#edit-cover-input');
     const editCoverImagePreview = form.querySelector('#cover-preview');
     const editCoverPlaceholder = form.querySelector('#cover-placeholder');
-    const coverImagePreview = form.querySelector('#cover-preview');
     const editCoverErrorPlaceholder = form.querySelector('#cover-error-placeholder');
 
     // Publication fields
@@ -65,12 +73,12 @@ export async function initializeEditForm(form, book) {
 
     // Handle cover preview
     if (book.cover_image) {
-        coverImagePreview.src = `/storage/${book.cover_image}`;
-        coverImagePreview.classList.remove('hidden');
+        editCoverImagePreview.src = `/storage/${book.cover_image}`;
+        editCoverImagePreview.classList.remove('hidden');
         editCoverPlaceholder?.classList.add('hidden');
     } else {
-        coverImagePreview.src = '';
-        coverImagePreview.classList.add('hidden');
+        editCoverImagePreview.src = '';
+        editCoverImagePreview.classList.add('hidden');
         editCoverPlaceholder?.classList.remove('hidden');
     }
 
@@ -93,7 +101,9 @@ export async function initializeEditForm(form, book) {
          };
     }
 
-    initializeCopiesTable(editBookCopiesContainer, book.copies);
+    // Setup and render copies table using helper
+    setupCopiesTableStructure(editBookCopiesContainer, form);
+    renderCopiesTable(book, form);
 
     // Always remove before re-adding
     editCategorySelect.removeEventListener('change', form._categoryChangeHandler);
@@ -123,7 +133,7 @@ export async function initializeEditForm(form, book) {
                     formData.set('genre', null);
                 }
 
-                await editBookHandler(formData, form.id);
+                editBookHandler(formData, form.id);
 
                 // Immediately scroll to top after editBookHandler resolves
                 
@@ -135,13 +145,11 @@ export async function initializeEditForm(form, book) {
 
         // Add reset handler
         editBookForm.addEventListener('reset', function(e) {
-            e.preventDefault();
-            
-            // Reset all copy review actions and status
-            resetAllCopiesToOriginal(form);
-            
-            // The parent bookCatalog.js will handle resetting form fields
-            // by calling populateEditForm(originalBookData)
+            // We don't prevent default here because we want the form to reset its fields
+            // But we need to handle the copies table reset manually
+            setTimeout(() => {
+                 resetAllCopiesToOriginal(form);
+            }, 0);
         });
     }
 
@@ -153,108 +161,51 @@ export async function initializeEditForm(form, book) {
 
 }
 
-function initializeCopiesTable(container, copies = []) {
+function setupCopiesTableStructure(container, form) {
+   
     if (!container) return;
-    container.innerHTML = ''; // Clear container
-
-    if (!copies.length) {
-        const noCopiesEl = document.createElement('div');
-        noCopiesEl.className = 'h-40 flex items-center justify-center text-gray-500';
-        noCopiesEl.textContent = 'No copies found for this book.';
-        container.appendChild(noCopiesEl);
-        return;
+    
+    // Check if structure exists
+    if (!container.querySelector('#copies-table-body')) {
+        container.innerHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    Manage Copies
+                    <span id="copies-count-badge" class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+                </h3>
+                <button type="button" id="add-copy-btn" class="text-sm text-accent font-medium hover:text-accent/80 flex items-center gap-1 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Copy
+                </button>
+            </div>
+            <div class="overflow-x-auto border rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Copy Number</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Controls</th>
+                        </tr>
+                    </thead>
+                    <tbody id="copies-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="copies-pagination" class="mt-4 hidden"></div>
+        `;
     }
 
-    const table = document.createElement('table');
-    table.className = 'min-w-full text-sm text-left border-collapse';
-
-    table.innerHTML = `
-        <thead class="bg-gray-100 text-gray-700 uppercase text-xs font-semibold sticky top-0 z-10">
-            <tr>
-                <th class="px-4 py-3 border-b">Copy No.</th>
-                <th class="px-4 py-3 border-b">Status</th>
-                <th class="px-4 py-3 border-b">Date Added</th>
-                <th class="px-4 py-3 border-b">Action</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 text-gray-800">
-            ${copies.map(copy => {
-                const statusLower = copy.status?.toLowerCase() || '';
-                const statusColor = statusLower === 'available' ? 'text-green-600 font-semibold' : 'text-gray-800';
-                const possibleStatuses = ['available', 'lost', 'damaged', 'withdrawn'];
-
-                // Build options dynamically, exclude current status
-                const options = possibleStatuses
-                    .filter(s => s !== statusLower)
-                    .map(s => `<option value="${s}">Mark as ${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
-                    .join('');
-
-                return `
-                    <tr class="hover:bg-gray-50 transition" data-copy-id="${copy.id}">
-                        <td class="px-4 py-3 text-gray-600">${copy.copy_number}</td>
-                        <td class="px-4 py-3 copy-status ${statusColor}">${copy.status ?? 'Unknown'}</td>
-                        <td class="px-4 py-3 text-gray-500">${copy.created_at ? new Date(copy.created_at).toLocaleDateString() : ''}</td>
-                        <td class="px-4 py-3 text-right w-32 text-center">
-                            <select data-copy-id="${copy.id}" class="copy-action-select bg-secondary text-white w-full border rounded-md p-1 text-sm">
-                                <option value="" selected disabled>Change Status</option>
-                                ${options}
-                            </select>
-                            <!-- hidden input to ensure status is always submitted -->
-                            <input type="hidden" name="copies[${copy.id}]" value="${statusLower}">
-                        </td>
-                    </tr>
-                `;
-            }).join('')}
-        </tbody>
-    `;
-
-    container.appendChild(table);
-
-    // Add dynamic change listener to each select
-    table.querySelectorAll('.copy-action-select').forEach(select => {
-        select.addEventListener('change', e => {
-            const newStatus = e.target.value;
-            const row = e.target.closest('tr');
-            const statusCell = row.querySelector('.copy-status');
-
-            // Update status text
-            statusCell.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-
-            // Update color
-            statusCell.classList.remove('text-green-600', 'font-semibold', 'text-gray-800');
-            if (newStatus.toLowerCase() === 'available') {
-                statusCell.classList.add('text-green-600', 'font-semibold');
-            } else {
-                statusCell.classList.add('text-gray-800');
-            }
-
-            // Rebuild select options dynamically, exclude new current status
-            const possibleStatuses = ['available', 'lost', 'damaged', 'withdrawn'];
-            const filteredOptions = possibleStatuses
-                .filter(s => s !== newStatus.toLowerCase())
-                .map(s => `<option value="${s}">Mark as ${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
-                .join('');
-
-            // Reset select with disabled default
-            e.target.innerHTML = `<option value="" selected disabled>Change Status</option>${filteredOptions}`;
-
-            // Update corresponding hidden input value so FormData(form) includes the current status
-            const hiddenInput = row.querySelector(`input[type="hidden"][name="copies[${row.dataset.copyId}]"]`);
-            if (hiddenInput) {
-                hiddenInput.value = newStatus.toLowerCase();
-            } else {
-                // fallback: create/update hidden input
-                const newHidden = document.createElement('input');
-                newHidden.type = 'hidden';
-                newHidden.name = `copies[${row.dataset.copyId}]`;
-                newHidden.value = newStatus.toLowerCase();
-                e.target.insertAdjacentElement('afterend', newHidden);
-            }
-
-            // Ensure select keeps a name if you rely on select values too
-            e.target.name = `copies_select[${row.dataset.copyId}]`;
-        });
-    });
+    // Re-attach Add Copy listener
+    const addBtn = container.querySelector('#add-copy-btn');
+    if (addBtn) {
+        const newBtn = addBtn.cloneNode(true);
+        addBtn.parentNode.replaceChild(newBtn, addBtn);
+        newBtn.addEventListener('click', () => addNewCopy(form));
+    }
 }
 
 export function initializeErrorClearing(form) {

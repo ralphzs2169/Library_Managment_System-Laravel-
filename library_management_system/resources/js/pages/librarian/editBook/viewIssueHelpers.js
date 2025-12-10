@@ -1,3 +1,5 @@
+import { renderBookCopyStatusBadge } from "../../../utils/statusBadge";
+
 export function handleViewIssueDetails(copyId, allCopiesData) {
     const copy = allCopiesData.find(c => String(c.id) === String(copyId));
 
@@ -7,31 +9,31 @@ export function handleViewIssueDetails(copyId, allCopiesData) {
 
 
 export function openIssueDetailsModal(issueReport, copy) {
-    console.log('openIssueDetailsModal called with report:', issueReport);
+   
     const modal = document.getElementById('issue-details-modal');
-    console.log('openIssueDetailsModal called' + modal);
+  
     if (!modal) return;
     console.log('open modal');
 
     // Populate modal with issue report data
-    const reportType = modal.querySelector('#report-type');
+    const reportTypeBadge = modal.querySelector('#report-type');
     const reportStatus = modal.querySelector('#report-status');
     const copyNumber = modal.querySelector('#report-copy-number');
     const reportedDate = modal.querySelector('#reported-date');
     const description = modal.querySelector('#report-description');
     const reportedBy = modal.querySelector('#reported-by');
     const borrower = modal.querySelector('#borrower-name');
-
-    if (reportType) {
-        const typeLabel = issueReport.report_type === 'damage' ? 'Damaged' : 'Lost';
-        const typeClass = issueReport.report_type === 'damage' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700';
-        reportType.innerHTML = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${typeClass}">${typeLabel}</span>`;
-    }
+  
+    const reportType = issueReport.report_type === 'damage' ?
+                        issueReport.report_type + 'd' :
+                        issueReport.report_type;
+        
+    reportTypeBadge.innerHTML = renderBookCopyStatusBadge(reportType);
 
     if (reportStatus) {
         const statusLabel = issueReport.status.charAt(0).toUpperCase() + issueReport.status.slice(1);
         const statusClass = issueReport.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700';
-        reportStatus.innerHTML = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusLabel}</span>`;
+        reportStatus.innerHTML = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusLabel} </span>`;
     }
 
     if (copyNumber) copyNumber.textContent = `#${copy.copy_number}`;

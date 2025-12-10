@@ -139,24 +139,6 @@ export function enableAllFields(container) {
     });
 }
 
-
-export function disableAllFields(container) {
-    const containerEl = typeof container === 'string' 
-        ? document.querySelector(container) 
-        : container;
-    
-    if (!containerEl) return;
-    
-    const inputs = containerEl.querySelectorAll('input, textarea, select');
-    inputs.forEach(input => {
-        input.disabled = true;
-        if(input.tagName === 'SELECT') {
-            input.classList.add('appearance-none');
-        }
-    });
-
-}
-
 export function resetEditableFields(container) {
     const containerEl = typeof container === 'string' 
         ? document.querySelector(container) 
@@ -166,8 +148,17 @@ export function resetEditableFields(container) {
     
     const inputs = containerEl.querySelectorAll('input, textarea, select');
     inputs.forEach(input => {
+        // Skip hidden inputs, cover image input, and copies management fields
+        if (input.type === 'hidden' || 
+            input.id === 'edit-cover-input' || 
+            input.closest('.copy-row') || 
+            input.closest('#copies-table-container')) {
+            return;
+        }
+
         // Disable input
         input.disabled = true;
+        
         if(input.tagName === 'SELECT') {
             input.classList.add('appearance-none');
         }

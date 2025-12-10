@@ -43,6 +43,8 @@
                     <select id="books-sort" class="px-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition bg-white">
                         <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>Sort: Newest First</option>
                         <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Sort: Oldest First</option>
+                        <option value="borrow_count_desc" {{ request('sort') === 'borrow_count_desc' ? 'selected' : '' }}>Sort: Borrow Count (Desc) </option>
+                        <option value="borrow_count_asc" {{ request('sort') === 'borrow_count_asc' ? 'selected' : '' }}>Sort: Borrow Count (Asc) </option>
                         <option value="title_asc" {{ request('sort') === 'title_asc' ? 'selected' : '' }}>Sort: Title (A-Z)</option>
                         <option value="title_desc" {{ request('sort') === 'title_desc' ? 'selected' : '' }}>Sort: Title (Z-A)</option>
                         <option value="copies_asc" {{ request('sort') === 'copies_asc' ? 'selected' : '' }}>Sort: Fewest Copies First</option>
@@ -64,7 +66,7 @@
 
             <!-- Table Container -->
             <div id="books-table-container">
-                @include('partials.librarian.book-catalog-table', ['books' => $books])
+                @include('partials.librarian.book-inventory-table', ['books' => $books])
             </div>
         </div>
 

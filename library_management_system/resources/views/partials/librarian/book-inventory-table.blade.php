@@ -7,7 +7,7 @@
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-18">Cover</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-70">Book Info</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-36">ISBN</th>
-                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-32">Price</th>
+                <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-36">Borrow Count</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-20">Copies</th>
                 <th class="py-3 px-4 text-left font-semibold text-gray-700 uppercase tracking-wider text-xs w-46 whitespace-nowrap w-26">Status</th>
                 <th class="py-3 px-4 text-center font-semibold text-gray-700 uppercase tracking-wider text-xs whitespace-nowrap w-24">Actions</th>
@@ -57,7 +57,7 @@
                     <p class="text-xs text-gray-900 ">{{ $book->isbn ?? 'N/A' }}</p>
                 </td>
                 <td class="px-4 py-3">
-                    <p class="text-xs text-gray-900">{{ $book->price ? '₱ ' . number_format($book->price, 2) : 'N/A' }}</p>
+                    <p class="text-sm text-gray-900">{{ $book->borrow_count ?? '0' }} <span class="text-xs text-gray-900"> times borrowed</span></p>
                 </td>
                 <td class="px-4 py-3 ">
                     @php

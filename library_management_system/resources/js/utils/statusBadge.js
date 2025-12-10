@@ -301,3 +301,60 @@ export function getClearanceStatusBadge(status) {
 
     return badgeHtml;
 }
+
+export function renderBookCopyStatusBadge(status) {
+    const statusConfig = {
+        available: {
+            class: 'bg-green-200 text-green-700 border-green-100',
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>`,
+            label: 'Available'
+        },
+        borrowed: {
+            class: 'bg-blue-200 text-blue-700 border-blue-100',
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>`,
+            label: 'Borrowed'
+        },
+        damaged: {
+            class: 'bg-orange-200 text-orange-700 border-orange-100',
+            icon: `<img src="/build/assets/icons/damaged-badge.svg" alt="Damaged Icon" class="w-3.5 h-3.5">`,
+            label: 'Damaged'
+        },
+        lost: {
+            class: 'bg-red-200 text-red-700 border-red-100',
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>`,
+            label: 'Lost'
+        },
+        withdrawn: {
+            class: 'bg-gray-200 text-gray-700 border-gray-200',
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>`,
+            label: 'Withdrawn'
+        },
+        pending_issue_review: {
+            class: 'bg-amber-300 text-amber-800 border-amber-200',
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+            label: 'Pending Review'
+        },
+        on_hold_for_pickup: {
+            class: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>`,
+            label: 'On Hold For Pickup'
+        }
+    };
+
+    const config = statusConfig[status] || statusConfig['available'];
+    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${config.class}">
+        ${config.icon}
+        ${config.label}
+    </span>`;
+}

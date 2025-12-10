@@ -4,9 +4,7 @@
         <!-- Header -->
         <div class="bg-modal-header drop-shadow-md px-6 py-4 flex items-center justify-between">
             <h2 class="text-xl font-semibold text-black flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+
                 Activity Log Details
             </h2>
             <button id="close-activity-log-details" class="cursor-pointer text-gray-500 hover:text-gray-700 hover:scale-110 transition">
@@ -65,7 +63,7 @@
 
         <!-- Footer -->
         <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end">
-            <button id="close-activity-log-button" class="px-6 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition shadow-sm">
+            <button id="close-activity-log-button" class="px-6 py-2.5 cursor-pointer bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg font-medium transition shadow-sm">
                 Close
             </button>
         </div>

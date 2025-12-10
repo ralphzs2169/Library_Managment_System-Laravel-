@@ -1,6 +1,7 @@
 import { SETTINGS_ROUTES, INVALID_INPUT } from "../config.js";
 import { displayInputErrors } from "../helpers.js";
 import { showSuccessWithRedirect, showWarning, showConfirmation, showInfo, showToast } from "../utils/alerts.js";
+import { resetEditableFields } from "../utils/fieldEditor.js";
 
 export async function updateSettingsHandler(settingsData, form) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -32,10 +33,11 @@ export async function updateSettingsHandler(settingsData, form) {
 
     // Check if no changes detected
     if (result.status === 'unchanged') {
+        resetEditableFields(form);
         showInfo('No changes detected', 'You didn\'t make any modifications to update.');
         return;
     }
-
+    
     // Step 2: Show confirmation
     const isConfirmed = await showConfirmation(
         'Save Settings?',
@@ -61,7 +63,7 @@ export async function updateSettingsHandler(settingsData, form) {
         showWarning('Something went wrong', 'Please try again.');
         return;
     }
-
+    resetEditableFields(form);
     showSuccessWithRedirect('Success', 'Settings updated successfully!', window.location.href);
 }
 

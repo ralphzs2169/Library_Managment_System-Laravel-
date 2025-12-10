@@ -81,18 +81,15 @@ class BookController extends Controller
             case 'title_desc':
                 $query->orderBy('title', 'desc');
                 break;
-            case 'author_asc':
-                $query->join('authors', 'books.author_id', '=', 'authors.id')
-                      ->orderBy('authors.lastname', 'asc')
-                      ->orderBy('authors.firstname', 'asc')
-                      ->select('books.*');
+            case 'borrow_count_asc':
+                $query->withCount('borrowTransactions')
+                      ->orderBy('borrow_transactions_count', 'asc');
                 break;
-            case 'author_desc':
-                $query->join('authors', 'books.author_id', '=', 'authors.id')
-                      ->orderBy('authors.lastname', 'desc')
-                      ->orderBy('authors.firstname', 'desc')
-                      ->select('books.*');
+            case 'borrow_count_desc':
+                $query->withCount('borrowTransactions')
+                      ->orderBy('borrow_transactions_count', 'desc');
                 break;
+            
             case 'copies_asc':
                 $query->withCount('copies')
                       ->orderBy('copies_count', 'asc');
@@ -104,17 +101,17 @@ class BookController extends Controller
             default: // newest
                 $query->orderBy('created_at', 'desc');
         }
-
+        
         $books = $query->with(['author', 'genre.category', 'copies'])
                        ->paginate(15)
                        ->withQueryString();
 
         if ($request->ajax()) {
             // Return only the table partial for dynamic updates
-            return view('partials.librarian.book-catalog-table', compact('books'))->render();
+            return view('partials.librarian.book-inventory-table', compact('books'))->render();
         }
 
-        return view('pages.librarian.book-catalog', compact('books', 'categories'));
+        return view('pages.librarian.book-inventory', compact('books', 'categories'));
     }
 
     public function getBooksForBorrowOrReserve(Request $request, $transactionType, $member_id)
