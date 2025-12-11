@@ -28,8 +28,8 @@
     </div>
 
 
-    @can('view-footer')
+    {{-- @can('view-footer')
     @include('components/footer')
-    @endcan
+    @endcan --}}
 </body>
 </html>

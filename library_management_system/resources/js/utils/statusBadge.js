@@ -5,7 +5,7 @@ export function getBorrowingStatusBadge(transaction) {
     const daysOverdue = transaction.days_overdue;
     // Assuming dueReminderThreshold is available in the transaction object or a global setting
     const dueReminderThreshold = transaction.due_reminder_threshold ?? 3; 
-
+    console.log('Due Reminder Threshold:', dueReminderThreshold);
     let badgeBg = '';
     let svg = '';
     let label = '';

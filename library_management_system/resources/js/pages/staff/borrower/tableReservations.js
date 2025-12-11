@@ -52,6 +52,26 @@ export function populateReservationsTable(modal, borrower) {
         
         const dateExpired = reservation.pickup_deadline_date ? formatDate(reservation.pickup_deadline_date) : '—';
 
+        // Determine border color based on status
+        let borderClass = '';
+        switch (reservation.status) {
+            case 'pending':
+                borderClass = 'border-l-4 border-l-yellow-400';
+                break;
+            case 'ready_for_pickup':
+                borderClass = 'border-l-4 border-l-blue-500';
+                break;
+            case 'completed':
+                borderClass = 'border-l-4 border-l-green-500';
+                break;
+            case 'cancelled':
+            case 'expired':
+                borderClass = 'border-l-4 border-l-gray-400';
+                break;
+            default:
+                borderClass = 'border-l-4 border-l-gray-200';
+        }
+
         // Reservation queue position (if available)
         let queuePosition = '';
 
@@ -122,7 +142,7 @@ export function populateReservationsTable(modal, borrower) {
         `;
 
         const row = `
-            <tr class="hover:bg-gray-50 transition-colors">
+            <tr class="hover:bg-gray-50 transition-colors ${borderClass}">
                 <td class="py-3 px-4 text-gray-600 font-medium">${index + 1}</td>
                 <td class="py-3 px-4">
                     <div class="flex items-center gap-3">

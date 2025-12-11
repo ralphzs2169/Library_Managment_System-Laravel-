@@ -18,6 +18,7 @@ use App\Enums\LibraryStatus;
 use App\Enums\PenaltyStatus;
 use App\Models\Payment;
 use App\Enums\ReservationStatus;
+use App\Models\Reservation;
 use App\Policies\BorrowPolicy;
 use App\Policies\RenewalPolicy;
 use App\Policies\ReservationPolicy;
@@ -112,17 +113,15 @@ public function getBorrowerDetails($targetUserId, $requestorId)
 
         $activeReservations = $borrower->activeReservations()->get();
 
-        // Separate pending for queue calculation
-        $pendingReservations = $activeReservations->where('status', ReservationStatus::PENDING);
-
-        $positionsByBook = $pendingReservations
-            ->groupBy('book_id')
-            ->map(fn($reservationsForBook) => $reservationsForBook->pluck('id')->flip());
-
         // Assign queue position and date_expired
-        $activeReservations->each(function ($reservation) use ($positionsByBook) {
+        $activeReservations->each(function ($reservation) {
             if ($reservation->status === ReservationStatus::PENDING) {
-                $reservation->queue_position = $positionsByBook[$reservation->book_id][$reservation->id] + 1;
+                // Calculate global queue position for this book
+                $reservation->queue_position = Reservation::where('book_id', $reservation->book_id)
+                    ->where('status', ReservationStatus::PENDING)
+                    ->where('id', '<=', $reservation->id)
+                    ->count();
+                
                 $reservation->pickup_deadline_date = null;
             } else { // READY_FOR_PICKUP
                 $reservation->queue_position = 0;

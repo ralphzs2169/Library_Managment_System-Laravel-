@@ -8,10 +8,10 @@ import { formatDate } from "../../utils";
 
 
 export function initReservationRecordDetailListeners() {
-    // Always re-attach listeners after table updates (AJAX)
     const detailButtons = document.querySelectorAll('.open-reservation-record-details');
     if (!detailButtons.length) return; // No buttons found
-
+    
+    console.log('Initializing reservation record detail listeners...');
     detailButtons.forEach(button => {
         // Remove previous listener if any
         button.onclick = null;
@@ -148,21 +148,19 @@ function initializeReservationRecordDetailsModal(modal, data) {
         checkoutBtn && checkoutBtn.classList.add('inline-flex');
     }
 
-    // Attach close modal listeners only once
-    if (!reservationRecordModalListenersInitialized) {
-        reservationRecordModalListenersInitialized = true;
-
-        cancelBtn && (cancelBtn.onclick = async () => {
-                
+    // Update data-dependent listeners (Always update these)
+    if (cancelBtn) {
+        cancelBtn.onclick = async () => {
             const reservationId = reservation.id;
-
-            const result = await cancelReservation(reservationId );
+            const result = await cancelReservation(reservationId);
             if (result) {
                 closeReservationRecordModal();
             }
-        });
+        };
+    }
 
-        checkoutBtn && (checkoutBtn.onclick = () => {
+    if (checkoutBtn) {
+        checkoutBtn.onclick = () => {
             const modal = document.getElementById('reservation-record-details-modal');
             const modalContent = document.getElementById('reservation-record-content');
             
@@ -178,7 +176,12 @@ function initializeReservationRecordDetailsModal(modal, data) {
                 const context = 'main_table_view';
                 openConfirmBorrowModal(borrower, book, true, context);
             }, 50);
-        });
+        };
+    }
+
+    // Attach close modal listeners only once
+    if (!reservationRecordModalListenersInitialized) {
+        reservationRecordModalListenersInitialized = true;
 
         // Close button
         const closeBtn = document.getElementById('close-reservation-record-modal');

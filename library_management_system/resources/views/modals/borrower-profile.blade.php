@@ -139,16 +139,16 @@
                                 <div class="flex flex-wrap gap-3 mt-5">
                                     <button id="borrow-book-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                         <img src="{{ asset("build/assets/icons/add-book-white.svg")}}" alt="Borrow Icon" class="w-5 h-5">
-                                        Borrow a Book
+                                        Issue Book
                                     </button>
                                     <button id="add-reservation-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-light hover:bg-secondary-light/90 cursor-pointer text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                         <img src="{{ asset("build/assets/icons/reservation-white.svg")}}" alt="Approve Icon" class="w-5 h-5">
-                                        Add Reservation
+                                        Make Reservation
                                     </button>
                                     <div>
                                         <button id="clearance-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                             {{-- <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Mark as Cleared Icon" class="w-5 h-5"> --}}
-                                            Mark as Cleared
+
                                         </button>
                                         <button id="suspension-btn" class="inline-flex items-center cursor-pointer gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow">
                                             {{-- <img src="{{ asset("build/assets/icons/check-white.svg")}}" alt="Mark as Cleared Icon" class="w-5 h-5"> --}}

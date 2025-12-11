@@ -282,6 +282,7 @@ export async function loadQueueReservations(page = QUEUE_RESERVATIONS_FILTERS.pa
         // Re-attach pagination listeners for active borrows
         initStaffDashboardPagination(loadQueueReservations);
         initReservationRecordDetailListeners();
+        
         const searchTerm = searchInput?.value?.trim();
         if (searchTerm) {
             highlightSearchMatches(searchTerm, '#queue-reservations-table-container', SEARCH_COLUMN_INDEXES.QUEUE_RESERVATIONS);

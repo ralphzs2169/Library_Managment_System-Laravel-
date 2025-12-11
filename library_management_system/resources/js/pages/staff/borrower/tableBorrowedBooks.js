@@ -24,7 +24,7 @@ export async function populateCurrentlyBorrowedBooks(modal, borrower) {
         closeBorrowerModal();
         return;
     }
-
+    
     if (!tbody) return;
     
     const borrowedBooks = borrower.active_borrows || [];
@@ -67,13 +67,13 @@ export async function populateCurrentlyBorrowedBooks(modal, borrower) {
         const status = transaction.status;
         const daysUntilDue = transaction.days_until_due;
         const isReturned = transaction.returned_at !== null;
-
+        transaction.due_reminder_threshold = dueReminderThreshold;
         let borderClass = '';
 
         if (status === 'overdue') {
             borderClass = 'border-l-4 border-l-red-500';
         } else if (status === 'borrowed' && daysUntilDue <= dueReminderThreshold) {
-            borderClass = 'border-l-4 border-l-yellow-400';
+            borderClass = 'border-l-4 border-l-orange-400';
         } else if (status === 'borrowed') {
             borderClass = 'border-l-4 border-l-blue-500';
         }

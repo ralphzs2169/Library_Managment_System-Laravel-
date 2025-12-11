@@ -165,6 +165,10 @@
                                             <span class="w-26 font-bold">Date Added</span>
                                             <span>{{ $book->created_at->format('F d, Y') ?? '-' }}</span>
                                         </div>
+                                        <div class="flex">
+                                            <span class="w-26 font-bold">Language</span>
+                                            <span>{{ $book->language ?? '-' }}</span>
+                                        </div>
                                     </div>
                                 </div>
 
